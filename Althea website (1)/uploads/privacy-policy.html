@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy — Althea</title>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { -webkit-font-smoothing: antialiased; scroll-behavior: smooth; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+      color: #1A1D2B;
+      background: #fff;
+      line-height: 1.7;
+    }
+
+    /* ── Nav ─────────────────────────────────────────────── */
+    .site-nav {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(255,255,255,0.9);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(0,0,0,0.07);
+      padding: 14px 24px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .wordmark {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none; color: #1A1D2B;
+      font-size: 20px; font-weight: 700; letter-spacing: -0.03em;
+    }
+    .nav-back {
+      font-size: 13px; font-weight: 500; color: #2AB5A2;
+      text-decoration: none; display: flex; align-items: center; gap: 4px;
+    }
+    .nav-back:hover { opacity: 0.75; }
+
+    /* ── Hero ────────────────────────────────────────────── */
+    .doc-hero {
+      padding: 64px 24px 48px;
+      max-width: 760px; margin: 0 auto;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+    }
+    .doc-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(42,181,162,0.08); padding: 5px 14px;
+      border-radius: 20px; font-size: 12px; font-weight: 600;
+      color: #1A8A7A; margin-bottom: 20px;
+    }
+    .doc-badge-dot { width: 6px; height: 6px; border-radius: 3px; background: #2AB5A2; }
+    .doc-title {
+      font-size: clamp(28px, 4vw, 40px); font-weight: 750;
+      letter-spacing: -0.03em; color: #1A1D2B; line-height: 1.1; margin-bottom: 16px;
+    }
+    .doc-meta {
+      font-size: 14px; color: #8E8E93;
+    }
+
+    /* ── Content ─────────────────────────────────────────── */
+    .doc-body {
+      max-width: 760px; margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+
+    .toc {
+      background: #F8FAF9; border-radius: 16px;
+      padding: 24px 28px; margin-bottom: 48px;
+    }
+    .toc-title {
+      font-size: 12px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.08em; color: #8E8E93; margin-bottom: 12px;
+    }
+    .toc ol {
+      padding-left: 18px; display: flex; flex-direction: column; gap: 8px;
+    }
+    .toc li a {
+      font-size: 14px; color: #2AB5A2; text-decoration: none; font-weight: 500;
+    }
+    .toc li a:hover { text-decoration: underline; }
+
+    section[id] { scroll-margin-top: 80px; }
+
+    h2 {
+      font-size: 22px; font-weight: 700; letter-spacing: -0.02em;
+      color: #1A1D2B; margin: 48px 0 16px; line-height: 1.25;
+      padding-bottom: 10px; border-bottom: 1px solid rgba(0,0,0,0.06);
+    }
+    h2:first-of-type { margin-top: 0; }
+
+    h3 {
+      font-size: 16px; font-weight: 650; color: #1A1D2B;
+      margin: 28px 0 10px;
+    }
+
+    p { font-size: 15.5px; color: #3D4654; margin-bottom: 16px; line-height: 1.72; }
+    p:last-child { margin-bottom: 0; }
+
+    ul, ol {
+      padding-left: 22px; margin-bottom: 16px;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    li { font-size: 15.5px; color: #3D4654; line-height: 1.65; }
+
+    .callout {
+      background: rgba(42,181,162,0.07); border-left: 3px solid #2AB5A2;
+      border-radius: 0 12px 12px 0; padding: 16px 20px; margin: 24px 0;
+    }
+    .callout p { color: #1A4A44; margin: 0; font-size: 14.5px; }
+
+    .data-table {
+      width: 100%; border-collapse: collapse; margin: 16px 0 24px; font-size: 14.5px;
+    }
+    .data-table th {
+      text-align: left; font-size: 12px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.07em; color: #8E8E93; padding: 10px 16px;
+      background: #F8FAF9; border-bottom: 1px solid rgba(0,0,0,0.06);
+    }
+    .data-table td {
+      padding: 12px 16px; border-bottom: 1px solid rgba(0,0,0,0.05);
+      color: #3D4654; vertical-align: top;
+    }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table td:first-child { font-weight: 500; color: #1A1D2B; }
+
+    .contact-card {
+      background: #F8FAF9; border-radius: 16px; padding: 28px;
+      display: flex; gap: 16px; align-items: flex-start; margin-top: 24px;
+    }
+    .contact-icon {
+      width: 44px; height: 44px; border-radius: 12px;
+      background: rgba(42,181,162,0.12); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .contact-icon svg { display: block; }
+    .contact-card p { margin: 0; font-size: 14.5px; }
+    .contact-card a { color: #2AB5A2; font-weight: 500; }
+
+    /* ── Footer ──────────────────────────────────────────── */
+    .site-footer {
+      background: #1A1D2B; padding: 40px 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 16px;
+    }
+    .site-footer a {
+      font-size: 13px; color: rgba(255,255,255,0.45); text-decoration: none;
+    }
+    .site-footer a:hover { color: rgba(255,255,255,0.7); }
+    .footer-links { display: flex; gap: 24px; }
+    .footer-copy { font-size: 12px; color: rgba(255,255,255,0.3); }
+  </style>
+</head>
+<body>
+
+  <!-- Nav -->
+  <nav class="site-nav">
+    <a class="wordmark" href="index.html">
+      <svg width="28" height="28" viewBox="0 0 48 48" fill="none">
+        <rect width="48" height="48" rx="12" fill="#2AB5A2"/>
+        <path d="M24 12c-6 4-10 10-10 18 3-2 6-3.5 10-3.5s7 1.5 10 3.5c0-8-4-14-10-18z" fill="#fff" opacity="0.9"/>
+        <path d="M24 16c-4 3-6.5 7.5-6.5 13 2-1.2 4-1.8 6.5-1.8s4.5.6 6.5 1.8c0-5.5-2.5-10-6.5-13z" fill="#fff" opacity="0.5"/>
+        <line x1="24" y1="15" x2="24" y2="30" stroke="#fff" stroke-width="1.5" opacity="0.6" stroke-linecap="round"/>
+      </svg>
+      althea
+    </a>
+    <a class="nav-back" href="index.html">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M10 12L6 8l4-4" stroke="#2AB5A2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Back to home
+    </a>
+  </nav>
+
+  <!-- Hero -->
+  <div class="doc-hero">
+    <div class="doc-badge"><span class="doc-badge-dot"></span>Legal</div>
+    <h1 class="doc-title">Privacy Policy</h1>
+    <p class="doc-meta">Effective date: June 4, 2025 &nbsp;·&nbsp; Last updated: June 4, 2025</p>
+  </div>
+
+  <!-- Body -->
+  <main class="doc-body">
+
+    <div class="callout">
+      <p><strong>The short version:</strong> Althea stores your health data on your own device and in your private iCloud account. We do not sell, share, or monetise your personal information. We never have access to your health records.</p>
+    </div>
+
+    <!-- TOC -->
+    <div class="toc">
+      <div class="toc-title">Contents</div>
+      <ol>
+        <li><a href="#who-we-are">Who we are</a></li>
+        <li><a href="#data-collected">Data we collect and why</a></li>
+        <li><a href="#healthkit">Apple HealthKit</a></li>
+        <li><a href="#icloud">iCloud &amp; CloudKit</a></li>
+        <li><a href="#third-parties">Third-party services</a></li>
+        <li><a href="#notifications">Notifications</a></li>
+        <li><a href="#subscriptions">Subscriptions &amp; payments</a></li>
+        <li><a href="#retention">Data retention &amp; deletion</a></li>
+        <li><a href="#children">Children's privacy</a></li>
+        <li><a href="#your-rights">Your rights</a></li>
+        <li><a href="#changes">Changes to this policy</a></li>
+        <li><a href="#contact">Contact us</a></li>
+      </ol>
+    </div>
+
+    <!-- 1 -->
+    <section id="who-we-are">
+      <h2>1. Who we are</h2>
+      <p>Althea is an iOS application developed to help individuals track their GLP-1 receptor agonist medication journey. References to "Althea," "we," "us," or "our" in this Privacy Policy refer to the developer of the Althea application.</p>
+      <p>This Privacy Policy describes how we handle information when you use the Althea iOS app ("App"). By downloading or using the App you agree to the terms described here.</p>
+    </section>
+
+    <!-- 2 -->
+    <section id="data-collected">
+      <h2>2. Data we collect and why</h2>
+      <p>All data you enter into Althea is stored locally on your device and, if you enable iCloud, in your private iCloud account under your Apple ID. We do <strong>not</strong> operate servers that receive or store your personal health information.</p>
+
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Data type</th>
+            <th>How it is used</th>
+            <th>Stored where</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Display name</td>
+            <td>Personalise greetings within the app</td>
+            <td>On-device + iCloud (if enabled)</td>
+          </tr>
+          <tr>
+            <td>Medication &amp; dosing details</td>
+            <td>Calculate active drug levels, reminders, injection site rotation</td>
+            <td>On-device + iCloud (if enabled)</td>
+          </tr>
+          <tr>
+            <td>Body weight entries</td>
+            <td>Display trends and progress charts</td>
+            <td>On-device + iCloud (if enabled)</td>
+          </tr>
+          <tr>
+            <td>Body measurements</td>
+            <td>Track additional progress metrics</td>
+            <td>On-device + iCloud (if enabled)</td>
+          </tr>
+          <tr>
+            <td>Side effect logs</td>
+            <td>Visualise symptom trends for personal review or clinician reports</td>
+            <td>On-device + iCloud (if enabled)</td>
+          </tr>
+          <tr>
+            <td>Food &amp; hydration logs</td>
+            <td>Display daily nutrition and hydration summaries</td>
+            <td>On-device + iCloud (if enabled)</td>
+          </tr>
+          <tr>
+            <td>Goal weight &amp; start weight</td>
+            <td>Calculate progress toward your goal</td>
+            <td>On-device + iCloud (if enabled)</td>
+          </tr>
+          <tr>
+            <td>Doctor appointment dates</td>
+            <td>Generate appointment reminders</td>
+            <td>On-device + iCloud (if enabled)</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>We do <strong>not</strong> collect crash analytics, advertising identifiers, device fingerprints, location data, or any form of behavioural tracking data.</p>
+    </section>
+
+    <!-- 3 -->
+    <section id="healthkit">
+      <h2>3. Apple HealthKit</h2>
+      <p>Althea may request access to Apple HealthKit to read and write your body weight data. This integration is entirely optional. If you grant permission:</p>
+      <ul>
+        <li>Weight entries you log in Althea can be written to HealthKit so your other health apps stay in sync.</li>
+        <li>Althea can read your most recent weight from HealthKit to pre-fill the logging interface.</li>
+      </ul>
+      <p>HealthKit data is processed only on your device. We do not transmit HealthKit data to any server, and we do not use it for advertising or unrelated research. HealthKit data is never shared with third parties without your explicit, separate consent.</p>
+      <p>You can revoke HealthKit permission at any time via <strong>Settings › Privacy &amp; Security › Health › Althea</strong> on your iPhone.</p>
+    </section>
+
+    <!-- 4 -->
+    <section id="icloud">
+      <h2>4. iCloud &amp; CloudKit</h2>
+      <p>If you are signed into iCloud on your device, Althea uses Apple's CloudKit framework to sync your data across your personal devices (iPhone, iPad). Your data is stored in your <strong>private iCloud database</strong> — accessible only to you and governed by Apple's iCloud Terms and Privacy Policy. We cannot access your CloudKit data.</p>
+      <p>You can disable iCloud sync at any time via <strong>Settings › [Your Name] › iCloud › Althea</strong>. Disabling sync does not delete existing data from your device; it only stops future synchronisation.</p>
+    </section>
+
+    <!-- 5 -->
+    <section id="third-parties">
+      <h2>5. Third-party services</h2>
+      <h3>Open Food Facts</h3>
+      <p>When you use the barcode scanner or food search feature, Althea sends the scanned barcode number or search text to <a href="https://world.openfoodfacts.org" target="_blank" rel="noopener">Open Food Facts</a> — a free, open-source food database. The query is made anonymously and no personal information is attached. Please review Open Food Facts' own privacy policy for details on how they handle query data.</p>
+
+      <h3>Apple StoreKit</h3>
+      <p>Subscription billing is handled entirely by Apple through the App Store. Althea never receives, stores, or processes your payment card details. Subscription status is verified on-device via StoreKit. Please refer to <a href="https://www.apple.com/legal/privacy/" target="_blank" rel="noopener">Apple's Privacy Policy</a> for how they handle payment data.</p>
+
+      <h3>No advertising SDKs</h3>
+      <p>Althea contains no advertising SDKs, tracking pixels, social media embeds, or analytics services that profile your behaviour for commercial purposes.</p>
+    </section>
+
+    <!-- 6 -->
+    <section id="notifications">
+      <h2>6. Notifications</h2>
+      <p>Althea may request permission to send you local push notifications for dose reminders and doctor appointment alerts. These notifications are scheduled entirely on-device using iOS's local notification system. No notification content is transmitted to external servers. You can disable notifications at any time via <strong>Settings › Notifications › Althea</strong>.</p>
+    </section>
+
+    <!-- 7 -->
+    <section id="subscriptions">
+      <h2>7. Subscriptions &amp; payments</h2>
+      <p>Althea offers an auto-renewing subscription managed entirely by Apple through the App Store. We do not collect or store any payment information. Subscription management — including cancellation — is handled through your Apple ID settings:</p>
+      <ul>
+        <li>On your iPhone: <strong>Settings › [Your Name] › Subscriptions</strong></li>
+        <li>In the App Store: tap your profile photo › Subscriptions</li>
+      </ul>
+      <p>Apple may share limited purchase verification data with us (e.g. whether a valid subscription exists) solely to unlock premium features. This data contains no payment card information.</p>
+    </section>
+
+    <!-- 8 -->
+    <section id="retention">
+      <h2>8. Data retention &amp; deletion</h2>
+      <p>Because your data is stored on your device and in your private iCloud, <strong>you control retention completely</strong>. You can:</p>
+      <ul>
+        <li><strong>Delete individual entries</strong> within the app by swiping left on any item in the activity feed.</li>
+        <li><strong>Reset all app data</strong> by deleting the Althea app from your device. This permanently removes all local data.</li>
+        <li><strong>Remove iCloud data</strong> by disabling iCloud sync and then deleting the app, or by managing your iCloud storage via <strong>Settings › [Your Name] › iCloud › Manage Account Storage</strong>.</li>
+      </ul>
+      <p>We do not retain copies of your data on any servers, so there is no separate data-deletion request process required on our end.</p>
+    </section>
+
+    <!-- 9 -->
+    <section id="children">
+      <h2>9. Children's privacy</h2>
+      <p>Althea is rated 17+ on the App Store and is not directed at or designed for use by children under the age of 17. We do not knowingly collect personal information from children. GLP-1 medications are prescribed medical treatments intended for adults; if you believe a minor is using the App without appropriate supervision, please contact your healthcare provider.</p>
+    </section>
+
+    <!-- 10 -->
+    <section id="your-rights">
+      <h2>10. Your rights</h2>
+      <p>Because we do not collect or process your personal health data on our servers, most traditional data-subject requests (access, portability, rectification, erasure) are fulfilled directly through your device and iCloud account. You always have full control and access to your own data.</p>
+      <p>If you are located in the European Economic Area, United Kingdom, or California, you may have additional rights under GDPR, UK GDPR, or CCPA respectively. Given our architecture — no server-side data storage — those rights are inherently satisfied. If you have a specific concern, please contact us at the address below.</p>
+    </section>
+
+    <!-- 11 -->
+    <section id="changes">
+      <h2>11. Changes to this policy</h2>
+      <p>We may update this Privacy Policy from time to time. When we do, we will revise the "Last updated" date at the top of this page and, for material changes, we will notify you via an in-app notice. Continued use of Althea after a policy update constitutes your acceptance of the revised terms.</p>
+    </section>
+
+    <!-- 12 -->
+    <section id="contact">
+      <h2>12. Contact us</h2>
+      <p>If you have questions or concerns about this Privacy Policy or Althea's data practices, please reach out:</p>
+      <div class="contact-card">
+        <div class="contact-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" stroke="#2AB5A2" stroke-width="1.8" stroke-linejoin="round"/>
+            <path d="M22 6l-10 7L2 6" stroke="#2AB5A2" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div>
+          <p><strong>Althea Support</strong></p>
+          <p>Email: <a href="mailto:privacy@altheaapp.com">privacy@altheaapp.com</a></p>
+          <p>We aim to respond within 5 business days.</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div style="display:flex;align-items:center;gap:10px;color:#fff;font-size:18px;font-weight:700;letter-spacing:-0.03em;">
+      <svg width="24" height="24" viewBox="0 0 48 48" fill="none">
+        <rect width="48" height="48" rx="12" fill="#2AB5A2"/>
+        <path d="M24 12c-6 4-10 10-10 18 3-2 6-3.5 10-3.5s7 1.5 10 3.5c0-8-4-14-10-18z" fill="#fff" opacity="0.9"/>
+      </svg>
+      althea
+    </div>
+    <nav class="footer-links">
+      <a href="privacy-policy.html">Privacy Policy</a>
+      <a href="terms-of-use.html">Terms of Use</a>
+      <a href="mailto:privacy@altheaapp.com">Support</a>
+    </nav>
+    <span class="footer-copy">© 2025 Althea. All rights reserved.</span>
+  </footer>
+
+</body>
+</html>
