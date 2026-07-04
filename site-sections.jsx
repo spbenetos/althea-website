@@ -229,14 +229,6 @@ function TrustBar() {
         {[
           {
             icon: (
-              <svg width="22" height="22" viewBox="0 0 24 24">
-                <polygon points="12,2 15.1,8.3 22,9.3 17,14.1 18.2,21 12,17.8 5.8,21 7,14.1 2,9.3 8.9,8.3" fill="#FF8C5A"/>
-              </svg>
-            ),
-            label: '4.8 on the App Store',
-          },
-          {
-            icon: (
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
                 <rect x="5" y="11" width="14" height="10" rx="2.5" stroke="#2AB5A2" strokeWidth="1.8"/>
                 <path d="M8 11V8a4 4 0 0 1 8 0v3" stroke="#2AB5A2" strokeWidth="1.8" strokeLinecap="round"/>
@@ -259,11 +251,19 @@ function TrustBar() {
           },
           {
             icon: (
+              <svg width="22" height="22" viewBox="0 0 24 24">
+                <polygon points="12,2 15.1,8.3 22,9.3 17,14.1 18.2,21 12,17.8 5.8,21 7,14.1 2,9.3 8.9,8.3" fill="#FF8C5A"/>
+              </svg>
+            ),
+            label: 'Built by doctors',
+          },
+          {
+            icon: (
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
                 <path d="M2 12h4l2-5 3 10 2-7 2 4h7" stroke="#FF8C5A" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             ),
-            label: 'Built for patients',
+            label: '...for patients',
           },
         ].map((item, i, arr) => (
           <div key={i} style={{
@@ -527,14 +527,7 @@ function HowItWorksSection() {
                   position: 'absolute', top: 16, right: 20,
                   fontFamily: 'system-ui',
                 }}>{s.n}</div>
-                <div style={{
-                  width: 44, height: 44, borderRadius: 13, background: s.color + '15',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  marginBottom: 20,
-                }}>
-                  <span style={{ fontSize: 20, fontWeight: 700, color: s.color, fontFamily: 'system-ui' }}>{i + 1}</span>
-                </div>
-                <h3 style={{ fontSize: 19, fontWeight: 700, color: '#0D1117', marginBottom: 10, letterSpacing: '-0.02em' }}>{s.title}</h3>
+                <h3 style={{ fontSize: 19, fontWeight: 700, color: '#0D1117', marginBottom: 10, letterSpacing: '-0.02em', marginTop: 4 }}>{s.title}</h3>
                 <p style={{ fontSize: 15, lineHeight: 1.6, color: '#5F6B7A', margin: 0 }}>{s.desc}</p>
               </div>
             </RevealOnScroll>
@@ -716,7 +709,7 @@ function FooterSection() {
           <a href="terms-of-use" style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', textDecoration: 'none' }}>Terms of Use</a>
           <a href="mailto:hello@althea.team" style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', textDecoration: 'none' }}>Support</a>
         </div>
-        <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.2)' }}>© 2025 Althea. All rights reserved.</span>
+        <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.2)' }}>© 2026 Althea. All rights reserved.</span>
       </div>
     </footer>
   );
