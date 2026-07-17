@@ -2,7 +2,7 @@
 // No mock UI. User drops real screenshots in.
 
 /* ── PhoneBezel — pure CSS iPhone shell ─────────────────────────────────── */
-function PhoneBezel({ id }) {
+function PhoneBezel({ id, src }) {
   const W = 390, H = 844;
   // inner = W/H - 20px padding each axis
   // status bar 59px, home indicator 34px, content = 824-59-34 = 731px
@@ -62,14 +62,19 @@ function PhoneBezel({ id }) {
           </div>
         </div>
 
-        {/* Screen content — 731px tall image slot */}
+        {/* Screen content — 731px tall */}
         <div style={{ height: 731, flexShrink: 0, background: '#0D1117', position: 'relative' }}>
-          <image-slot
-            id={`screen-${id}`}
-            placeholder="Drop screenshot here"
-            shape="rect"
-            style={{ display: 'block', width: '100%', height: '100%' }}
-          />
+          {src ? (
+            <img src={src} alt="Althea app screenshot" draggable="false"
+              style={{ display: 'block', width: '100%', height: '100%', objectFit: 'cover', userSelect: 'none', WebkitUserSelect: 'none', pointerEvents: 'none' }} />
+          ) : (
+            <image-slot
+              id={`screen-${id}`}
+              placeholder="Drop screenshot here"
+              shape="rect"
+              style={{ display: 'block', width: '100%', height: '100%' }}
+            />
+          )}
         </div>
 
         {/* Home indicator */}
@@ -85,6 +90,14 @@ function PhoneBezel({ id }) {
 }
 
 /* ── PhoneFrame — scales bezel and collapses layout space ────────────────── */
+const SCREENSHOTS = {
+  'hero-left': 'screenshots/hero-left.webp',
+  'hero-center': 'screenshots/hero-center.webp',
+  'hero-right': 'screenshots/hero-right.webp',
+  'feat-1': 'screenshots/feat-1.webp',
+  'feat-2': 'screenshots/feat-2.webp',
+  'feat-3': 'screenshots/feat-3.webp',
+};
 function PhoneFrame({ id, scale = 0.65, style = {} }) {
   const W = 390, H = 844;
   const cW = Math.round(W * scale);
@@ -96,7 +109,7 @@ function PhoneFrame({ id, scale = 0.65, style = {} }) {
         transform: `scale(${scale})`, transformOrigin: 'top left',
         width: W, height: H,
       }}>
-        <PhoneBezel id={id} />
+        <PhoneBezel id={id} src={SCREENSHOTS[id]} />
       </div>
     </div>
   );
