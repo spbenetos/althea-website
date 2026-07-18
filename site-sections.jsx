@@ -56,14 +56,29 @@ function AltheaLogo({ size = 32 }) {
     style={{ borderRadius: Math.round(size * 0.22), display: 'block', flexShrink: 0 }} />;
 }
 
-function AppStoreBadge({ dark = true, size = 'md' }) {
+function AppStoreBadge({ dark = true, size = 'md', compact = false }) {
   const { appStoreUrl, accentColor } = React.useContext(TweaksContext);
-  const pad = size === 'lg' ? '12px 24px 12px 20px' : '10px 20px 10px 16px';
-  const iconSz = size === 'lg' ? 26 : 22;
-  const titleSz = size === 'lg' ? 19 : 17;
   const bg = dark ? '#000' : '#fff';
   const fg = dark ? '#fff' : '#000';
   const border = dark ? 'none' : '1.5px solid rgba(0,0,0,0.12)';
+  if (compact) {
+    return (
+      <a href={appStoreUrl} style={{
+        display: 'inline-flex', alignItems: 'center', gap: 7,
+        background: bg, color: fg, border, borderRadius: 11,
+        padding: '8px 15px 8px 13px', textDecoration: 'none', flexShrink: 0,
+      }}>
+        <svg width="15" height="18" viewBox="0 0 22 26" fill={fg}>
+          <path d="M18.07 13.62c-.03-3.1 2.53-4.6 2.65-4.67-1.44-2.11-3.69-2.4-4.49-2.43-1.91-.2-3.73 1.12-4.7 1.12-.97 0-2.47-1.1-4.06-1.07-2.09.03-4.01 1.21-5.09 3.08-2.17 3.77-.56 9.36 1.56 12.42 1.03 1.5 2.27 3.18 3.89 3.12 1.56-.06 2.15-1.01 4.04-1.01 1.89 0 2.42 1.01 4.07.98 1.68-.03 2.74-1.53 3.76-3.03 1.19-1.74 1.68-3.42 1.71-3.51-.04-.02-3.28-1.26-3.34-5z"/>
+          <path d="M14.95 4.27c.86-1.04 1.44-2.48 1.28-3.92-1.24.05-2.74.82-3.63 1.86-.79.92-1.49 2.38-1.3 3.79 1.38.11 2.79-.7 3.65-1.73z"/>
+        </svg>
+        <span style={{ fontSize: 14, fontWeight: 650, letterSpacing: '-0.01em' }}>Get</span>
+      </a>
+    );
+  }
+  const pad = size === 'lg' ? '12px 24px 12px 20px' : '10px 20px 10px 16px';
+  const iconSz = size === 'lg' ? 26 : 22;
+  const titleSz = size === 'lg' ? 19 : 17;
   return (
     <a href={appStoreUrl} style={{
       display: 'inline-flex', alignItems: 'center', gap: 10,
@@ -119,7 +134,7 @@ function NavBar() {
             <a href="#pricing" style={{ fontSize: 14, fontWeight: 500, color: '#5F6B7A', textDecoration: 'none' }}>Pricing</a>
             <a href="#faq" style={{ fontSize: 14, fontWeight: 500, color: '#5F6B7A', textDecoration: 'none' }}>FAQ</a>
           </>}
-          <AppStoreBadge dark size="sm" />
+          <AppStoreBadge dark size="sm" compact={mobile} />
         </div>
       </div>
     </nav>
@@ -138,10 +153,15 @@ function HeroSection() {
       paddingTop: mobile ? 100 : 120,
       paddingBottom: 0,
       background: 'linear-gradient(180deg, #EDF8F6 0%, #F5FBFA 40%, #fff 75%)',
+      position: 'relative',
       overflowX: 'clip',
     }}>
+      {/* subtle leaves behind the title */}
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: mobile ? 420 : 480, pointerEvents: 'none' }}>
+        <FallingLeaves color={accentColor} count={4} fadeMin={0.18} fadeMax={0.38} />
+      </div>
       {/* Text */}
-      <div style={{ maxWidth: 760, margin: '0 auto', padding: '0 24px', textAlign: 'center' }}>
+      <div style={{ maxWidth: 760, margin: '0 auto', padding: '0 24px', textAlign: 'center', position: 'relative', zIndex: 1 }}>
         <RevealOnScroll delay={0.07}>
           <h1 style={{
             fontSize: mobile ? 'clamp(34px, 9vw, 44px)' : 'clamp(48px, 6vw, 72px)',
@@ -465,12 +485,12 @@ function FeaturePillarsSection() {
           display: 'flex', gap: 20,
           overflowX: 'auto', scrollSnapType: 'x mandatory',
           padding: '4px 4px 20px',
-          margin: '0 -4px',
+          margin: '0 -4px', scrollPaddingLeft: 4,
           WebkitOverflowScrolling: 'touch',
         }}>
           {pillars.map((p, i) => (
             <div key={i} style={{
-              flex: '0 0 auto', width: 280, scrollSnapAlign: 'start',
+              flex: '0 0 auto', width: 'min(280px, 82vw)', scrollSnapAlign: 'start',
               background: '#FAFAFA', borderRadius: 22, padding: '32px 28px',
               border: '1px solid rgba(0,0,0,0.05)',
               transition: 'transform 0.2s ease, box-shadow 0.2s ease',
@@ -513,10 +533,11 @@ function FeatureDeep({ reverse, bg, accentColor, tag, title, body, bullets, phon
         <div style={{ flex: '1 1 360px', maxWidth: 480 }}>
           <RevealOnScroll delay={delay} from={mobile ? 'bottom' : (reverse ? 'right' : 'left')}>
             <div style={{
-              display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 11.5, fontWeight: 700, letterSpacing: '0.1em',
-              textTransform: 'uppercase', color: accentColor, marginBottom: 16,
+              display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 11.5, fontWeight: 700, letterSpacing: '0.14em',
+              textTransform: 'uppercase', color: '#fff', marginBottom: 16,
+              background: '#0D1117', padding: '6px 12px', borderRadius: 20,
             }}>
-              <span style={{ width: 22, height: 2, borderRadius: 2, background: accentColor, display: 'inline-block' }}></span>
+              <span style={{ width: 6, height: 6, borderRadius: 3, background: accentColor, display: 'inline-block' }}></span>
               {tag}
             </div>
             <h2 style={{
@@ -539,6 +560,7 @@ function FeatureDeep({ reverse, bg, accentColor, tag, title, body, bullets, phon
                 marginTop: 28, padding: '18px 20px 16px', background: '#fff',
                 border: '1px solid rgba(0,0,0,0.06)', borderRadius: 18,
                 boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
+                transform: 'translateZ(0)', backfaceVisibility: 'hidden',
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -547,8 +569,8 @@ function FeatureDeep({ reverse, bg, accentColor, tag, title, body, bullets, phon
                     <span style={{ fontSize: 12, color: '#8896A5' }}>· 12 weeks</span>
                   </div>
                   <span style={{
-                    fontSize: 13, fontWeight: 700, color: accentColor,
-                    background: accentColor + '14', padding: '3px 10px', borderRadius: 20,
+                    fontSize: 13, fontWeight: 700, color: '#fff',
+                    background: '#0D1117', padding: '3px 10px', borderRadius: 20,
                   }}>
                     <CountUp value={9.2} decimals={1} prefix="↓ " suffix=" kg" />
                   </span>
@@ -561,7 +583,7 @@ function FeatureDeep({ reverse, bg, accentColor, tag, title, body, bullets, phon
 
         {/* Phone */}
         <RevealOnScroll delay={delay + 0.12} from={mobile ? 'bottom' : (reverse ? 'left' : 'right')}>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14, transform: 'translateZ(0)', backfaceVisibility: 'hidden' }}>
             <PhoneFrame id={phoneId} scale={mobile ? 0.65 : 0.68} />
             {caption && (
               <span style={{ fontSize: 13, fontWeight: 500, color: '#8896A5', letterSpacing: '0.01em' }}>{caption}</span>
@@ -579,25 +601,26 @@ function FeatureDeep({ reverse, bg, accentColor, tag, title, body, bullets, phon
 function ResultsBand() {
   const mobile = useIsMobile(640);
   const stats = [
-    { v: 16, suffix: '+', decimals: 0, label: 'GLP-1 medications supported' },
-    { v: 94, suffix: '%', decimals: 0, label: 'Average dose adherence' },
-    { v: 4.8, suffix: '', decimals: 1, label: 'App Store rating' },
+    { v: 16, suffix: '+', decimals: 0, label: 'GLP-1 medications', sub: 'supported out of the box' },
+    { v: 100, suffix: '%', decimals: 0, label: 'Private', sub: 'your data stays on your device' },
+    { v: 4.8, suffix: '', decimals: 1, label: 'App Store', sub: 'average rating' },
   ];
   return (
-    <section style={{ padding: mobile ? '56px 0' : '72px 0', background: '#0D1117' }}>
+    <section style={{ padding: mobile ? '48px 0' : '72px 0', background: '#0D1117' }}>
       <div style={{
-        maxWidth: 1000, margin: '0 auto', padding: '0 24px',
-        display: 'grid', gridTemplateColumns: mobile ? '1fr' : 'repeat(3, 1fr)',
-        gap: mobile ? 32 : 24, textAlign: 'center',
+        maxWidth: 1000, margin: '0 auto', padding: mobile ? '0 16px' : '0 24px',
+        display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)',
+        gap: mobile ? 8 : 24, textAlign: 'center',
       }}>
         {stats.map((s, i) => (
           <div key={i} style={{
-            borderLeft: (!mobile && i > 0) ? '1px solid rgba(255,255,255,0.1)' : 'none',
+            borderLeft: (i > 0) ? '1px solid rgba(255,255,255,0.1)' : 'none',
           }}>
-            <div style={{ fontSize: mobile ? 44 : 54, fontWeight: 800, letterSpacing: '-0.03em', color: '#fff', lineHeight: 1 }}>
+            <div style={{ fontSize: mobile ? 26 : 54, fontWeight: 800, letterSpacing: '-0.03em', color: '#fff', lineHeight: 1 }}>
               <CountUp value={s.v} suffix={s.suffix} decimals={s.decimals} />
             </div>
-            <div style={{ fontSize: 14.5, color: 'rgba(255,255,255,0.55)', marginTop: 12 }}>{s.label}</div>
+            <div style={{ fontSize: mobile ? 12 : 15, fontWeight: 650, color: 'rgba(255,255,255,0.9)', marginTop: mobile ? 8 : 12 }}>{s.label}</div>
+            <div style={{ fontSize: mobile ? 10.5 : 13.5, lineHeight: 1.35, color: 'rgba(255,255,255,0.45)', marginTop: 3 }}>{s.sub}</div>
           </div>
         ))}
       </div>
@@ -663,7 +686,7 @@ function HowItWorksSection() {
     {
       n: '01', color: '#2AB5A2',
       title: 'Set up your medication',
-      desc: 'Choose from 16+ GLP-1 drugs — Retatrutide, Ozempic, Wegovy, Mounjaro, Zepbound, and more. Enter your dose and start date.',
+      desc: 'Choose from 16+ GLP-1 drugs — Retatrutide, Ozempic, Wegovy, Mounjaro, Zepbound, and more.',
     },
     {
       n: '02', color: '#2AB5A2',
@@ -735,7 +758,7 @@ function PricingSection() {
   return (
     <section id="pricing" style={{ padding: '88px 0', background: '#F7FBFA', position: 'relative', overflow: 'hidden' }}>
       <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
-        <FallingLeaves color={accentColor} count={14} />
+        <FallingLeaves color={accentColor} count={4} fadeMin={0.18} fadeMax={0.38} />
       </div>
       <div style={{ maxWidth: 680, margin: '0 auto', padding: '0 24px', position: 'relative' }}>
         <RevealOnScroll>
@@ -827,11 +850,10 @@ function PricingSection() {
               background: `linear-gradient(90deg, #35C07B, ${accentColor})`,
               color: '#fff', fontSize: 16.5, fontWeight: 700, letterSpacing: '-0.01em',
               padding: '16px 40px', borderRadius: 16, textDecoration: 'none',
-              boxShadow: '0 8px 28px rgba(53,192,123,0.3)',
-              transition: 'transform 0.18s ease, box-shadow 0.18s ease',
+              transition: 'transform 0.18s ease',
             }}
-            onMouseEnter={e => { e.currentTarget.style.transform='scale(1.03)'; e.currentTarget.style.boxShadow='0 12px 36px rgba(53,192,123,0.4)'; }}
-            onMouseLeave={e => { e.currentTarget.style.transform='scale(1)'; e.currentTarget.style.boxShadow='0 8px 28px rgba(53,192,123,0.3)'; }}>
+            onMouseEnter={e => { e.currentTarget.style.transform='scale(1.03)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform='scale(1)'; }}>
               <svg width="18" height="16" viewBox="0 0 24 20" fill="#fff">
                 <path d="M2 6l5 4 5-8 5 8 5-4-2 12H4L2 6z"/>
                 <rect x="4" y="19" width="16" height="1.5" rx="0.75"/>
@@ -914,8 +936,8 @@ function FooterSection() {
           <span style={{ fontSize: 20, fontWeight: 600, letterSpacing: '-0.03em', color: '#fff' }}>Althea</span>
         </a>
         <div style={{ display: 'flex', gap: 24 }}>
-          <a href="privacy-policy.html" style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', textDecoration: 'none' }}>Privacy Policy</a>
-          <a href="terms-of-use.html" style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', textDecoration: 'none' }}>Terms of Use</a>
+          <a href="privacy-policy/" style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', textDecoration: 'none' }}>Privacy Policy</a>
+          <a href="terms-of-use/" style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', textDecoration: 'none' }}>Terms of Use</a>
           <a href="mailto:support@althea.team" style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', textDecoration: 'none' }}>Support</a>
         </div>
         <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.2)' }}>© 2026 Althea. All rights reserved.</span>

@@ -163,7 +163,7 @@ function DrawChart({ color = '#2AB5A2', width = 300, height = 140, strokeWidth =
 }
 
 /* ── FallingLeaves — gentle falling Althea leaves (canvas) ──────────────── */
-function FallingLeaves({ color = '#2AB5A2', count = 20 }) {
+function FallingLeaves({ color = '#2AB5A2', count = 20, fadeMin = 0.45, fadeMax = 0.8 }) {
   const canvasRef = React.useRef(null);
   React.useEffect(() => {
     const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -172,6 +172,11 @@ function FallingLeaves({ color = '#2AB5A2', count = 20 }) {
     const ctx = canvas.getContext('2d');
     let raf = 0, w = 0, h = 0;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+    const sprite = new Image();
+    let spriteReady = false;
+    sprite.onload = () => { spriteReady = true; };
+    sprite.src = 'leaf.png';
 
     const resize = () => {
       const r = canvas.parentElement.getBoundingClientRect();
@@ -187,28 +192,16 @@ function FallingLeaves({ color = '#2AB5A2', count = 20 }) {
     const rand = (a, b) => a + Math.random() * (b - a);
     const leaves = Array.from({ length: count }, () => ({
       x: rand(0, 1), y: rand(-0.3, 1.1),
-      size: rand(9, 18),
+      size: rand(20, 38),
       speed: rand(0.045, 0.11),
       drift: rand(0.4, 1.1) * (Math.random() < 0.5 ? -1 : 1),
       spin: rand(-1.4, 1.4),
       phase: rand(0, Math.PI * 2),
-      opacity: rand(0.18, 0.5),
-      fadeStart: rand(0.45, 0.8),
+      opacity: rand(0.35, 0.75),
+      fadeStart: rand(fadeMin, fadeMax),
     }));
 
-    const drawLeaf = (s) => {
-      // simple two-arc leaf around origin, height ~ s
-      ctx.beginPath();
-      ctx.moveTo(0, -s / 2);
-      ctx.quadraticCurveTo(s / 2, 0, 0, s / 2);
-      ctx.quadraticCurveTo(-s / 2, 0, 0, -s / 2);
-      ctx.closePath();
-      ctx.fill();
-      // mid vein
-      ctx.beginPath();
-      ctx.moveTo(0, -s / 2); ctx.lineTo(0, s / 2);
-      ctx.stroke();
-    };
+    const drawLeaf = null; // (leaves now rendered from leaf.png sprite)
 
     const start = performance.now();
     const frame = (now) => {
@@ -225,15 +218,13 @@ function FallingLeaves({ color = '#2AB5A2', count = 20 }) {
         if (prog > p.fadeStart) {
           alpha *= Math.max(0, 1 - (prog - p.fadeStart) / (1 - p.fadeStart));
         }
-        if (alpha <= 0.01) continue;
+        if (alpha <= 0.01 || !spriteReady) continue;
         ctx.save();
         ctx.translate(xx, yy);
         ctx.rotate(angle);
         ctx.globalAlpha = alpha;
-        ctx.fillStyle = color;
-        ctx.strokeStyle = 'rgba(255,255,255,0.5)';
-        ctx.lineWidth = 0.8;
-        drawLeaf(p.size);
+        const dw = p.size, dh = p.size * (sprite.height / sprite.width || 1);
+        ctx.drawImage(sprite, -dw / 2, -dh / 2, dw, dh);
         ctx.restore();
       }
       if (!reduce) raf = requestAnimationFrame(frame);
@@ -241,7 +232,7 @@ function FallingLeaves({ color = '#2AB5A2', count = 20 }) {
     if (reduce) { frame(start + 3000); } else { raf = requestAnimationFrame(frame); }
 
     return () => { cancelAnimationFrame(raf); ro.disconnect(); };
-  }, [color, count]);
+  }, [color, count, fadeMin, fadeMax]);
 
   return <canvas ref={canvasRef} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }} />;
 }

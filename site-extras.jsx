@@ -86,7 +86,7 @@ function StickyMobileCTA() {
       <a href={appStoreUrl} style={{
         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
         background: 'rgba(13,17,23,0.92)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
-        color: '#fff', borderRadius: 16, padding: '15px 20px', textDecoration: 'none',
+        color: '#fff', borderRadius: 999, padding: '15px 20px', textDecoration: 'none',
         boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
       }}>
         <img src="app-icon.png" alt="" width="26" height="26" style={{ borderRadius: 6 }} />
