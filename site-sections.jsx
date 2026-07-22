@@ -114,10 +114,10 @@ function NavBar() {
   return (
     <nav style={{
       position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
-      background: scrolled ? 'rgba(255,255,255,0.9)' : 'transparent',
-      backdropFilter: scrolled ? 'blur(20px) saturate(1.8)' : 'none',
-      WebkitBackdropFilter: scrolled ? 'blur(20px) saturate(1.8)' : 'none',
-      borderBottom: scrolled ? '1px solid rgba(0,0,0,0.07)' : '1px solid transparent',
+      background: 'transparent',
+      backdropFilter: 'none',
+      WebkitBackdropFilter: 'none',
+      borderBottom: '1px solid transparent',
       transition: 'all 0.3s ease',
     }}>
       <div style={{
@@ -194,21 +194,18 @@ function HeroSection() {
 
       {/* Phones */}
       <RevealOnScroll delay={0.22}>
-        <div style={{
-          display: 'flex', justifyContent: 'center', alignItems: 'flex-end',
-          gap: mobile ? 10 : 20,
-          marginTop: mobile ? 32 : 32,
-          padding: '34px 24px 0',
-          overflow: 'hidden',
-        }}>
-          {!mobile && (
+        {mobile ? (
+          <HeroPhoneCluster />
+        ) : (
+          <div style={{
+            display: 'flex', justifyContent: 'center', alignItems: 'flex-end',
+            gap: 20, marginTop: 32, padding: '34px 24px 0', overflow: 'hidden',
+          }}>
             <ParallaxPhone id="hero-left" scale={0.52} speed={0.06} baseMargin={-40} />
-          )}
-          <ParallaxPhone id="hero-center" scale={mobile ? 0.72 : 0.60} speed={mobile ? 0 : 0.02} baseMargin={mobile ? 12 : 28} />
-          {!mobile && (
+            <ParallaxPhone id="hero-center" scale={0.60} speed={0.02} baseMargin={28} />
             <ParallaxPhone id="hero-right" scale={0.52} speed={0.1} baseMargin={-80} />
-          )}
-        </div>
+          </div>
+        )}
       </RevealOnScroll>
     </section>
   );
@@ -220,6 +217,88 @@ function ParallaxPhone({ id, scale, speed, baseMargin }) {
   return (
     <div ref={ref} style={{ marginBottom: baseMargin, transform: `translateY(${y}px)`, willChange: 'transform' }}>
       <PhoneFrame id={id} scale={scale} />
+    </div>
+  );
+}
+
+/* HeroPhoneCluster — mobile carousel: center phone flanked by two lower,
+   half-hidden phones. Tap a side phone or swipe to rotate; positions animate. */
+function HeroPhoneCluster() {
+  const ids = ['hero-left', 'hero-center', 'hero-right'];
+  const N = ids.length;
+  const [active, setActive] = React.useState(1);
+  const [drag, setDrag] = React.useState(0);
+  const [dragging, setDragging] = React.useState(false);
+  const st = React.useRef({ x: 0, moved: 0, down: false });
+
+  const centerScale = 0.60;
+  const baseH = Math.round(844 * centerScale);
+  const ratio = 0.44 / centerScale;
+  const OFF = 118, STEP = 150;
+
+  const go = (dir) => setActive(a => (a + dir + N) % N);
+  const offsetOf = (i) => { let d = i - active; if (d > 1) d -= N; if (d < -1) d += N; return d; };
+  // continuous slot from a fractional offset f (0=center, ±1=sides), wraps at ±1.5
+  const pos = (f) => {
+    while (f > 1.5) f -= N; while (f < -1.5) f += N;
+    const af = Math.abs(f), c = Math.min(af, 1);
+    return {
+      x: f * OFF, y: 6 + c * 76,
+      s: Math.max(0.3, 1 - af * (1 - ratio)),
+      o: af <= 1 ? 1 : Math.max(0, 0.9 * (1 - (af - 1) / 0.5)),
+      z: Math.round(30 - af * 10),
+    };
+  };
+
+  const onDown = (e) => { st.current = { x: e.clientX, moved: 0, down: true }; setDragging(true); e.currentTarget.setPointerCapture?.(e.pointerId); };
+  const onMove = (e) => {
+    if (!st.current.down) return;
+    const dx = e.clientX - st.current.x;
+    st.current.moved = Math.max(st.current.moved, Math.abs(dx));
+    setDrag(Math.max(-135, Math.min(135, dx)));
+  };
+  const onUp = () => {
+    if (!st.current.down) return;
+    const d = drag; st.current.down = false;
+    setDragging(false); setDrag(0);
+    if (d <= -45) go(1); else if (d >= 45) go(-1);
+  };
+  const tap = (i) => { if (st.current.moved < 8) setActive(i); };
+
+  const trans = dragging ? 'none' : 'transform 0.6s cubic-bezier(0.22,1,0.36,1), opacity 0.5s ease';
+  // While dragging, interpolate each phone from its current slot to the slot it
+  // will occupy after the pending swipe — so the back phone travels inward to
+  // its new position, exactly like a tap does.
+  const dir = drag > 0 ? -1 : drag < 0 ? 1 : 0;
+  const t = Math.min(1, Math.abs(drag) / STEP);
+  const wrap = (v) => (v > 1 ? v - N : v < -1 ? v + N : v);
+  const lerp = (a, b, k) => a + (b - a) * k;
+  const at = (i) => {
+    const o = offsetOf(i);
+    if (!dir) return pos(o);
+    const a = pos(o), b = pos(wrap(o - dir));
+    return { x: lerp(a.x, b.x, t), y: lerp(a.y, b.y, t), s: lerp(a.s, b.s, t), o: lerp(a.o, b.o, t), z: Math.round(lerp(a.z, b.z, t)) };
+  };
+  return (
+    <div style={{
+      position: 'relative', width: '100%', height: baseH + 20, marginTop: 20,
+      overflow: 'hidden', touchAction: 'pan-y', cursor: dragging ? 'grabbing' : 'grab',
+    }}
+      onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}>
+      {ids.map((id, i) => {
+        const p = at(i);
+        return (
+          <div key={id} onClick={() => tap(i)} style={{
+            position: 'absolute', top: 0, left: '50%',
+            transform: `translate(calc(-50% + ${p.x}px), ${p.y}px) scale(${p.s})`,
+            transformOrigin: 'top center', zIndex: p.z, opacity: p.o,
+            cursor: Math.round(p.x) === 0 ? 'inherit' : 'pointer',
+            transition: trans, WebkitTapHighlightColor: 'transparent',
+          }}>
+            <div style={{ pointerEvents: 'none' }}><PhoneFrame id={id} scale={centerScale} /></div>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -242,37 +321,30 @@ function ImpactBand() {
       <div style={{ maxWidth: 820, margin: '0 auto', padding: '0 24px', position: 'relative' }}>
         <RevealOnScroll>
           <div style={{
-            fontSize: 11.5, fontWeight: 700, letterSpacing: '0.12em',
-            textTransform: 'uppercase', color: accentColor, marginBottom: 10,
-          }}>Our community's impact</div>
+            fontSize: 11.5, fontWeight: 700, letterSpacing: '0.14em',
+            textTransform: 'uppercase', color: accentColor, marginBottom: 18,
+          }}>Why it matters</div>
         </RevealOnScroll>
         <RevealOnScroll delay={0.06}>
-          <div style={{
-            fontSize: mobile ? 'clamp(48px, 15vw, 64px)' : 'clamp(64px, 8vw, 96px)',
-            fontWeight: 800, letterSpacing: '-0.05em', lineHeight: 0.95,
+          <h2 style={{
+            fontSize: mobile ? 'clamp(30px, 8vw, 38px)' : 'clamp(40px, 5.4vw, 60px)',
+            fontWeight: 800, letterSpacing: '-0.035em', lineHeight: 1.08,
             color: '#0D1117',
           }}>
-            <CountUp value={128940} duration={2200} style={{
+            The hard part isn't starting.<br />
+            <span style={{
               background: `linear-gradient(120deg, ${accentColor}, #1A8A7A)`,
               WebkitBackgroundClip: 'text', backgroundClip: 'text',
               WebkitTextFillColor: 'transparent', color: 'transparent',
-            }} />
-          </div>
+            }}>It's staying consistent.</span>
+          </h2>
         </RevealOnScroll>
-        <RevealOnScroll delay={0.12}>
-          <div style={{
-            fontSize: mobile ? 17 : 20, fontWeight: 750, letterSpacing: '-0.02em',
-            color: '#0D1117', marginTop: 4,
-          }}>life-years gained</div>
-        </RevealOnScroll>
-        <RevealOnScroll delay={0.18}>
+        <RevealOnScroll delay={0.14}>
           <p style={{
-            fontSize: mobile ? 14.5 : 15.5, lineHeight: 1.6, color: '#4A5568',
-            maxWidth: 480, margin: '12px auto 0', textWrap: 'pretty',
-            background: 'radial-gradient(ellipse 90% 130% at 50% 50%, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.6) 55%, transparent 100%)',
-            borderRadius: 24, padding: '10px 18px',
+            fontSize: mobile ? 16 : 18.5, lineHeight: 1.65, color: '#4A5568',
+            maxWidth: 520, margin: '22px auto 0', textWrap: 'pretty',
           }}>
-            Every kilogram lost adds healthy time to your life. Together, people tracking with Althea have reclaimed over a hundred thousand years of it.
+            GLP-1 treatment works when you stay with it — the right dose, on time, tracked. Althea turns that into a daily habit you'll actually keep, so the results can follow.
           </p>
         </RevealOnScroll>
       </div>
@@ -357,7 +429,130 @@ function TrustBar() {
 /* ═══════════════════════════════════════════════════════════════════════════
    FEATURE PILLARS
    ═══════════════════════════════════════════════════════════════════════════ */
+/* FeatureCardStack — mobile: real cards stacked on one another.
+   Swipe left/right or tap the front card to shuffle through them. */
+function FeatureCardStack({ pillars }) {
+  const N = pillars.length;
+  const [active, setActive] = React.useState(0);
+  const [drag, setDrag] = React.useState(0);
+  const [dragging, setDragging] = React.useState(false);
+  const [exit, setExit] = React.useState(null); // { i, dir, from }
+  const [exitGo, setExitGo] = React.useState(false);
+  const st = React.useRef({ x: 0, moved: 0, down: false, vx: 0, lx: 0, lt: 0 });
+  const depthOf = (i) => (i - active + N) % N;
+  const CARD_H = 200;
+
+  // Fling the front card off-screen while the next card rises into its place.
+  const fling = (step, flyDir) => {
+    const i = active, from = drag;
+    setExit({ i, dir: flyDir, from });
+    setExitGo(false);
+    setActive(a => (a + step + N) % N);
+    setDrag(0);
+    requestAnimationFrame(() => requestAnimationFrame(() => setExitGo(true)));
+    setTimeout(() => { setExit(null); setExitGo(false); }, 500);
+  };
+
+  const onDown = (e) => { st.current = { x: e.clientX, moved: 0, down: true, vx: 0, lx: e.clientX, lt: Date.now() }; setDragging(true); e.currentTarget.setPointerCapture?.(e.pointerId); };
+  const onMove = (e) => {
+    if (!st.current.down) return;
+    const dx = e.clientX - st.current.x;
+    const now = Date.now(), dt = now - st.current.lt;
+    if (dt > 0) st.current.vx = (e.clientX - st.current.lx) / dt;
+    st.current.lx = e.clientX; st.current.lt = now;
+    st.current.moved = Math.max(st.current.moved, Math.abs(dx));
+    setDrag(Math.max(-200, Math.min(200, dx)));
+  };
+  const onUp = () => {
+    if (!st.current.down) return;
+    const d = drag, v = st.current.vx; st.current.down = false;
+    setDragging(false);
+    if (d <= -40 || v < -0.35) fling(1, -1);
+    else if (d >= 40 || v > 0.35) fling(-1, 1);
+    else setDrag(0);
+  };
+  const tap = () => { if (st.current.moved < 8) fling(1, -1); };
+
+  const cardVisual = {
+    background: '#fff', borderRadius: 22, padding: '28px 26px',
+    border: '1px solid rgba(13,17,23,0.08)',
+    display: 'flex', flexDirection: 'column', WebkitTapHighlightColor: 'transparent',
+  };
+  const CardBody = ({ p }) => (
+    <React.Fragment>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 13, marginBottom: 14 }}>
+        <div style={{ display: 'flex', flexShrink: 0 }}>{p.icon}</div>
+        <h3 style={{ fontSize: 18.5, fontWeight: 700, color: '#0D1117', letterSpacing: '-0.02em', margin: 0 }}>{p.title}</h3>
+      </div>
+      <p style={{ fontSize: 14.5, lineHeight: 1.6, color: '#5F6B7A', margin: 0 }}>{p.desc}</p>
+    </React.Fragment>
+  );
+  const flyX = Math.max(typeof window !== 'undefined' ? window.innerWidth : 420, 420) + 60;
+
+  return (
+    <div>
+      <div style={{
+        position: 'relative', height: CARD_H + 44, touchAction: 'pan-y',
+        cursor: dragging ? 'grabbing' : 'grab', userSelect: 'none',
+      }}
+        onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}>
+        {pillars.map((p, i) => {
+          if (exit && i === exit.i) return null;
+          const d = depthOf(i);
+          if (d > 3) return null;
+          const front = d === 0;
+          const x = front ? drag : 0;
+          const rot = front ? drag * 0.02 : 0;
+          const y = d * 18;
+          const s = 1 - d * 0.035;
+          return (
+            <div key={i} onClick={front ? tap : undefined} style={{
+              ...cardVisual,
+              position: 'absolute', left: 0, right: 0, top: 0, height: CARD_H,
+              zIndex: N - d,
+              transform: `translate(${x}px, ${y}px) scale(${s}) rotate(${rot}deg)`,
+              opacity: d >= 3 ? 0 : 1, transformOrigin: 'top center',
+              transition: dragging && front ? 'none' : 'transform 0.5s cubic-bezier(0.16,1,0.3,1), opacity 0.35s ease',
+              boxShadow: front ? '0 18px 40px -18px rgba(13,17,23,0.22)' : '0 10px 24px -14px rgba(13,17,23,0.13)',
+            }}>
+              <CardBody p={p} />
+            </div>
+          );
+        })}
+        {exit && (
+          <div style={{
+            ...cardVisual,
+            position: 'absolute', left: 0, right: 0, top: 0, height: CARD_H,
+            zIndex: N + 2, transformOrigin: 'top center',
+            transform: exitGo
+              ? `translate(${exit.dir * flyX}px, 0) rotate(${exit.dir * 11}deg)`
+              : `translate(${exit.from}px, 0) rotate(${exit.from * 0.02}deg)`,
+            opacity: exitGo ? 0 : 1,
+            transition: 'transform 0.5s cubic-bezier(0.4,0,0.7,0.2), opacity 0.5s ease',
+            boxShadow: '0 18px 40px -18px rgba(13,17,23,0.22)',
+          }}>
+            <CardBody p={pillars[exit.i]} />
+          </div>
+        )}
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, marginTop: 22 }}>
+        {pillars.map((_, i) => (
+          <button key={i} aria-label={`Feature ${i + 1}`} onClick={() => setActive(i)} style={{
+            width: i === active ? 22 : 7, height: 7, borderRadius: 4, padding: 0, border: 'none',
+            background: i === active ? '#2AB5A2' : 'rgba(13,17,23,0.16)',
+            transition: 'width 0.3s ease, background 0.3s ease', cursor: 'pointer',
+          }} />
+        ))}
+      </div>
+      <p style={{ textAlign: 'center', fontSize: 12.5, color: '#9AA3AF', margin: '12px 0 0', letterSpacing: '0.01em' }}>
+        Swipe or tap to explore · {active + 1} / {N}
+      </p>
+    </div>
+  );
+}
+
 function FeaturePillarsSection() {
+  const mobile = useIsMobile();
   const pillars = [
     {
       color: '#2AB5A2',
@@ -467,50 +662,52 @@ function FeaturePillarsSection() {
     },
   ];
   return (
-    <section id="features" style={{ padding: '88px 0', background: '#fff' }}>
+    <section id="features" style={{ padding: mobile ? '64px 0' : '88px 0', background: '#fff' }}>
       <div style={{ maxWidth: 1160, margin: '0 auto', padding: '0 24px' }}>
         <RevealOnScroll>
-          <div style={{ textAlign: 'center', marginBottom: 56 }}>
+          <div style={{ textAlign: 'center', marginBottom: mobile ? 30 : 56 }}>
             <h2 style={{
               fontSize: 'clamp(30px, 3.5vw, 42px)', fontWeight: 750,
               letterSpacing: '-0.03em', color: '#0D1117', marginBottom: 14, lineHeight: 1.15,
-            }}>Everything you need, built in</h2>
+            }}>Everything you need,{mobile ? <br /> : ' '}built in</h2>
             <p style={{ fontSize: 17, color: '#4A5568', maxWidth: 440, margin: '0 auto' }}>
-              One app for your entire GLP-1 journey. Scroll to explore →
+              One app for your entire GLP-1 journey — from your first dose to doctor-ready reports.
             </p>
           </div>
         </RevealOnScroll>
 
-        <div className="features-scroll" style={{
-          display: 'flex', gap: 20,
-          overflowX: 'auto', scrollSnapType: 'x mandatory',
-          padding: '4px 4px 20px',
-          margin: '0 -4px', scrollPaddingLeft: 4,
-          WebkitOverflowScrolling: 'touch',
-        }}>
-          {pillars.map((p, i) => (
-            <div key={i} style={{
-              flex: '0 0 auto', width: 'min(280px, 82vw)', scrollSnapAlign: 'start',
-              background: '#FAFAFA', borderRadius: 22, padding: '32px 28px',
-              border: '1px solid rgba(0,0,0,0.05)',
-              transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-            }}
-            onMouseEnter={e => { e.currentTarget.style.transform='translateY(-3px)'; e.currentTarget.style.boxShadow='0 8px 32px rgba(0,0,0,0.07)'; }}
-            onMouseLeave={e => { e.currentTarget.style.transform='none'; e.currentTarget.style.boxShadow='none'; }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+        {mobile ? (
+          <RevealOnScroll delay={0.06}>
+            <FeatureCardStack pillars={pillars} />
+          </RevealOnScroll>
+        ) : (
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))',
+            gap: 16,
+          }}>
+            {pillars.map((p, i) => (
+              <div key={i} style={{
+                background: '#fff', borderRadius: 20, padding: '30px 28px',
+                border: '1px solid rgba(13,17,23,0.07)',
+                transition: 'transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.transform='translateY(-4px)'; e.currentTarget.style.boxShadow='0 14px 40px rgba(26,138,122,0.12)'; e.currentTarget.style.borderColor='rgba(42,181,162,0.4)'; }}
+              onMouseLeave={e => { e.currentTarget.style.transform='none'; e.currentTarget.style.boxShadow='none'; e.currentTarget.style.borderColor='rgba(13,17,23,0.07)'; }}>
                 <div style={{
-                  width: 34, height: 34, borderRadius: 9, flexShrink: 0,
+                  width: 48, height: 48, borderRadius: 13, marginBottom: 18,
                   background: 'linear-gradient(150deg, #3FD0BC, #1F9E8C)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  boxShadow: '0 6px 16px rgba(31,158,140,0.28)',
                 }}>
-                  <div style={{ filter: 'brightness(0) invert(1)', display: 'flex', transform: 'scale(0.5)' }}>{p.icon}</div>
+                  <div style={{ filter: 'brightness(0) invert(1)', display: 'flex', transform: 'scale(0.6)' }}>{p.icon}</div>
                 </div>
-                <h3 style={{ fontSize: 16.5, fontWeight: 700, color: '#0D1117', letterSpacing: '-0.02em', margin: 0 }}>{p.title}</h3>
+                <h3 style={{ fontSize: 18, fontWeight: 700, color: '#0D1117', letterSpacing: '-0.02em', margin: '0 0 8px' }}>{p.title}</h3>
+                <p style={{ fontSize: 14.5, lineHeight: 1.6, color: '#5F6B7A', margin: 0 }}>{p.desc}</p>
               </div>
-              <p style={{ fontSize: 15, lineHeight: 1.6, color: '#5F6B7A', margin: 0 }}>{p.desc}</p>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
@@ -602,8 +799,8 @@ function ResultsBand() {
   const mobile = useIsMobile(640);
   const stats = [
     { v: 16, suffix: '+', decimals: 0, label: 'GLP-1 medications', sub: 'supported out of the box' },
-    { v: 100, suffix: '%', decimals: 0, label: 'Private', sub: 'your data stays on your device' },
-    { v: 4.8, suffix: '', decimals: 1, label: 'App Store', sub: 'average rating' },
+    { v: 60, prefix: '<', suffix: 's', decimals: 0, label: 'To log your day', sub: 'doses, weight & symptoms' },
+    { v: 100, suffix: '%', decimals: 0, label: 'On-device privacy', sub: 'no servers, no tracking' },
   ];
   return (
     <section style={{ padding: mobile ? '48px 0' : '72px 0', background: '#0D1117' }}>
@@ -880,14 +1077,6 @@ function FinalCTASection() {
   const { accentColor, trialDays, appStoreUrl } = React.useContext(TweaksContext);
   return (
     <section style={{ padding: '100px 0', background: '#0D1117', position: 'relative', overflow: 'hidden' }}>
-      {/* Glow */}
-      <div style={{
-        position: 'absolute', top: '50%', left: '50%',
-        transform: 'translate(-50%, -50%)',
-        width: 600, height: 300,
-        background: `radial-gradient(ellipse, ${accentColor}30 0%, transparent 70%)`,
-        pointerEvents: 'none',
-      }} />
       <div style={{ maxWidth: 640, margin: '0 auto', padding: '0 24px', textAlign: 'center', position: 'relative' }}>
         <RevealOnScroll>
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 24 }}>
@@ -923,24 +1112,54 @@ function FinalCTASection() {
    FOOTER
    ═══════════════════════════════════════════════════════════════════════════ */
 function FooterSection() {
-  const mobile = useIsMobile(640);
+  const mobile = useIsMobile(768);
+  const linkStyle = { fontSize: 14, color: 'rgba(255,255,255,0.55)', textDecoration: 'none', display: 'block', marginBottom: 12 };
+  const headStyle = { fontSize: 11.5, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.32)', marginBottom: 16 };
   return (
-    <footer style={{ background: '#080B10', padding: '40px 24px' }}>
-      <div style={{
-        maxWidth: 1160, margin: '0 auto',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        flexWrap: 'wrap', gap: 16,
-      }}>
-        <a href="index.html" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
-          <AltheaLogo size={28} />
-          <span style={{ fontSize: 20, fontWeight: 600, letterSpacing: '-0.03em', color: '#fff' }}>Althea</span>
-        </a>
-        <div style={{ display: 'flex', gap: 24 }}>
-          <a href="privacy-policy/" style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', textDecoration: 'none' }}>Privacy Policy</a>
-          <a href="terms-of-use/" style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', textDecoration: 'none' }}>Terms of Use</a>
-          <a href="mailto:support@althea.team" style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', textDecoration: 'none' }}>Support</a>
+    <footer style={{ background: '#080B10', padding: mobile ? '48px 24px 32px' : '64px 24px 32px' }}>
+      <div style={{ maxWidth: 1160, margin: '0 auto' }}>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: mobile ? '1fr' : '1.7fr 1fr 1fr 1.1fr',
+          gap: mobile ? 36 : 40,
+          paddingBottom: 40, borderBottom: '1px solid rgba(255,255,255,0.08)',
+        }}>
+          <div>
+            <a href="index.html" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', marginBottom: 16 }}>
+              <AltheaLogo size={30} />
+              <span style={{ fontSize: 21, fontWeight: 600, letterSpacing: '-0.03em', color: '#fff' }}>Althea</span>
+            </a>
+            <p style={{ fontSize: 14, lineHeight: 1.6, color: 'rgba(255,255,255,0.45)', maxWidth: 300, marginBottom: 22 }}>
+              The companion app for your GLP-1 medication journey. Private by design.
+            </p>
+            <AppStoreBadge dark={false} size="sm" />
+          </div>
+          <div>
+            <div style={headStyle}>Product</div>
+            <a href="#features" style={linkStyle}>Features</a>
+            <a href="#pricing" style={linkStyle}>Pricing</a>
+            <a href="#faq" style={linkStyle}>FAQ</a>
+          </div>
+          <div>
+            <div style={headStyle}>Legal</div>
+            <a href="privacy-policy/" style={linkStyle}>Privacy Policy</a>
+            <a href="terms-of-use/" style={linkStyle}>Terms of Use</a>
+          </div>
+          <div>
+            <div style={headStyle}>Contact</div>
+            <a href="mailto:support@althea.team" style={linkStyle}>support@althea.team</a>
+            <span style={{ fontSize: 14, color: 'rgba(255,255,255,0.35)' }}>Made with care</span>
+          </div>
         </div>
-        <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.2)' }}>© 2026 Althea. All rights reserved.</span>
+        <div style={{
+          display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'space-between',
+          alignItems: 'flex-start', paddingTop: 24,
+        }}>
+          <span style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.3)', maxWidth: 640, lineHeight: 1.55 }}>
+            Althea is a personal tracking companion — not a medical device, and not a substitute for professional medical advice. Always consult your healthcare provider about your treatment.
+          </span>
+          <span style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.3)', whiteSpace: 'nowrap' }}>© 2026 Althea. All rights reserved.</span>
+        </div>
       </div>
     </footer>
   );
@@ -949,7 +1168,7 @@ function FooterSection() {
 Object.assign(window, {
   RevealOnScroll, useIsMobile,
   AltheaLogo, AppStoreBadge,
-  NavBar, HeroSection, ImpactBand, TrustBar,
+  NavBar, HeroSection, HeroPhoneCluster, ImpactBand, TrustBar,
   FeaturePillarsSection, FeatureDeepSection,
   HowItWorksSection, PricingSection,
   FinalCTASection, FooterSection,

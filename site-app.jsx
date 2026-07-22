@@ -3,7 +3,7 @@
 const TWEAK_DEFAULTS = {
   accentColor: '#2AB5A2',
   headline: 'Track every dose.\nSee every result.',
-  subline: 'The companion app for your GLP-1 medication journey — dose logging, weight tracking, and side effect monitoring in one place.',
+  subline: 'The companion app for your GLP-1 medication journey.',
   appStoreUrl: 'https://apps.apple.com',
   trialDays: 7,
   animChartDraw: true,
@@ -29,9 +29,11 @@ function App() {
         <HeroSection />
         <ImpactBand />
         <TrustBar />
+        <ShowcaseSection />
         <FeaturePillarsSection />
         <FeatureDeepSection />
         <HowItWorksSection />
+        <TestimonialsSection />
         <PricingSection />
         <FAQSection />
         <FinalCTASection />

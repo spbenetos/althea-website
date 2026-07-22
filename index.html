@@ -50,7 +50,7 @@
 
     #root { min-height: 100vh; }
 
-    a { transition: opacity 0.15s ease; }
+    a { color: #1A8A7A; transition: opacity 0.15s ease; }
     a:hover { opacity: 0.85; }
     button { font-family: inherit; }
 
@@ -74,6 +74,16 @@
     }
     .features-scroll::-webkit-scrollbar-thumb:hover { background: rgba(42,181,162,0.5); background-clip: padding-box; }
     .features-scroll { scrollbar-width: thin; scrollbar-color: rgba(42,181,162,0.35) transparent; }
+
+    /* Showcase horizontal scrollbar */
+    .showcase-scroll::-webkit-scrollbar { height: 8px; }
+    .showcase-scroll::-webkit-scrollbar-track { background: transparent; }
+    .showcase-scroll::-webkit-scrollbar-thumb {
+      background: rgba(42,181,162,0.28); border-radius: 20px;
+      border: 2px solid transparent; background-clip: padding-box;
+    }
+    .showcase-scroll::-webkit-scrollbar-thumb:hover { background: rgba(42,181,162,0.5); background-clip: padding-box; }
+    .showcase-scroll { scrollbar-width: thin; scrollbar-color: rgba(42,181,162,0.35) transparent; }
 
     @keyframes impactRise {
       0% { transform: translateY(28px); opacity: 0; }
@@ -105,6 +115,7 @@
   <script type="text/babel" src="phone-screens.jsx"></script>
   <script type="text/babel" src="site-sections.jsx"></script>
   <script type="text/babel" src="site-extras.jsx"></script>
+  <script type="text/babel" src="site-showcase.jsx"></script>
   <script type="text/babel" src="site-app.jsx"></script>
 </body>
 </html>
