@@ -162,6 +162,91 @@ function DrawChart({ color = '#2AB5A2', width = 300, height = 140, strokeWidth =
   );
 }
 
+/* ── WeightTrendCardA — quiet dark weight-trend card (Option A) ─────────── */
+function WeightTrendCardA({ color = '#3EC4B0' }) {
+  const { animChartDraw } = React.useContext(AnimContext);
+  const [ref, inView] = useInView(0.4);
+  const W = 390, H = 210, topKg = 95, botKg = 80, goalKg = 81;
+  const data = [92.4, 92.1, 91.3, 90.8, 89.6, 88.2, 87.5, 86.1, 84.9, 84.0, 83.5, 83.2];
+  const yOf = w => 10 + ((topKg - w) / (topKg - botKg)) * (H - 20);
+  const pts = React.useMemo(() => data.map((v, i) => [4 + (i / (data.length - 1)) * (W - 12), yOf(v)]), []);
+  // Catmull-Rom → cubic bezier for a smooth, quiet line
+  const line = React.useMemo(() => {
+    let d = `M${pts[0][0].toFixed(1)},${pts[0][1].toFixed(1)}`;
+    for (let i = 0; i < pts.length - 1; i++) {
+      const p0 = pts[Math.max(i - 1, 0)], p1 = pts[i], p2 = pts[i + 1], p3 = pts[Math.min(i + 2, pts.length - 1)];
+      const c1 = [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6];
+      const c2 = [p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6];
+      d += ` C${c1[0].toFixed(1)},${c1[1].toFixed(1)} ${c2[0].toFixed(1)},${c2[1].toFixed(1)} ${p2[0].toFixed(1)},${p2[1].toFixed(1)}`;
+    }
+    return d;
+  }, [pts]);
+  const drawn = !animChartDraw || inView;
+  const last = pts[pts.length - 1];
+  const gid = React.useMemo(() => 'wt' + Math.random().toString(36).slice(2, 8), []);
+  const grid = [95, 90, 85, 80];
+  const goalY = yOf(goalKg);
+  const axLbl = { position: 'absolute', right: 10, transform: 'translateY(-50%)', fontSize: 11, fontWeight: 500, color: '#5C636B', lineHeight: 1 };
+  return (
+    <div ref={ref} style={{
+      background: '#17191E', borderRadius: 20, overflow: 'hidden',
+      boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.055), 0 12px 32px rgba(13,17,23,0.22)',
+    }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, padding: '18px 20px 0' }}>
+        <div>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 5 }}>
+            <span style={{ fontSize: 30, fontWeight: 700, color: '#F2F4F5', letterSpacing: '-0.02em', lineHeight: 1 }}>83.2</span>
+            <span style={{ fontSize: 14, fontWeight: 500, color: '#8A9096' }}>kg</span>
+          </div>
+          <div style={{ fontSize: 12, color: '#8A9096', marginTop: 4 }}>Current weight</div>
+        </div>
+        <div style={{ textAlign: 'right' }}>
+          <div style={{ fontSize: 21, fontWeight: 700, color: '#4ADE80', letterSpacing: '-0.01em', whiteSpace: 'nowrap', lineHeight: 1.2 }}>
+            <CountUp value={9.2} decimals={1} prefix="↓ " suffix=" kg" />
+          </div>
+          <div style={{ fontSize: 12, color: '#8A9096', marginTop: 3 }}>lost in 12 weeks</div>
+        </div>
+      </div>
+      <div style={{ position: 'relative', marginTop: 4, marginBottom: 8 }}>
+        <svg width="100%" height={H} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{ display: 'block' }}>
+          <defs>
+            <linearGradient id={gid} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={color} stopOpacity="0.13" />
+              <stop offset="100%" stopColor={color} stopOpacity="0" />
+            </linearGradient>
+          </defs>
+          {grid.map(g => (
+            <line key={g} x1="0" y1={yOf(g)} x2={W} y2={yOf(g)} stroke="rgba(255,255,255,0.045)" strokeWidth="1" vectorEffect="non-scaling-stroke" />
+          ))}
+          <line x1="0" y1={goalY} x2={W} y2={goalY} stroke="rgba(74,222,128,0.4)" strokeWidth="1" strokeDasharray="3 5" vectorEffect="non-scaling-stroke" />
+          <g style={{
+            clipPath: `inset(-20% ${drawn ? 0 : 100}% -20% 0)`,
+            WebkitClipPath: `inset(-20% ${drawn ? 0 : 100}% -20% 0)`,
+            transition: 'clip-path 1.5s cubic-bezier(.4,0,.2,1), -webkit-clip-path 1.5s cubic-bezier(.4,0,.2,1)',
+          }}>
+            <path d={`${line} L${last[0]},${H} L${pts[0][0]},${H} Z`} fill={`url(#${gid})`} />
+            <path d={line} fill="none" stroke={color} strokeWidth="2" vectorEffect="non-scaling-stroke" strokeLinecap="round" strokeLinejoin="round" />
+          </g>
+        </svg>
+        {grid.map(g => (
+          <span key={g} style={{ ...axLbl, top: `${(yOf(g) / H) * 100}%` }}>{g}</span>
+        ))}
+        <span style={{
+          position: 'absolute', left: 20, top: `${(goalY / H) * 100}%`, transform: 'translateY(-130%)',
+          fontSize: 9.5, fontWeight: 700, letterSpacing: '0.06em', color: 'rgba(74,222,128,0.75)',
+        }}>GOAL {goalKg}</span>
+        <div style={{
+          position: 'absolute', left: `${(last[0] / W) * 100}%`, top: `${(last[1] / H) * 100}%`,
+          width: 8, height: 8, borderRadius: '50%', background: color,
+          boxShadow: `0 0 0 4px ${color}22`,
+          transform: `translate(-50%, -50%) scale(${drawn ? 1 : 0})`,
+          transition: 'transform 0.4s cubic-bezier(.34,1.56,.64,1) 1.2s',
+        }} />
+      </div>
+    </div>
+  );
+}
+
 /* ── FallingLeaves — gentle falling Althea leaves (canvas) ──────────────── */
 function FallingLeaves({ color = '#2AB5A2', count = 20, fadeMin = 0.45, fadeMax = 0.8 }) {
   const canvasRef = React.useRef(null);
@@ -200,8 +285,6 @@ function FallingLeaves({ color = '#2AB5A2', count = 20, fadeMin = 0.45, fadeMax 
       opacity: rand(0.35, 0.75),
       fadeStart: rand(fadeMin, fadeMax),
     }));
-
-    const drawLeaf = null; // (leaves now rendered from leaf.png sprite)
 
     const start = performance.now();
     const frame = (now) => {
@@ -292,5 +375,5 @@ function useParallax(speed = 0.12) {
 
 Object.assign(window, {
   AnimContext, useInView, useScrollProgress, ScrollProgressRail,
-  CountUp, DrawChart, useParallax, FallingLeaves, RisingBars,
+  CountUp, DrawChart, WeightTrendCardA, useParallax, FallingLeaves, RisingBars,
 });

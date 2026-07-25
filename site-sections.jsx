@@ -344,7 +344,7 @@ function ImpactBand() {
             fontSize: mobile ? 16 : 18.5, lineHeight: 1.65, color: '#4A5568',
             maxWidth: 520, margin: '22px auto 0', textWrap: 'pretty',
           }}>
-            GLP-1 treatment works when you stay with it — the right dose, on time, tracked. Althea turns that into a daily habit you'll actually keep, so the results can follow.
+            Life gets busy, and treatment slips. Althea quietly keeps you on schedule — reminders, one-tap logging, and progress you can see.
           </p>
         </RevealOnScroll>
       </div>
@@ -357,12 +357,13 @@ function ImpactBand() {
    ═══════════════════════════════════════════════════════════════════════════ */
 function TrustBar() {
   const mobile = useIsMobile(640);
+  const [ref, inView] = useInView(0.5);
   return (
     <div style={{
       background: '#fff', borderTop: '1px solid rgba(0,0,0,0.06)',
       borderBottom: '1px solid rgba(0,0,0,0.06)',
     }}>
-      <div style={{
+      <div ref={ref} style={{
         maxWidth: 1160, margin: '0 auto', padding: mobile ? '20px 20px' : '0 24px',
         height: mobile ? 'auto' : 64,
         display: mobile ? 'grid' : 'flex',
@@ -416,6 +417,9 @@ function TrustBar() {
             justifyContent: mobile ? 'flex-start' : 'center',
             padding: mobile ? '0' : '0 20px',
             borderRight: (!mobile && i < arr.length - 1) ? '1px solid rgba(0,0,0,0.08)' : 'none',
+            opacity: inView ? 1 : 0,
+            transform: inView ? 'none' : 'translateY(14px)',
+            transition: `opacity 0.55s ease ${i * 0.12}s, transform 0.55s cubic-bezier(0.22,1,0.36,1) ${i * 0.12}s`,
           }}>
             <span style={{ flexShrink: 0, display: 'flex' }}>{item.icon}</span>
             <span style={{ fontSize: 13.5, fontWeight: 500, color: '#4A5568', whiteSpace: mobile ? 'normal' : 'nowrap' }}>{item.label}</span>
@@ -429,18 +433,73 @@ function TrustBar() {
 /* ═══════════════════════════════════════════════════════════════════════════
    FEATURE PILLARS
    ═══════════════════════════════════════════════════════════════════════════ */
-/* FeatureCardStack — mobile: real cards stacked on one another.
-   Swipe left/right or tap the front card to shuffle through them. */
-function FeatureCardStack({ pillars }) {
+/* StackCardMedia — hoisted so drag re-renders don't remount the custom element */
+const CARD_SHOTS = {
+  medlevels: 'screenshots/cards/medlevels.png',
+  weight: 'screenshots/cards/weight.png',
+  sideeffects: 'screenshots/symptoms-card.png',
+  library: 'screenshots/cards/library.png',
+  reminders: 'screenshots/cards/reminders.png',
+  achievements: 'screenshots/cards/achievements.png',
+  food: 'screenshots/cards/food.png',
+  reports: 'screenshots/cards/reports.png',
+  measurements: 'screenshots/cards/measurements.png',
+};
+/* Warm the feature-card shots into cache once the hero art has finished,
+   so the "Everything you need" grid paints instantly on arrival. */
+if (typeof window !== 'undefined' && !window.__altheaWarmCards) {
+  window.__altheaWarmCards = true;
+  const warm = () => Object.values(CARD_SHOTS).forEach(s => { const i = new Image(); i.decoding = 'async'; i.fetchPriority = 'low'; i.src = s; });
+  const kick = () => (window.requestIdleCallback ? requestIdleCallback(warm, { timeout: 1500 }) : setTimeout(warm, 300));
+  if (document.readyState === 'complete') kick();
+  else window.addEventListener('load', kick, { once: true });
+}
+function StackCardMedia({ p, radius = '21' }) {
+  const src = CARD_SHOTS[p.slot];
+  if (src) return (
+    <img src={src} alt={p.title + ' — Althea app'} draggable="false" loading="eager" decoding="async" fetchpriority="low"
+      style={{ display: 'block', width: '100%', height: '100%', objectFit: 'cover', borderRadius: Number(radius), userSelect: 'none', WebkitUserSelect: 'none', pointerEvents: 'none' }} />
+  );
+  return (
+    <image-slot id={'stack-shot-' + p.slot} shape="rounded" radius={radius}
+      placeholder={p.title + ' \u2014 drop an app image (800\u00d7400)'}
+      style={{ width: '100%', height: '100%', display: 'block' }}></image-slot>
+  );
+}
+
+/* FeatureCardStack — mobile: app-screenshot cards stacked on one another.
+   Swipe left/right to shuffle; the active feature's text sits above the stack. */
+function FeatureCardStack({ pillars, wide = false }) {
   const N = pillars.length;
   const [active, setActive] = React.useState(0);
   const [drag, setDrag] = React.useState(0);
   const [dragging, setDragging] = React.useState(false);
   const [exit, setExit] = React.useState(null); // { i, dir, from }
   const [exitGo, setExitGo] = React.useState(false);
-  const st = React.useRef({ x: 0, moved: 0, down: false, vx: 0, lx: 0, lt: 0 });
+  const st = React.useRef({ x: 0, moved: 0, down: false, vx: 0, lx: 0, lt: 0, cap: false });
   const depthOf = (i) => (i - active + N) % N;
-  const CARD_H = 200;
+  // Cards render at an exact 2:1 box so a full 800×400 image shows uncropped.
+  const wrapRef = React.useRef(null);
+  const [cw, setCw] = React.useState(wide ? 720 : 352);
+  React.useEffect(() => {
+    const m = () => { if (wrapRef.current) setCw(wrapRef.current.offsetWidth); };
+    m(); window.addEventListener('resize', m);
+    return () => window.removeEventListener('resize', m);
+  }, []);
+  const CARD_H = Math.round(cw / 2);
+  // Text cross-fade: fade the shown title/desc out, then swap to the active card's.
+  const [shown, setShown] = React.useState(0);
+  const [txtVis, setTxtVis] = React.useState(true);
+  React.useEffect(() => {
+    if (shown === active) return;
+    setTxtVis(false);
+    const t = setTimeout(() => { setShown(active); setTxtVis(true); }, 180);
+    return () => clearTimeout(t);
+  }, [active, shown]);
+  const txtStyle = {
+    opacity: txtVis ? 1 : 0,
+    transition: 'opacity 0.18s ease',
+  };
 
   // Fling the front card off-screen while the next card rises into its place.
   const fling = (step, flyDir) => {
@@ -453,10 +512,12 @@ function FeatureCardStack({ pillars }) {
     setTimeout(() => { setExit(null); setExitGo(false); }, 500);
   };
 
-  const onDown = (e) => { st.current = { x: e.clientX, moved: 0, down: true, vx: 0, lx: e.clientX, lt: Date.now() }; setDragging(true); e.currentTarget.setPointerCapture?.(e.pointerId); };
+  const onDown = (e) => { st.current = { x: e.clientX, moved: 0, down: true, vx: 0, lx: e.clientX, lt: Date.now(), cap: false }; setDragging(true); };
   const onMove = (e) => {
     if (!st.current.down) return;
     const dx = e.clientX - st.current.x;
+    // Capture only once it's clearly a drag, so taps still reach the image-slot (browse / reframe).
+    if (!st.current.cap && Math.abs(dx) > 8) { st.current.cap = true; e.currentTarget.setPointerCapture?.(e.pointerId); }
     const now = Date.now(), dt = now - st.current.lt;
     if (dt > 0) st.current.vx = (e.clientX - st.current.lx) / dt;
     st.current.lx = e.clientX; st.current.lt = now;
@@ -468,31 +529,31 @@ function FeatureCardStack({ pillars }) {
     const d = drag, v = st.current.vx; st.current.down = false;
     setDragging(false);
     if (d <= -40 || v < -0.35) fling(1, -1);
-    else if (d >= 40 || v > 0.35) fling(-1, 1);
-    else setDrag(0);
+    else if (d >= 40 || v > 0.35) fling(wide ? -1 : 1, 1);
+    else { setDrag(0); if (st.current.moved < 8) fling(1, -1); }
   };
-  const tap = () => { if (st.current.moved < 8) fling(1, -1); };
 
   const cardVisual = {
-    background: '#fff', borderRadius: 22, padding: '28px 26px',
-    border: '1px solid rgba(13,17,23,0.08)',
-    display: 'flex', flexDirection: 'column', WebkitTapHighlightColor: 'transparent',
+    background: '#fff', borderRadius: 22,
+    border: '1px solid rgba(13,17,23,0.08)', WebkitTapHighlightColor: 'transparent',
   };
-  const CardBody = ({ p }) => (
-    <React.Fragment>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 13, marginBottom: 14 }}>
-        <div style={{ display: 'flex', flexShrink: 0 }}>{p.icon}</div>
-        <h3 style={{ fontSize: 18.5, fontWeight: 700, color: '#0D1117', letterSpacing: '-0.02em', margin: 0 }}>{p.title}</h3>
-      </div>
-      <p style={{ fontSize: 14.5, lineHeight: 1.6, color: '#5F6B7A', margin: 0 }}>{p.desc}</p>
-    </React.Fragment>
-  );
   const flyX = Math.max(typeof window !== 'undefined' ? window.innerWidth : 420, 420) + 60;
 
+  const sp = pillars[shown];
+  const arrowBtn = {
+    width: 38, height: 38, borderRadius: '50%', border: '1px solid rgba(13,17,23,0.12)',
+    background: '#fff', color: '#0D1117', cursor: 'pointer', display: 'flex',
+    alignItems: 'center', justifyContent: 'center', padding: 0, flexShrink: 0,
+    transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
+  };
   return (
-    <div>
+    <div ref={wrapRef} style={{ maxWidth: wide ? 720 : 400, margin: '0 auto' }}>
+      <style>{'image-slot::part(image){touch-action:pan-y}'}</style>
+      <div style={{ ...txtStyle, marginBottom: 16 }}>
+        <h3 style={{ fontSize: wide ? 24 : 19, fontWeight: 700, color: '#0D1117', letterSpacing: '-0.02em', margin: 0, textAlign: 'center' }}>{sp.title}</h3>
+      </div>
       <div style={{
-        position: 'relative', height: CARD_H + 44, touchAction: 'pan-y',
+        position: 'relative', height: CARD_H + 40, touchAction: 'pan-y',
         cursor: dragging ? 'grabbing' : 'grab', userSelect: 'none',
       }}
         onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}>
@@ -503,10 +564,10 @@ function FeatureCardStack({ pillars }) {
           const front = d === 0;
           const x = front ? drag : 0;
           const rot = front ? drag * 0.02 : 0;
-          const y = d * 18;
+          const y = d * 16;
           const s = 1 - d * 0.035;
           return (
-            <div key={i} onClick={front ? tap : undefined} style={{
+            <div key={i} style={{
               ...cardVisual,
               position: 'absolute', left: 0, right: 0, top: 0, height: CARD_H,
               zIndex: N - d,
@@ -515,7 +576,7 @@ function FeatureCardStack({ pillars }) {
               transition: dragging && front ? 'none' : 'transform 0.5s cubic-bezier(0.16,1,0.3,1), opacity 0.35s ease',
               boxShadow: front ? '0 18px 40px -18px rgba(13,17,23,0.22)' : '0 10px 24px -14px rgba(13,17,23,0.13)',
             }}>
-              <CardBody p={p} />
+              <StackCardMedia p={p} />
             </div>
           );
         })}
@@ -531,11 +592,20 @@ function FeatureCardStack({ pillars }) {
             transition: 'transform 0.5s cubic-bezier(0.4,0,0.7,0.2), opacity 0.5s ease',
             boxShadow: '0 18px 40px -18px rgba(13,17,23,0.22)',
           }}>
-            <CardBody p={pillars[exit.i]} />
+            <StackCardMedia p={pillars[exit.i]} />
           </div>
         )}
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, marginTop: 22 }}>
+      <p style={{ ...txtStyle, fontSize: wide ? 16 : 14.5, lineHeight: 1.6, color: '#5F6B7A', margin: '16px 0 0', minHeight: wide ? 52 : 69, textAlign: wide ? 'center' : 'left', maxWidth: wide ? 560 : 'none', marginLeft: wide ? 'auto' : 0, marginRight: wide ? 'auto' : 0 }}>{sp.desc}</p>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: wide ? 18 : 7, marginTop: 18 }}>
+        {wide && (
+          <button aria-label="Previous feature" onClick={() => fling(-1, 1)} style={arrowBtn}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = '#2AB5A2'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(42,181,162,0.2)'; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(13,17,23,0.12)'; e.currentTarget.style.boxShadow = 'none'; }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+          </button>
+        )}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
         {pillars.map((_, i) => (
           <button key={i} aria-label={`Feature ${i + 1}`} onClick={() => setActive(i)} style={{
             width: i === active ? 22 : 7, height: 7, borderRadius: 4, padding: 0, border: 'none',
@@ -543,10 +613,82 @@ function FeatureCardStack({ pillars }) {
             transition: 'width 0.3s ease, background 0.3s ease', cursor: 'pointer',
           }} />
         ))}
+        </div>
+        {wide && (
+          <button aria-label="Next feature" onClick={() => fling(1, -1)} style={arrowBtn}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = '#2AB5A2'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(42,181,162,0.2)'; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(13,17,23,0.12)'; e.currentTarget.style.boxShadow = 'none'; }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+          </button>
+        )}
       </div>
       <p style={{ textAlign: 'center', fontSize: 12.5, color: '#9AA3AF', margin: '12px 0 0', letterSpacing: '0.01em' }}>
-        Swipe or tap to explore · {active + 1} / {N}
+        {wide ? 'Drag the cards or use the arrows' : 'Swipe or tap the cards to explore'} · {active + 1} / {N}
       </p>
+    </div>
+  );
+}
+
+/* FeatureCardBatch — desktop: pages of 3 cards, arrows + dots to flip between pages. */
+function FeatureCardBatch({ pillars }) {
+  const pages = [];
+  for (let i = 0; i < pillars.length; i += 3) pages.push(pillars.slice(i, i + 3));
+  const [page, setPage] = React.useState(0);
+  const [shown, setShown] = React.useState(0);
+  const [vis, setVis] = React.useState(true);
+  React.useEffect(() => {
+    if (shown === page) return;
+    setVis(false);
+    const t = setTimeout(() => { setShown(page); setVis(true); }, 180);
+    return () => clearTimeout(t);
+  }, [page, shown]);
+  const go = (p) => setPage((p + pages.length) % pages.length);
+  const arrowBtn = {
+    width: 38, height: 38, borderRadius: '50%', border: '1px solid rgba(13,17,23,0.12)',
+    background: '#fff', color: '#0D1117', cursor: 'pointer', display: 'flex',
+    alignItems: 'center', justifyContent: 'center', padding: 0, flexShrink: 0,
+    transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
+  };
+  const hov = e => { e.currentTarget.style.borderColor = '#2AB5A2'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(42,181,162,0.2)'; };
+  const out = e => { e.currentTarget.style.borderColor = 'rgba(13,17,23,0.12)'; e.currentTarget.style.boxShadow = 'none'; };
+  return (
+    <div>
+      <div style={{
+        display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 28, alignItems: 'start',
+        opacity: vis ? 1 : 0, transform: vis ? 'none' : 'translateY(8px)',
+        transition: 'opacity 0.18s ease, transform 0.18s ease',
+      }}>
+        {pages[shown].map((p, i) => (
+          <div key={p.slot || i}>
+            <h3 style={{ fontSize: 16.5, fontWeight: 700, color: '#0D1117', letterSpacing: '-0.02em', margin: '0 0 12px', textAlign: 'center' }}>{p.title}</h3>
+            <div style={{
+              aspectRatio: '2 / 1', background: '#fff', borderRadius: 18,
+              border: '1px solid rgba(13,17,23,0.08)', overflow: 'hidden',
+              boxShadow: '0 14px 32px -18px rgba(13,17,23,0.18)',
+            }}>
+              <StackCardMedia p={p} radius="17" />
+            </div>
+            <p style={{ fontSize: 13.5, lineHeight: 1.6, color: '#5F6B7A', margin: '12px 0 0' }}>{p.desc}</p>
+          </div>
+        ))}
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 18, marginTop: 34 }}>
+        <button aria-label="Previous features" onClick={() => go(page - 1)} style={arrowBtn} onMouseEnter={hov} onMouseLeave={out}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+          {pages.map((_, i) => (
+            <button key={i} aria-label={`Features page ${i + 1}`} onClick={() => go(i)} style={{
+              width: i === page ? 22 : 7, height: 7, borderRadius: 4, padding: 0, border: 'none',
+              background: i === page ? '#2AB5A2' : 'rgba(13,17,23,0.16)',
+              transition: 'width 0.3s ease, background 0.3s ease', cursor: 'pointer',
+            }} />
+          ))}
+        </div>
+        <button aria-label="Next features" onClick={() => go(page + 1)} style={arrowBtn} onMouseEnter={hov} onMouseLeave={out}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
+      </div>
     </div>
   );
 }
@@ -558,48 +700,12 @@ function FeaturePillarsSection() {
       color: '#2AB5A2',
       icon: (
         <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#2AB5A2" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M12 2.5s5.5 6 5.5 10.5a5.5 5.5 0 0 1-11 0C6.5 8.5 12 2.5 12 2.5z"/>
-          <line x1="12" y1="9.5" x2="12" y2="15.5"/>
-          <line x1="9" y1="12.5" x2="15" y2="12.5"/>
+          <path d="M3 16.5c2.5 0 3.5-9 6-9s3.5 11 6 11 3-6.5 6-6.5"/>
+          <circle cx="15" cy="18.5" r="0.6" fill="#2AB5A2"/>
         </svg>
       ),
-      title: 'Dose Tracking',
-      desc: 'Log every injection with one tap. Automatic site rotation, personalised reminders, and real-time drug level curves.',
-    },
-    {
-      color: '#2AB5A2',
-      icon: (
-        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#2AB5A2" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <rect x="3" y="3" width="18" height="18" rx="5"/>
-          <path d="M8.5 15.5a4 4 0 0 1 7-2.6"/>
-          <line x1="12" y1="15.5" x2="14.6" y2="11.8"/>
-          <circle cx="12" cy="7" r="0.6" fill="#2AB5A2"/>
-        </svg>
-      ),
-      title: 'Weight Progress',
-      desc: 'Tap to log, watch the trend. Milestone charts, goal tracking, and doctor-ready PDF reports in seconds.',
-    },
-    {
-      color: '#2AB5A2',
-      icon: (
-        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#2AB5A2" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M12 20.5S4.5 15.5 4.5 9.8A3.8 3.8 0 0 1 12 8a3.8 3.8 0 0 1 7.5 1.8c0 5.7-7.5 10.7-7.5 10.7z"/>
-          <path d="M7.5 11h2l1-1.7 1.6 3.2 1-1.5H15"/>
-        </svg>
-      ),
-      title: 'Side Effect Log',
-      desc: 'Quick-tap symptom chips with severity scoring. See patterns emerge and bring real data to every appointment.',
-    },
-    {
-      color: '#2AB5A2',
-      icon: (
-        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#2AB5A2" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <rect x="2.5" y="8" width="19" height="8" rx="4" transform="rotate(45 12 12)"/>
-          <line x1="9.2" y1="9.2" x2="14.8" y2="14.8"/>
-        </svg>
-      ),
-      title: 'GLP-1 Drug Library',
-      desc: 'In-depth profiles for 16+ medications — Retatrutide, Ozempic, Wegovy, Mounjaro, Zepbound and more — with dosing schedules and PK curves.',
+      title: 'Medication Levels', slot: 'medlevels',
+      desc: 'See a live estimate of the active drug in your body between doses — know when levels peak, dip, and steady out.',
     },
     {
       color: '#2AB5A2',
@@ -609,7 +715,7 @@ function FeaturePillarsSection() {
           <path d="M10.2 20.5a2.2 2.2 0 0 0 3.6 0"/>
         </svg>
       ),
-      title: 'Smart Reminders',
+      title: 'Smart Reminders', slot: 'reminders',
       desc: 'Dose and appointment reminders that adapt to your schedule, so you never miss a beat in your routine.',
     },
     {
@@ -622,8 +728,32 @@ function FeaturePillarsSection() {
           <path d="M8.5 20.5h7M9.5 20.5l.4-2.5h4.2l.4 2.5"/>
         </svg>
       ),
-      title: 'Achievements',
+      title: 'Achievements', slot: 'achievements',
       desc: 'Stay motivated with milestone badges, dose streaks, and gentle celebrations as your progress builds.',
+    },
+    {
+      color: '#2AB5A2',
+      icon: (
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#2AB5A2" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="2.5" y="8" width="19" height="8" rx="4" transform="rotate(45 12 12)"/>
+          <line x1="9.2" y1="9.2" x2="14.8" y2="14.8"/>
+        </svg>
+      ),
+      title: 'GLP-1 Drug Library', slot: 'library', shot: 'screenshots/feat-1.webp',
+      desc: 'In-depth profiles for 16+ medications — Retatrutide, Ozempic, Wegovy, Mounjaro, Zepbound and more — with dosing schedules and PK curves.',
+    },
+    {
+      color: '#2AB5A2',
+      icon: (
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#2AB5A2" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="5"/>
+          <path d="M8.5 15.5a4 4 0 0 1 7-2.6"/>
+          <line x1="12" y1="15.5" x2="14.6" y2="11.8"/>
+          <circle cx="12" cy="7" r="0.6" fill="#2AB5A2"/>
+        </svg>
+      ),
+      title: 'Weight Progress', slot: 'weight', shot: 'screenshots/feat-2.webp',
+      desc: 'Tap to log, watch the trend. Milestone charts, goal tracking, and doctor-ready PDF reports in seconds.',
     },
     {
       color: '#2AB5A2',
@@ -633,8 +763,19 @@ function FeaturePillarsSection() {
           <path d="M16 3c-1.6 0-2.6 2.2-2.6 5s1 4 2.6 4v9"/>
         </svg>
       ),
-      title: 'Food & Water Logging',
+      title: 'Food & Water Logging', slot: 'food',
       desc: 'Barcode scanning, macro breakdowns, and hydration goals — know exactly what is fuelling your progress.',
+    },
+    {
+      color: '#2AB5A2',
+      icon: (
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#2AB5A2" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 20.5S4.5 15.5 4.5 9.8A3.8 3.8 0 0 1 12 8a3.8 3.8 0 0 1 7.5 1.8c0 5.7-7.5 10.7-7.5 10.7z"/>
+          <path d="M7.5 11h2l1-1.7 1.6 3.2 1-1.5H15"/>
+        </svg>
+      ),
+      title: 'Side Effect Log', slot: 'sideeffects', shot: 'screenshots/symptoms-card.png',
+      desc: 'Quick-tap symptom chips with severity scoring. See patterns emerge and bring real data to every appointment.',
     },
     {
       color: '#2AB5A2',
@@ -646,19 +787,22 @@ function FeaturePillarsSection() {
           <line x1="9" y1="16.5" x2="13" y2="16.5"/>
         </svg>
       ),
-      title: 'Doctor-Ready Reports',
+      title: 'Doctor-Ready Reports', slot: 'reports',
       desc: 'Export a clean PDF of your doses, weight, and side effects to share with your care team in one tap.',
     },
     {
       color: '#2AB5A2',
       icon: (
         <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#2AB5A2" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M7 18.5a4.2 4.2 0 0 1-.3-8.4 5.6 5.6 0 0 1 10.8-1.6 3.8 3.8 0 0 1 .5 7.5"/>
-          <path d="M9.5 15l2 2 3.5-4"/>
+          <rect x="2.5" y="8.5" width="19" height="7" rx="2"/>
+          <line x1="6.5" y1="8.5" x2="6.5" y2="11.5"/>
+          <line x1="10.5" y1="8.5" x2="10.5" y2="13"/>
+          <line x1="14.5" y1="8.5" x2="14.5" y2="11.5"/>
+          <line x1="18" y1="8.5" x2="18" y2="13"/>
         </svg>
       ),
-      title: 'Private iCloud Sync',
-      desc: 'Your data stays yours — synced across your devices through your own private iCloud, never our servers.',
+      title: 'Body Measurements', slot: 'measurements',
+      desc: 'Track waist, hips, arms, and more alongside your weight — because the scale never tells the whole story.',
     },
   ];
   return (
@@ -676,38 +820,9 @@ function FeaturePillarsSection() {
           </div>
         </RevealOnScroll>
 
-        {mobile ? (
-          <RevealOnScroll delay={0.06}>
-            <FeatureCardStack pillars={pillars} />
-          </RevealOnScroll>
-        ) : (
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))',
-            gap: 16,
-          }}>
-            {pillars.map((p, i) => (
-              <div key={i} style={{
-                background: '#fff', borderRadius: 20, padding: '30px 28px',
-                border: '1px solid rgba(13,17,23,0.07)',
-                transition: 'transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease',
-              }}
-              onMouseEnter={e => { e.currentTarget.style.transform='translateY(-4px)'; e.currentTarget.style.boxShadow='0 14px 40px rgba(26,138,122,0.12)'; e.currentTarget.style.borderColor='rgba(42,181,162,0.4)'; }}
-              onMouseLeave={e => { e.currentTarget.style.transform='none'; e.currentTarget.style.boxShadow='none'; e.currentTarget.style.borderColor='rgba(13,17,23,0.07)'; }}>
-                <div style={{
-                  width: 48, height: 48, borderRadius: 13, marginBottom: 18,
-                  background: 'linear-gradient(150deg, #3FD0BC, #1F9E8C)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  boxShadow: '0 6px 16px rgba(31,158,140,0.28)',
-                }}>
-                  <div style={{ filter: 'brightness(0) invert(1)', display: 'flex', transform: 'scale(0.6)' }}>{p.icon}</div>
-                </div>
-                <h3 style={{ fontSize: 18, fontWeight: 700, color: '#0D1117', letterSpacing: '-0.02em', margin: '0 0 8px' }}>{p.title}</h3>
-                <p style={{ fontSize: 14.5, lineHeight: 1.6, color: '#5F6B7A', margin: 0 }}>{p.desc}</p>
-              </div>
-            ))}
-          </div>
-        )}
+        <RevealOnScroll delay={0.06}>
+          {mobile ? <FeatureCardStack pillars={pillars} /> : <FeatureCardBatch pillars={pillars} />}
+        </RevealOnScroll>
       </div>
     </section>
   );
@@ -716,7 +831,7 @@ function FeaturePillarsSection() {
 /* ═══════════════════════════════════════════════════════════════════════════
    FEATURE DEEP DIVES
    ═══════════════════════════════════════════════════════════════════════════ */
-function FeatureDeep({ reverse, bg, accentColor, tag, title, body, bullets, phoneId, delay = 0, chart = false, caption }) {
+function FeatureDeep({ reverse, bg, accentColor, tag, title, body, bullets, phoneId, delay = 0, chart = false, caption, imageCard }) {
   const mobile = useIsMobile();
   return (
     <section style={{ padding: '80px 0', background: bg }}>
@@ -753,26 +868,8 @@ function FeatureDeep({ reverse, bg, accentColor, tag, title, body, bullets, phon
               ))}
             </div>
             {chart && (
-              <div style={{
-                marginTop: 28, padding: '18px 20px 16px', background: '#fff',
-                border: '1px solid rgba(0,0,0,0.06)', borderRadius: 18,
-                boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
-                transform: 'translateZ(0)', backfaceVisibility: 'hidden',
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{ width: 8, height: 8, borderRadius: 4, background: accentColor, display: 'inline-block' }}></span>
-                    <span style={{ fontSize: 12.5, fontWeight: 600, color: '#0D1117', letterSpacing: '0.01em' }}>Weight trend</span>
-                    <span style={{ fontSize: 12, color: '#8896A5' }}>· 12 weeks</span>
-                  </div>
-                  <span style={{
-                    fontSize: 13, fontWeight: 700, color: '#fff',
-                    background: '#0D1117', padding: '3px 10px', borderRadius: 20,
-                  }}>
-                    <CountUp value={9.2} decimals={1} prefix="↓ " suffix=" kg" />
-                  </span>
-                </div>
-                <DrawChart color={accentColor} height={150} />
+              <div style={{ marginTop: 0, transform: 'translateZ(0)', backfaceVisibility: 'hidden' }}>
+                <WeightTrendCardA color={accentColor} />
               </div>
             )}
           </RevealOnScroll>
@@ -781,7 +878,11 @@ function FeatureDeep({ reverse, bg, accentColor, tag, title, body, bullets, phon
         {/* Phone */}
         <RevealOnScroll delay={delay + 0.12} from={mobile ? 'bottom' : (reverse ? 'left' : 'right')}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14, transform: 'translateZ(0)', backfaceVisibility: 'hidden' }}>
-            <PhoneFrame id={phoneId} scale={mobile ? 0.65 : 0.68} />
+            {imageCard ? (
+              <img src={imageCard} alt={caption || title} style={{ width: mobile ? '100%' : 480, maxWidth: '100%', borderRadius: 18, boxShadow: '0 12px 40px rgba(13,17,23,0.12)', display: 'block' }} />
+            ) : (
+              <PhoneFrame id={phoneId} scale={mobile ? 0.65 : 0.68} />
+            )}
             {caption && (
               <span style={{ fontSize: 13, fontWeight: 500, color: '#8896A5', letterSpacing: '0.01em' }}>{caption}</span>
             )}
@@ -807,11 +908,12 @@ function ResultsBand() {
       <div style={{
         maxWidth: 1000, margin: '0 auto', padding: mobile ? '0 16px' : '0 24px',
         display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)',
-        gap: mobile ? 8 : 24, textAlign: 'center',
+        textAlign: 'center',
       }}>
         {stats.map((s, i) => (
           <div key={i} style={{
             borderLeft: (i > 0) ? '1px solid rgba(255,255,255,0.1)' : 'none',
+            padding: mobile ? '0 4px' : '0 12px',
           }}>
             <div style={{ fontSize: mobile ? 26 : 54, fontWeight: 800, letterSpacing: '-0.03em', color: '#fff', lineHeight: 1 }}>
               <CountUp value={s.v} suffix={s.suffix} decimals={s.decimals} />
@@ -847,11 +949,7 @@ function FeatureDeepSection() {
         tag="Weight & Progress"
         title="Watch your progress unfold"
         body="Log your weight in a single tap and watch the trend emerge week by week. Althea's charts show you not just where you are today, but how far you've come — the most important thing to see when you're in it for the long haul."
-        bullets={[
-          'One-tap weight logging with smart pre-fill',
-          'Trend charts with milestone markers',
-          'PDF reports ready to share with your doctor',
-        ]}
+        bullets={[]}
         phoneId="feat-2"
         delay={0.04}
         chart

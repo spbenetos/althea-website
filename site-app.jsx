@@ -24,7 +24,6 @@ function App() {
   return (
     <TweaksContext.Provider value={t}>
       <AnimContext.Provider value={anim}>
-        <ScrollProgressRail color={t.accentColor} />
         <NavBar />
         <HeroSection />
         <ImpactBand />
@@ -33,7 +32,6 @@ function App() {
         <FeaturePillarsSection />
         <FeatureDeepSection />
         <HowItWorksSection />
-        <TestimonialsSection />
         <PricingSection />
         <FAQSection />
         <FinalCTASection />

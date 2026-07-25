@@ -66,6 +66,8 @@ function PhoneBezel({ id, src }) {
         <div style={{ height: 731, flexShrink: 0, background: '#0D1117', position: 'relative' }}>
           {src ? (
             <img src={src} alt="Althea app screenshot" draggable="false"
+              loading="eager" decoding="async"
+              fetchpriority={String(id).startsWith('hero') ? 'high' : 'low'}
               style={{ display: 'block', width: '100%', height: '100%', objectFit: 'cover', userSelect: 'none', WebkitUserSelect: 'none', pointerEvents: 'none' }} />
           ) : (
             <image-slot
@@ -92,7 +94,7 @@ function PhoneBezel({ id, src }) {
 /* ── PhoneFrame — scales bezel and collapses layout space ────────────────── */
 const SCREENSHOTS = {
   'hero-left': 'screenshots/hero-left.webp',
-  'hero-center': 'screenshots/hero-center.webp',
+  'hero-center': 'screenshots/hero-center.png',
   'hero-right': 'screenshots/hero-right.webp',
   'feat-1': 'screenshots/feat-1.webp',
   'feat-2': 'screenshots/feat-2.webp',
