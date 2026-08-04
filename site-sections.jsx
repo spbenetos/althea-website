@@ -114,10 +114,10 @@ function NavBar() {
   return (
     <nav style={{
       position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
-      background: 'transparent',
-      backdropFilter: 'none',
-      WebkitBackdropFilter: 'none',
-      borderBottom: '1px solid transparent',
+      background: scrolled ? 'rgba(255,255,255,0.85)' : 'transparent',
+      backdropFilter: scrolled ? 'saturate(180%) blur(14px)' : 'none',
+      WebkitBackdropFilter: scrolled ? 'saturate(180%) blur(14px)' : 'none',
+      borderBottom: `1px solid ${scrolled ? 'rgba(0,0,0,0.06)' : 'transparent'}`,
       transition: 'all 0.3s ease',
     }}>
       <div style={{
@@ -126,7 +126,7 @@ function NavBar() {
       }}>
         <a href="index.html" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
           <AltheaLogo size={34} />
-          <span style={{ fontSize: 22, fontWeight: 600, letterSpacing: '-0.03em', color: '#0D1117' }}>Althea</span>
+          <span style={{ fontFamily: "'Newsreader', Georgia, serif", fontSize: 23, fontWeight: 500, letterSpacing: '-0.02em', color: '#0D1117' }}>Althea</span>
         </a>
         <div style={{ display: 'flex', alignItems: 'center', gap: mobile ? 12 : 32 }}>
           {!mobile && <>
@@ -303,6 +303,28 @@ function HeroPhoneCluster() {
   );
 }
 
+/* ═══ MEDICATION WALL — ported from the redesign ═══ */
+function MedicationBand() {
+  const mobile = useIsMobile(640);
+  const meds = ['Ozempic®', 'Wegovy®', 'Mounjaro®', 'Zepbound®', 'Rybelsus®', 'Saxenda®', 'Trulicity®', 'Victoza®', 'Retatrutide'];
+  const label = { fontFamily: "'JetBrains Mono', monospace", fontSize: 10.5, fontWeight: 500, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#8896A5' };
+  return (
+    <div style={{ background: '#fff', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+      <div style={{
+        maxWidth: 1160, margin: '0 auto', padding: mobile ? '22px 20px' : '26px 24px',
+        display: 'flex', flexWrap: 'wrap', alignItems: 'baseline', justifyContent: 'center',
+        gap: mobile ? '8px 16px' : '10px 28px',
+      }}>
+        <span style={label}>Works with</span>
+        {meds.map(m => (
+          <span key={m} style={{ fontFamily: "'Newsreader', Georgia, serif", fontSize: mobile ? 17 : 19, color: '#0D1117', whiteSpace: 'nowrap' }}>{m}</span>
+        ))}
+        <span style={label}>+ oral & compounded</span>
+      </div>
+    </div>
+  );
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════
    IMPACT BAND — life-years saved
    ═══════════════════════════════════════════════════════════════════════════ */
@@ -321,13 +343,13 @@ function ImpactBand() {
       <div style={{ maxWidth: 820, margin: '0 auto', padding: '0 24px', position: 'relative' }}>
         <RevealOnScroll>
           <div style={{
-            fontSize: 11.5, fontWeight: 700, letterSpacing: '0.14em',
+            fontFamily: "'JetBrains Mono', monospace", fontSize: 11, fontWeight: 500, letterSpacing: '0.16em',
             textTransform: 'uppercase', color: accentColor, marginBottom: 18,
           }}>Why it matters</div>
         </RevealOnScroll>
         <RevealOnScroll delay={0.06}>
           <h2 style={{
-            fontSize: mobile ? 'clamp(30px, 8vw, 38px)' : 'clamp(40px, 5.4vw, 60px)',
+            fontSize: mobile ? 'clamp(24px, 6.8vw, 30px)' : 'clamp(40px, 5.4vw, 60px)',
             fontWeight: 800, letterSpacing: '-0.035em', lineHeight: 1.08,
             color: '#0D1117',
           }}>
@@ -811,9 +833,9 @@ function FeaturePillarsSection() {
         <RevealOnScroll>
           <div style={{ textAlign: 'center', marginBottom: mobile ? 30 : 56 }}>
             <h2 style={{
-              fontSize: 'clamp(30px, 3.5vw, 42px)', fontWeight: 750,
+              fontSize: 'clamp(24px, 3.5vw, 42px)', fontWeight: 750,
               letterSpacing: '-0.03em', color: '#0D1117', marginBottom: 14, lineHeight: 1.15,
-            }}>Everything you need,{mobile ? <br /> : ' '}built in</h2>
+            }}>Everything you need, built in</h2>
             <p style={{ fontSize: 17, color: '#4A5568', maxWidth: 440, margin: '0 auto' }}>
               One app for your entire GLP-1 journey — from your first dose to doctor-ready reports.
             </p>
@@ -853,7 +875,7 @@ function FeatureDeep({ reverse, bg, accentColor, tag, title, body, bullets, phon
               {tag}
             </div>
             <h2 style={{
-              fontSize: 'clamp(28px, 3.5vw, 40px)', fontWeight: 750,
+              fontSize: 'clamp(25px, 3.2vw, 40px)', fontWeight: 750,
               letterSpacing: '-0.03em', color: '#0D1117', marginBottom: 18, lineHeight: 1.15,
             }}>{title}</h2>
             <p style={{ fontSize: 16.5, lineHeight: 1.68, color: '#4A5568', marginBottom: 24, textWrap: 'pretty' }}>{body}</p>
@@ -915,7 +937,7 @@ function ResultsBand() {
             borderLeft: (i > 0) ? '1px solid rgba(255,255,255,0.1)' : 'none',
             padding: mobile ? '0 4px' : '0 12px',
           }}>
-            <div style={{ fontSize: mobile ? 26 : 54, fontWeight: 800, letterSpacing: '-0.03em', color: '#fff', lineHeight: 1 }}>
+            <div style={{ fontFamily: "'JetBrains Mono', monospace", fontVariantNumeric: 'tabular-nums', fontSize: mobile ? 24 : 46, fontWeight: 500, letterSpacing: '-0.03em', color: '#fff', lineHeight: 1 }}>
               <CountUp value={s.v} suffix={s.suffix} decimals={s.decimals} />
             </div>
             <div style={{ fontSize: mobile ? 12 : 15, fontWeight: 650, color: 'rgba(255,255,255,0.9)', marginTop: mobile ? 8 : 12 }}>{s.label}</div>
@@ -944,11 +966,12 @@ function FeatureDeepSection() {
         phoneId="feat-1"
         caption="Home dashboard — doses & drug levels"
       />
+      <ScrubStrip />
       <FeatureDeep
         reverse={true} bg="#fff" accentColor="#2AB5A2"
         tag="Weight & Progress"
         title="Watch your progress unfold"
-        body="Log your weight in a single tap and watch the trend emerge week by week. Althea's charts show you not just where you are today, but how far you've come — the most important thing to see when you're in it for the long haul."
+        body="Log your weight in a single tap and watch the trend emerge week by week — not just where you are today, but how far you've come."
         bullets={[]}
         phoneId="feat-2"
         delay={0.04}
@@ -980,18 +1003,18 @@ function HowItWorksSection() {
   const steps = [
     {
       n: '01', color: '#2AB5A2',
-      title: 'Set up your medication',
-      desc: 'Choose from 16+ GLP-1 drugs — Retatrutide, Ozempic, Wegovy, Mounjaro, Zepbound, and more.',
+      title: 'Starting out',
+      desc: 'Learn your medication before the first injection — storage, titration schedule, what the first weeks feel like — and log dose one in seconds.',
     },
     {
       n: '02', color: '#2AB5A2',
-      title: 'Log your day',
-      desc: 'Doses, weight, food, hydration, symptoms — all in under 60 seconds. Althea makes daily logging effortless.',
+      title: 'Titrating up',
+      desc: 'Dose changes are where side effects surface. See symptoms against your level curve, and know whether it’s the new dose or just Tuesday.',
     },
     {
       n: '03', color: '#1A8A7A',
-      title: 'See what\'s working',
-      desc: 'Clear charts, milestones, and exportable reports show your complete picture. Bring it to your next appointment.',
+      title: 'Maintaining',
+      desc: 'When the novelty fades, the streaks, trends and doctor-ready reports keep the habit — and the results — going.',
     },
   ];
   return (
@@ -1002,9 +1025,9 @@ function HowItWorksSection() {
             <h2 style={{
               fontSize: 'clamp(30px, 3.5vw, 42px)', fontWeight: 750,
               letterSpacing: '-0.03em', color: '#0D1117', marginBottom: 14,
-            }}>Up and running in minutes</h2>
-            <p style={{ fontSize: 17, color: '#4A5568', maxWidth: 400, margin: '0 auto' }}>
-              No complicated setup. Just open, set up, and start tracking.
+            }}>Built for every stage</h2>
+            <p style={{ fontSize: 17, color: '#4A5568', maxWidth: 420, margin: '0 auto' }}>
+              Week one and year two need different things — Althea meets you at both.
             </p>
           </div>
         </RevealOnScroll>
@@ -1225,7 +1248,7 @@ function FooterSection() {
           <div>
             <a href="index.html" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', marginBottom: 16 }}>
               <AltheaLogo size={30} />
-              <span style={{ fontSize: 21, fontWeight: 600, letterSpacing: '-0.03em', color: '#fff' }}>Althea</span>
+              <span style={{ fontFamily: "'Newsreader', Georgia, serif", fontSize: 22, fontWeight: 500, letterSpacing: '-0.02em', color: '#fff' }}>Althea</span>
             </a>
             <p style={{ fontSize: 14, lineHeight: 1.6, color: 'rgba(255,255,255,0.45)', maxWidth: 300, marginBottom: 22 }}>
               The companion app for your GLP-1 medication journey. Private by design.
@@ -1240,8 +1263,8 @@ function FooterSection() {
           </div>
           <div>
             <div style={headStyle}>Legal</div>
-            <a href="privacy-policy/" style={linkStyle}>Privacy Policy</a>
-            <a href="terms-of-use/" style={linkStyle}>Terms of Use</a>
+            <a href="privacy-policy/index.html" style={linkStyle}>Privacy Policy</a>
+            <a href="terms-of-use/index.html" style={linkStyle}>Terms of Use</a>
           </div>
           <div>
             <div style={headStyle}>Contact</div>
@@ -1263,11 +1286,58 @@ function FooterSection() {
   );
 }
 
+/* ScrubStrip — the signature scroll-scrubbed PK curve, ported from the redesign */
+function ScrubStrip() {
+  const mobile = useIsMobile(640);
+  const { accentColor } = React.useContext(TweaksContext);
+  return (
+    <section style={{ padding: mobile ? '0 0 72px' : '0 0 96px', background: '#F7FBFA' }}>
+      <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 24px' }}>
+        <RevealOnScroll>
+          <h3 style={{ fontFamily: "'Newsreader', Georgia, serif", fontWeight: 400, fontSize: mobile ? 22 : 32, letterSpacing: '-0.02em', color: '#0D1117', marginBottom: 8 }}>What’s in your system right now</h3>
+          <p style={{ fontSize: mobile ? 15.5 : 17, lineHeight: 1.6, color: '#4A5568', maxWidth: 560, marginBottom: 26, textWrap: 'pretty' }}>
+            Scroll through six weeks of weekly dosing — levels climb, dip, and settle into a steady state. The part of treatment nobody can feel.
+          </p>
+        </RevealOnScroll>
+        <RevealOnScroll delay={0.08}>
+          <DrugLevelScrub accent={accentColor} />
+        </RevealOnScroll>
+      </div>
+    </section>
+  );
+}
+
+/* PrivacyBand — ported from the redesign */
+function PrivacyBand() {
+  const mobile = useIsMobile(640);
+  const monoLabel = { fontFamily: "'JetBrains Mono', monospace", fontWeight: 500, letterSpacing: '0.14em', textTransform: 'uppercase' };
+  return (
+    <section id="privacy" style={{ padding: mobile ? '64px 0' : '96px 0', background: '#0F5A50', textAlign: 'center' }}>
+      <div style={{ maxWidth: 820, margin: '0 auto', padding: '0 24px' }}>
+        <RevealOnScroll>
+          <div style={{ ...monoLabel, fontSize: 11, color: 'rgba(255,255,255,0.78)', marginBottom: 18 }}>Privacy</div>
+        </RevealOnScroll>
+        <RevealOnScroll delay={0.06}>
+          <h2 style={{ fontSize: mobile ? 'clamp(30px, 8vw, 38px)' : 'clamp(38px, 4.6vw, 52px)', color: '#fff', lineHeight: 1.12, marginBottom: 20 }}>Nobody sees this but you.</h2>
+        </RevealOnScroll>
+        <RevealOnScroll delay={0.12}>
+          <p style={{ fontSize: mobile ? 16 : 18, lineHeight: 1.65, color: 'rgba(255,255,255,0.78)', maxWidth: 560, margin: '0 auto 28px', textWrap: 'pretty' }}>
+            What you weigh, what you inject, how you felt on Thursday — this is the most personal data you own. It lives on your iPhone and your private iCloud, and nowhere else.
+          </p>
+        </RevealOnScroll>
+        <RevealOnScroll delay={0.18}>
+          <div style={{ ...monoLabel, fontSize: mobile ? 11.5 : 13.5, color: '#fff' }}>No servers · No analytics · No exceptions</div>
+        </RevealOnScroll>
+      </div>
+    </section>
+  );
+}
+
 Object.assign(window, {
   RevealOnScroll, useIsMobile,
   AltheaLogo, AppStoreBadge,
-  NavBar, HeroSection, HeroPhoneCluster, ImpactBand, TrustBar,
-  FeaturePillarsSection, FeatureDeepSection,
+  NavBar, HeroSection, HeroPhoneCluster, MedicationBand, ImpactBand, TrustBar,
+  FeaturePillarsSection, FeatureDeepSection, ScrubStrip, PrivacyBand,
   HowItWorksSection, PricingSection,
   FinalCTASection, FooterSection,
 });

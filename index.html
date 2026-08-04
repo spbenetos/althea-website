@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Althea — The companion app for your GLP-1 medication journey. Track doses, monitor weight, log side effects.">
+  <meta name="description" content="Althea — the private GLP-1 companion app for Ozempic®, Wegovy®, Mounjaro®, Zepbound® and 16+ medications. Track doses, weight and side effects — all on your device.">
   <link rel="canonical" href="https://althea.team/">
   <link rel="icon" type="image/png" href="app-icon.png">
   <link rel="apple-touch-icon" href="app-icon.png">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://althea.team/">
-  <meta property="og:title" content="Althea — GLP-1 Companion App">
+  <meta property="og:title" content="Althea — GLP-1 Tracker for Ozempic®, Wegovy®, Mounjaro® & more">
   <meta property="og:description" content="Track every dose. See every result. Download Althea on the App Store.">
   <meta property="og:image" content="https://althea.team/og-image.png">
   <meta name="twitter:card" content="summary_large_image">
@@ -17,11 +17,14 @@
   <meta name="twitter:description" content="Track every dose. See every result.">
   <meta name="twitter:image" content="https://althea.team/og-image.png">
   <meta name="theme-color" content="#2AB5A2">
-  <link rel="preload" as="image" href="screenshots/hero-center.png" fetchpriority="high">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,300..500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="preload" as="image" href="screenshots/hero-center-780.webp" fetchpriority="high">
   <link rel="preload" as="image" href="screenshots/hero-left.webp" fetchpriority="high">
   <link rel="preload" as="image" href="screenshots/hero-right.webp" fetchpriority="high">
   <link rel="preload" as="image" href="leaf.png" fetchpriority="high">
-  <title>Althea — GLP-1 Medication Companion</title>
+  <title>Althea — GLP-1 Tracker for Ozempic®, Wegovy®, Mounjaro®, Zepbound® & more</title>
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -32,6 +35,18 @@
     "description": "The companion app for your GLP-1 medication journey — dose logging, weight tracking, and side effect monitoring.",
     "url": "https://althea.team",
     "offers": { "@type": "Offer", "price": "49.99", "priceCurrency": "USD" }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      { "@type": "Question", "name": "Which medications does Althea support?", "acceptedAnswer": { "@type": "Answer", "text": "Althea supports all major GLP-1 medications — Ozempic®, Wegovy®, Mounjaro®, Zepbound®, Rybelsus®, Saxenda®, Trulicity®, Victoza®, Retatrutide and more — 16+ drugs with dosing schedules, titration steps and pharmacokinetic curves, in injectable and oral forms." } },
+      { "@type": "Question", "name": "Is my health data private?", "acceptedAnswer": { "@type": "Answer", "text": "Completely. Your data lives on your device and in your own private iCloud — Althea runs no servers and never sees it. No analytics, no tracking, no ads." } },
+      { "@type": "Question", "name": "Does Althea support compounded GLP-1 medications?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Alongside brand-name drugs, Althea supports compounded semaglutide and tirzepatide with custom strengths and schedules." } },
+      { "@type": "Question", "name": "Does Althea replace my doctor?", "acceptedAnswer": { "@type": "Answer", "text": "No. Althea is a tracking companion, not a medical device. It helps you arrive at appointments with clear data, but every medication decision belongs with your prescribing provider." } }
+    ]
   }
   </script>
   <style>
@@ -59,6 +74,10 @@
     button { font-family: inherit; }
 
     [id] { scroll-margin-top: 80px; }
+
+    /* Ported from the redesign: serif display voice + keyboard focus */
+    h1, h2 { font-family: 'Newsreader', Georgia, 'Times New Roman', serif !important; font-weight: 400 !important; letter-spacing: -0.02em !important; }
+    :focus-visible { outline: 2px solid #1A8A7A; outline-offset: 3px; border-radius: 4px; }
 
     /* Prevent horizontal overflow */
     section, header, footer, nav { overflow-x: clip; }

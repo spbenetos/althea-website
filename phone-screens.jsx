@@ -94,7 +94,7 @@ function PhoneBezel({ id, src }) {
 /* ── PhoneFrame — scales bezel and collapses layout space ────────────────── */
 const SCREENSHOTS = {
   'hero-left': 'screenshots/hero-left.webp',
-  'hero-center': 'screenshots/hero-center.png',
+  'hero-center': 'screenshots/hero-center-780.webp',
   'hero-right': 'screenshots/hero-right.webp',
   'feat-1': 'screenshots/feat-1.webp',
   'feat-2': 'screenshots/feat-2.webp',

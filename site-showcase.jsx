@@ -28,11 +28,11 @@ function ShowcaseSection() {
               textTransform: 'uppercase', color: accentColor, marginBottom: 14,
             }}>See it in action</div>
             <h2 style={{
-              fontSize: 'clamp(30px, 3.5vw, 42px)', fontWeight: 750,
+              fontSize: 'clamp(24px, 3.5vw, 42px)', fontWeight: 750,
               letterSpacing: '-0.03em', color: '#0D1117', marginBottom: 14, lineHeight: 1.15,
-            }}>Designed for the way you actually track</h2>
+            }}>Made for the daily habit</h2>
             <p style={{ fontSize: 17, color: '#4A5568', maxWidth: 480, margin: '0 auto' }}>
-              Every screen built to make the daily habit fast, clear, and entirely yours.
+              Every screen built to make tracking fast, clear, and entirely yours.
             </p>
           </div>
         </RevealOnScroll>

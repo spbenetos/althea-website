@@ -31,7 +31,11 @@ function FAQSection() {
     { q: 'Is my health data private?',
       a: 'Completely. Your data lives on your device and in your own private iCloud — we run no servers and never see it. No analytics, no tracking, no ads. Read our Privacy Policy for the full details.' },
     { q: 'Which medications does Althea support?',
-      a: 'All the major GLP-1 medications — Retatrutide, Ozempic, Wegovy, Mounjaro, Zepbound, Saxenda, Rybelsus, Trulicity and more. 16+ drugs with dosing schedules, titration steps, and pharmacokinetic curves.' },
+      a: 'All the major GLP-1 medications — Ozempic®, Wegovy®, Mounjaro®, Zepbound®, Rybelsus®, Saxenda®, Trulicity®, Victoza®, Retatrutide and more. 16+ drugs with dosing schedules, titration steps, and pharmacokinetic curves, in injectable and oral forms.' },
+    { q: 'Does Althea support compounded GLP-1s?',
+      a: 'Yes. Alongside brand-name drugs, Althea supports compounded semaglutide and tirzepatide with custom strengths and schedules — you set the dose, Althea handles the rest.' },
+    { q: 'What makes Althea different from other GLP-1 trackers?',
+      a: 'Three things: your data never leaves your device (no servers, no analytics), it models the actual drug level in your body between doses, and its reports are designed with clinicians for real appointments.' },
     { q: 'Does Althea replace my doctor?',
       a: 'No. Althea is a tracking companion, not a medical device. It helps you arrive at appointments with clear data, but every medication decision belongs with your prescribing healthcare provider.' },
     { q: 'How does the free trial work?',
@@ -71,7 +75,10 @@ function StickyMobileCTA() {
   const { appStoreUrl } = React.useContext(TweaksContext);
   const [show, setShow] = React.useState(false);
   React.useEffect(() => {
-    const fn = () => setShow(window.scrollY > window.innerHeight * 1.1);
+    const fn = () => {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      setShow(window.scrollY > window.innerHeight * 1.1 && window.scrollY < max - 700);
+    };
     window.addEventListener('scroll', fn, { passive: true });
     fn();
     return () => window.removeEventListener('scroll', fn);

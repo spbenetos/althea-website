@@ -26,12 +26,14 @@ function App() {
       <AnimContext.Provider value={anim}>
         <NavBar />
         <HeroSection />
+        <MedicationBand />
         <ImpactBand />
         <TrustBar />
         <ShowcaseSection />
         <FeaturePillarsSection />
         <FeatureDeepSection />
         <HowItWorksSection />
+        <PrivacyBand />
         <PricingSection />
         <FAQSection />
         <FinalCTASection />

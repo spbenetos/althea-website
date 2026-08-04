@@ -186,7 +186,7 @@ function WeightTrendCardA({ color = '#3EC4B0' }) {
   const gid = React.useMemo(() => 'wt' + Math.random().toString(36).slice(2, 8), []);
   const grid = [95, 90, 85, 80];
   const goalY = yOf(goalKg);
-  const axLbl = { position: 'absolute', right: 10, transform: 'translateY(-50%)', fontSize: 11, fontWeight: 500, color: '#5C636B', lineHeight: 1 };
+  const axLbl = { position: 'absolute', right: 10, transform: 'translateY(-50%)', fontSize: 11, fontWeight: 500, color: '#9AA1A9', lineHeight: 1 };
   return (
     <div ref={ref} style={{
       background: '#17191E', borderRadius: 20, overflow: 'hidden',
@@ -373,7 +373,138 @@ function useParallax(speed = 0.12) {
   return [ref, y];
 }
 
+/* ── DrugLevelScrub — scroll-scrubbed multi-dose pharmacokinetic curve ───── */
+function DrugLevelScrub({ accent = '#2AB5A2' }) {
+  const W = 620, H = 250, DAYS = 42, DOSE_EVERY = 7;
+  const ka = 0.55, ke = 0.099; // absorption / elimination (t½ ≈ 7 days)
+  const wrapRef = React.useRef(null);
+  const [p, setP] = React.useState(0);
+  const mono = "'JetBrains Mono', monospace";
+
+  const { pts, path, area } = React.useMemo(() => {
+    const doses = [];
+    for (let d = 0; d <= DAYS; d += DOSE_EVERY) doses.push(d);
+    const N = 170, raw = [];
+    for (let i = 0; i < N; i++) {
+      const t = (i / (N - 1)) * DAYS;
+      let c = 0;
+      for (const d of doses) {
+        if (t >= d) { const dt = t - d; c += Math.exp(-ke * dt) - Math.exp(-ka * dt); }
+      }
+      raw.push([t, c]);
+    }
+    const max = Math.max(...raw.map(r => r[1])) || 1;
+    const padT = 26, padB = 34;
+    const pts = raw.map(([t, c]) => [
+      (t / DAYS) * W,
+      padT + (1 - c / max) * (H - padT - padB),
+      c / max, t,
+    ]);
+    const path = pts.map((q, i) => `${i ? 'L' : 'M'}${q[0].toFixed(1)},${q[1].toFixed(1)}`).join(' ');
+    const area = `${path} L${W},${H - padB} L0,${H - padB} Z`;
+    return { pts, path, area };
+  }, []);
+
+  React.useEffect(() => {
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) { setP(1); return; }
+    let raf = 0;
+    const fn = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        const el = wrapRef.current;
+        if (!el) return;
+        const r = el.getBoundingClientRect();
+        const span = window.innerHeight * 0.62;
+        const started = window.innerHeight * 0.82 - r.top;
+        setP(Math.max(0, Math.min(1, started / span)));
+      });
+    };
+    window.addEventListener('scroll', fn, { passive: true });
+    window.addEventListener('resize', fn, { passive: true });
+    fn();
+    return () => { window.removeEventListener('scroll', fn); window.removeEventListener('resize', fn); cancelAnimationFrame(raf); };
+  }, []);
+
+  const idx = Math.max(1, Math.round(p * (pts.length - 1)));
+  const cur = pts[idx];
+  const day = Math.round(cur[3]);
+  const level = Math.round(cur[2] * 100);
+  const nDoses = Math.floor(day / DOSE_EVERY) + 1;
+  const gid = React.useMemo(() => 'pk' + Math.random().toString(36).slice(2, 7), []);
+  const gridTone = 'rgba(13,17,23,0.07)';
+  const labelTone = '#5F6B7A';
+  const ticks = [];
+  for (let d = 0; d <= DAYS; d += DOSE_EVERY) ticks.push(d);
+
+  return (
+    <div ref={wrapRef} style={{
+      background: '#fff', border: '1px solid rgba(13,17,23,0.08)',
+      borderRadius: 20, padding: '22px 22px 16px',
+      boxShadow: '0 2px 12px rgba(13,17,23,0.04)',
+    }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 16, marginBottom: 16 }}>
+        <div>
+          <div style={{ fontFamily: mono, fontSize: 11, fontWeight: 500, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#1A8A7A', marginBottom: 8 }}>Active drug level</div>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 7 }}>
+            <span style={{ fontFamily: mono, fontVariantNumeric: 'tabular-nums', fontSize: 34, fontWeight: 500, color: '#0D1117', lineHeight: 1 }}>{level}</span>
+            <span style={{ fontFamily: mono, fontSize: 13, color: labelTone }}>% of peak</span>
+          </div>
+        </div>
+        <div style={{ fontFamily: mono, fontSize: 12, color: labelTone, textAlign: 'right', lineHeight: 1.5 }}>
+          DAY {String(day).padStart(2, '0')} / {DAYS}<br />
+          {nDoses} dose{nDoses === 1 ? '' : 's'} logged
+        </div>
+      </div>
+
+      <div style={{ position: 'relative' }}>
+        <svg width="100%" height={H} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{ display: 'block', overflow: 'visible' }} aria-hidden="true">
+          <defs>
+            <linearGradient id={gid} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={accent} stopOpacity=".15" />
+              <stop offset="100%" stopColor={accent} stopOpacity="0" />
+            </linearGradient>
+          </defs>
+          {[0.25, 0.5, 0.75].map(f => (
+            <line key={f} x1="0" y1={26 + f * (H - 60)} x2={W} y2={26 + f * (H - 60)}
+              stroke={gridTone} strokeWidth="1" vectorEffect="non-scaling-stroke" />
+          ))}
+          <line x1="0" y1={H - 34} x2={W} y2={H - 34} stroke={gridTone} strokeWidth="1" vectorEffect="non-scaling-stroke" />
+          <path d={path} fill="none" stroke={accent} strokeWidth="1.25" strokeOpacity=".2"
+            vectorEffect="non-scaling-stroke" strokeLinecap="round" strokeLinejoin="round" />
+          <g style={{ clipPath: `inset(-24% ${(1 - p) * 100}% -24% 0)`, WebkitClipPath: `inset(-24% ${(1 - p) * 100}% -24% 0)` }}>
+            <path d={area} fill={`url(#${gid})`} />
+            <path d={path} fill="none" stroke={accent} strokeWidth="2.25"
+              vectorEffect="non-scaling-stroke" strokeLinecap="round" strokeLinejoin="round" />
+          </g>
+        </svg>
+
+        {ticks.map(d => {
+          const passed = d <= day;
+          return (
+            <div key={d} style={{ position: 'absolute', left: `${(d / DAYS) * 100}%`, bottom: 0, transform: 'translateX(-50%)', textAlign: 'center' }}>
+              <div style={{ width: 1, height: 12, margin: '0 auto 5px', background: passed ? accent : gridTone, transition: 'background .3s ease' }} />
+              <span style={{ fontFamily: mono, fontSize: 9.5, letterSpacing: '.06em', color: passed ? '#1A8A7A' : labelTone, opacity: passed ? 1 : 0.55, transition: 'color .3s ease, opacity .3s ease' }}>D{d}</span>
+            </div>
+          );
+        })}
+
+        <div style={{ position: 'absolute', left: `${(cur[0] / W) * 100}%`, top: 0, bottom: 34, width: 1, background: 'rgba(13,17,23,0.16)', opacity: p > 0.02 ? 1 : 0 }} />
+        <div style={{
+          position: 'absolute', left: `${(cur[0] / W) * 100}%`, top: `${(cur[1] / H) * 100}%`,
+          width: 11, height: 11, borderRadius: '50%', background: accent,
+          border: '2px solid #fff', boxShadow: `0 0 0 4px ${accent}22`,
+          transform: `translate(-50%,-50%) scale(${p > 0.02 ? 1 : 0})`, transition: 'transform .3s cubic-bezier(.16,1,.3,1)',
+        }} />
+      </div>
+
+      <p style={{ fontFamily: mono, fontSize: 10.5, letterSpacing: '.05em', color: labelTone, marginTop: 14, textTransform: 'uppercase' }}>
+        Weekly dosing · modelled curve, not medical advice
+      </p>
+    </div>
+  );
+}
+
 Object.assign(window, {
   AnimContext, useInView, useScrollProgress, ScrollProgressRail,
-  CountUp, DrawChart, WeightTrendCardA, useParallax, FallingLeaves, RisingBars,
+  CountUp, DrawChart, WeightTrendCardA, useParallax, FallingLeaves, RisingBars, DrugLevelScrub,
 });
