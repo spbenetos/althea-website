@@ -126,7 +126,7 @@ function NavBar() {
       }}>
         <a href="index.html" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
           <AltheaLogo size={34} />
-          <span style={{ fontFamily: "'Newsreader', Georgia, serif", fontSize: 23, fontWeight: 500, letterSpacing: '-0.02em', color: '#0D1117' }}>Althea</span>
+          <span style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif", fontSize: 22, fontWeight: 600, letterSpacing: '-0.03em', color: '#0D1117' }}>Althea</span>
         </a>
         <div style={{ display: 'flex', alignItems: 'center', gap: mobile ? 12 : 32 }}>
           {!mobile && <>
@@ -1248,7 +1248,7 @@ function FooterSection() {
           <div>
             <a href="index.html" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', marginBottom: 16 }}>
               <AltheaLogo size={30} />
-              <span style={{ fontFamily: "'Newsreader', Georgia, serif", fontSize: 22, fontWeight: 500, letterSpacing: '-0.02em', color: '#fff' }}>Althea</span>
+              <span style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif", fontSize: 21, fontWeight: 600, letterSpacing: '-0.03em', color: '#fff' }}>Althea</span>
             </a>
             <p style={{ fontSize: 14, lineHeight: 1.6, color: 'rgba(255,255,255,0.45)', maxWidth: 300, marginBottom: 22 }}>
               The companion app for your GLP-1 medication journey. Private by design.

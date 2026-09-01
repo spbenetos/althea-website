@@ -9,40 +9,78 @@
   <title>Privacy Policy — Althea</title>
   <style>
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-    html { -webkit-font-smoothing:antialiased; scroll-behavior:smooth; }
-    body { font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-serif; color:#333D4E; background:#FDFDFC; line-height:1.75; }
-    a { color:#1A8A7A; }
+    html { -webkit-font-smoothing:antialiased; scroll-behavior:smooth; background:#000000; }
+    body { font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-serif; color:#EFF4F3; background:#000000; line-height:1.75; overflow-x:hidden; }
+    a { color:#2AB5A2; }
     a:hover { opacity:0.8; }
-    .site-nav { position:fixed; top:14px; left:50%; transform:translateX(-50%); z-index:50; display:flex; align-items:center; gap:12px; background:rgba(255,255,255,0.92); backdrop-filter:blur(20px) saturate(1.8); -webkit-backdrop-filter:blur(20px) saturate(1.8); border:1px solid rgba(13,17,23,0.06); box-shadow:0 10px 32px rgba(13,17,23,0.09); border-radius:999px; padding:8px 10px; white-space:nowrap; }
-    .wordmark { display:flex; align-items:center; gap:9px; text-decoration:none; color:#141B2E; font-size:17px; font-weight:750; letter-spacing:-0.02em; padding-left:2px; }
-    .nav-sep { width:1px; height:18px; background:rgba(13,17,23,0.1); }
-    .nav-back { font-size:14px; font-weight:600; color:#1A8A7A; text-decoration:none; display:flex; align-items:center; gap:4px; padding:6px 14px 6px 10px; border-radius:999px; }
-    .nav-back:hover { background:rgba(42,181,162,0.08); opacity:1; }
-    .doc-hero { padding:130px 24px 12px; max-width:720px; margin:0 auto; }
-    .doc-title { font-size:clamp(42px,8vw,64px); font-weight:800; letter-spacing:-0.035em; color:#141B2E; line-height:1.04; margin-bottom:22px; }
-    .doc-app { font-size:19px; color:#5B6472; margin-bottom:4px; }
-    .doc-meta { font-size:16px; color:#9AA3AF; }
-    .doc-body { max-width:720px; margin:0 auto; padding:28px 24px 96px; }
+    .bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; background: #000000; }
+.bg i { position: absolute; display: block; filter: blur(150px); will-change: transform; }
+.bg .b1 { width: 88vw; height: 80vw; left: -20vw; top: -30vw;
+  background: radial-gradient(ellipse 52% 38% at 28% 32%, rgba(10,42,38,0.62) 0%, transparent 68%),
+    radial-gradient(ellipse 38% 55% at 68% 58%, rgba(6,26,32,0.55) 0%, transparent 66%),
+    radial-gradient(ellipse 58% 32% at 52% 18%, rgba(14,50,44,0.4) 0%, transparent 70%);
+  animation: driftA 52s ease-in-out infinite; animation-delay: -11s; }
+.bg .b2 { width: 70vw; height: 74vw; right: -18vw; top: -14vw;
+  background: radial-gradient(ellipse 44% 60% at 62% 30%, rgba(9,14,34,0.58) 0%, transparent 65%),
+    radial-gradient(ellipse 55% 34% at 30% 68%, rgba(14,18,40,0.46) 0%, transparent 68%);
+  animation: driftB 68s ease-in-out infinite; animation-delay: -29s; }
+.bg .b3 { width: 94vw; height: 72vw; left: -26vw; bottom: -28vw;
+  background: radial-gradient(ellipse 60% 40% at 34% 62%, rgba(28,10,26,0.5) 0%, transparent 66%),
+    radial-gradient(ellipse 36% 52% at 70% 34%, rgba(18,8,22,0.5) 0%, transparent 64%),
+    radial-gradient(ellipse 46% 30% at 52% 82%, rgba(10,34,30,0.36) 0%, transparent 70%);
+  animation: driftC 61s ease-in-out infinite; animation-delay: -14s; }
+.bg .b4 { width: 62vw; height: 58vw; right: -12vw; bottom: -18vw;
+  background: radial-gradient(ellipse 50% 42% at 40% 40%, rgba(24,18,10,0.42) 0%, transparent 68%),
+    radial-gradient(ellipse 34% 48% at 68% 66%, rgba(30,14,10,0.4) 0%, transparent 65%);
+  animation: driftD 46s ease-in-out infinite; animation-delay: -33s; }
+.bg .b6 { width: 66vw; height: 70vw; right: -20vw; bottom: -30vw;
+  background: radial-gradient(ellipse 48% 56% at 56% 42%, rgba(8,28,34,0.44) 0%, transparent 66%),
+    radial-gradient(ellipse 38% 34% at 26% 70%, rgba(10,20,36,0.4) 0%, transparent 68%);
+  animation: driftE 74s ease-in-out infinite; animation-delay: -6s; }
+.bg .b7 { width: 84vw; height: 60vw; left: -32vw; top: 34vh;
+  background: radial-gradient(ellipse 56% 34% at 40% 46%, rgba(6,22,20,0.4) 0%, transparent 70%),
+    radial-gradient(ellipse 30% 50% at 72% 58%, rgba(16,10,30,0.36) 0%, transparent 66%);
+  animation: driftF 58s ease-in-out infinite; animation-delay: -41s; }
+.bg .vig { position: absolute; inset: 0; mix-blend-mode: normal; filter: none;
+  background: radial-gradient(120% 90% at 50% 50%, rgba(0,0,0,0) 18%, rgba(0,0,0,0.88) 100%); }
+@keyframes driftA { 0% { transform: translate3d(0,0,0) rotate(0deg) scale(1); } 12% { transform: translate3d(5vw,-9vh,0) rotate(9deg) scale(1.06); } 29% { transform: translate3d(14vw,3vh,0) rotate(-6deg) scale(0.94); } 47% { transform: translate3d(-4vw,15vh,0) rotate(4deg) scale(1.12); } 68% { transform: translate3d(-13vw,-6vh,0) rotate(-11deg) scale(0.97); } 85% { transform: translate3d(6vw,9vh,0) rotate(7deg) scale(1.04); } 100% { transform: translate3d(0,0,0) rotate(0deg) scale(1); } }
+@keyframes driftB { 0% { transform: translate3d(0,0,0) rotate(0deg) scale(1.05); } 18% { transform: translate3d(-11vw,7vh,0) rotate(-8deg) scale(0.92); } 34% { transform: translate3d(-3vw,-14vh,0) rotate(5deg) scale(1.1); } 55% { transform: translate3d(10vw,-4vh,0) rotate(-4deg) scale(0.98); } 74% { transform: translate3d(15vw,11vh,0) rotate(10deg) scale(1.08); } 90% { transform: translate3d(-6vw,5vh,0) rotate(-3deg) scale(1); } 100% { transform: translate3d(0,0,0) rotate(0deg) scale(1.05); } }
+@keyframes driftC { 0% { transform: translate3d(0,0,0) rotate(0deg) scale(1); } 15% { transform: translate3d(9vw,6vh,0) rotate(6deg) scale(1.08); } 38% { transform: translate3d(-6vw,16vh,0) rotate(-9deg) scale(0.93); } 52% { transform: translate3d(-16vw,4vh,0) rotate(3deg) scale(1.05); } 71% { transform: translate3d(-8vw,-11vh,0) rotate(-5deg) scale(1.14); } 88% { transform: translate3d(7vw,-3vh,0) rotate(8deg) scale(0.96); } 100% { transform: translate3d(0,0,0) rotate(0deg) scale(1); } }
+@keyframes driftD { 0% { transform: translate3d(0,0,0) rotate(0deg) scale(1.03); } 21% { transform: translate3d(-8vw,-10vh,0) rotate(-7deg) scale(0.95); } 40% { transform: translate3d(6vw,-18vh,0) rotate(11deg) scale(1.1); } 60% { transform: translate3d(14vw,-2vh,0) rotate(-3deg) scale(0.99); } 79% { transform: translate3d(2vw,10vh,0) rotate(6deg) scale(1.07); } 100% { transform: translate3d(0,0,0) rotate(0deg) scale(1.03); } }
+@keyframes driftE { 0% { transform: translate3d(0,0,0) rotate(0deg) scale(1); } 17% { transform: translate3d(10vw,4vh,0) rotate(5deg) scale(1.09); } 33% { transform: translate3d(4vw,-13vh,0) rotate(-10deg) scale(0.91); } 51% { transform: translate3d(-12vw,-5vh,0) rotate(4deg) scale(1.13); } 70% { transform: translate3d(-16vw,8vh,0) rotate(-6deg) scale(0.97); } 86% { transform: translate3d(-3vw,14vh,0) rotate(9deg) scale(1.02); } 100% { transform: translate3d(0,0,0) rotate(0deg) scale(1); } }
+@keyframes driftF { 0% { transform: translate3d(0,0,0) rotate(0deg) scale(1.02); } 13% { transform: translate3d(-6vw,8vh,0) rotate(-4deg) scale(0.96); } 31% { transform: translate3d(-15vw,-6vh,0) rotate(8deg) scale(1.1); } 49% { transform: translate3d(-5vw,-17vh,0) rotate(-9deg) scale(0.94); } 66% { transform: translate3d(9vw,-7vh,0) rotate(5deg) scale(1.06); } 83% { transform: translate3d(13vw,6vh,0) rotate(-6deg) scale(1); } 100% { transform: translate3d(0,0,0) rotate(0deg) scale(1.02); } }
+@media (prefers-reduced-motion: reduce) { .bg i { animation: none !important; } }
+#root { position: relative; z-index: 1; }
+    .site-nav { position:fixed; z-index:1; top:14px; left:50%; transform:translateX(-50%); z-index:50; display:flex; align-items:center; gap:12px; background:rgba(255,255,255,0.055); backdrop-filter:blur(24px) saturate(150%); -webkit-backdrop-filter:blur(24px) saturate(150%); border:1px solid rgba(255,255,255,0.13); box-shadow:0 28px 70px -26px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.14); border-radius:999px; padding:8px 10px; white-space:nowrap; }
+    .wordmark { display:flex; align-items:center; gap:9px; text-decoration:none; color:#EFF4F3; font-size:17px; font-weight:750; letter-spacing:-0.02em; padding-left:2px; }
+    .nav-sep { width:1px; height:18px; background:rgba(255,255,255,0.13); }
+    .nav-back { font-size:14px; font-weight:600; color:#2AB5A2; text-decoration:none; display:flex; align-items:center; gap:4px; padding:6px 14px 6px 10px; border-radius:999px; }
+    .nav-back:hover { background:rgba(42,181,162,0.12); opacity:1; }
+    .doc-hero { position:relative; z-index:1; padding:130px 24px 12px; max-width:720px; margin:0 auto; }
+    .doc-title { font-size:clamp(42px,8vw,64px); font-weight:800; letter-spacing:-0.035em; color:#EFF4F3; line-height:1.04; margin-bottom:22px; }
+    .doc-app { font-size:19px; color:rgba(239,244,243,0.66); margin-bottom:4px; }
+    .doc-meta { font-size:16px; color:rgba(239,244,243,0.45); }
+    .doc-body { position:relative; z-index:1; max-width:720px; margin:0 auto; padding:28px 24px 96px; }
     section[id] { scroll-margin-top:96px; }
-    h2 { font-size:clamp(25px,4.5vw,32px); font-weight:750; letter-spacing:-0.025em; color:#141B2E; margin:60px 0 20px; line-height:1.2; }
-    h3 { font-size:18.5px; font-weight:700; color:#141B2E; margin:32px 0 12px; }
-    p { font-size:17px; margin-bottom:18px; }
+    h2 { font-size:clamp(25px,4.5vw,32px); font-weight:750; letter-spacing:-0.025em; color:#EFF4F3; margin:60px 0 20px; line-height:1.2; }
+    h3 { font-size:18.5px; font-weight:700; color:#EFF4F3; margin:32px 0 12px; }
+    p { font-size:17px; margin-bottom:18px; color:rgba(239,244,243,0.72); }
     p:last-child { margin-bottom:0; }
     ul, ol { padding-left:24px; margin-bottom:18px; display:flex; flex-direction:column; gap:10px; }
-    li { font-size:17px; line-height:1.7; }
-    strong { color:#141B2E; font-weight:650; }
-    .callout, .callout-teal { background:#F2F7F6; border-radius:16px; padding:20px 24px; margin:32px 0; }
-    .callout p, .callout-teal p { color:#1A4A44; margin:0; font-size:16px; line-height:1.65; }
+    li { font-size:17px; line-height:1.7; color:rgba(239,244,243,0.72); }
+    strong { color:#EFF4F3; font-weight:650; }
+    .callout, .callout-teal { background:rgba(42,181,162,0.1); border:1px solid rgba(42,181,162,0.22); border-radius:16px; padding:20px 24px; margin:32px 0; }
+    .callout p, .callout-teal p { color:rgba(239,244,243,0.85); margin:0; font-size:16px; line-height:1.65; }
     .data-table { width:100%; border-collapse:collapse; margin:20px 0 28px; font-size:15px; }
-    .data-table th { text-align:left; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.07em; color:#8896A5; padding:10px 16px; background:#F5F7F6; border-bottom:1px solid rgba(13,17,23,0.06); }
-    .data-table td { padding:13px 16px; border-bottom:1px solid rgba(13,17,23,0.05); vertical-align:top; }
+    .data-table th { text-align:left; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.07em; color:rgba(239,244,243,0.45); padding:10px 16px; background:rgba(255,255,255,0.04); border-bottom:1px solid rgba(255,255,255,0.08); }
+    .data-table td { padding:13px 16px; border-bottom:1px solid rgba(255,255,255,0.06); vertical-align:top; color:rgba(239,244,243,0.72); }
     .data-table tr:last-child td { border-bottom:none; }
-    .data-table td:first-child { font-weight:600; color:#141B2E; }
-    .contact-card { background:#F2F7F6; border-radius:16px; padding:32px 28px; margin-top:24px; text-align:center; }
+    .data-table td:first-child { font-weight:600; color:#EFF4F3; }
+    .contact-card { background:rgba(255,255,255,0.045); border:1px solid rgba(255,255,255,0.1); border-radius:16px; padding:32px 28px; margin-top:24px; text-align:center; }
     .contact-card p { margin:0; }
     .contact-btn { display:inline-flex; align-items:center; background:#2AB5A2; color:#fff !important; font-size:15px; font-weight:600; padding:12px 26px; border-radius:999px; text-decoration:none; transition:background 0.15s ease; }
     .contact-btn:hover { background:#1A8A7A; opacity:1; }
-    .site-footer { background:#0D1117; padding:40px 24px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px; }
+    .site-footer { position:relative; z-index:1; background:#000000; border-top:1px solid rgba(255,255,255,0.08); padding:40px 24px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px; }
     .site-footer a { font-size:13px; color:rgba(255,255,255,0.45); text-decoration:none; }
     .site-footer a:hover { color:rgba(255,255,255,0.7); }
     .footer-links { display:flex; gap:24px; }
@@ -50,6 +88,7 @@
   </style>
 </head>
 <body>
+  <div class="bg" aria-hidden="true"><i class="b1"></i><i class="b2"></i><i class="b3"></i><i class="b4"></i><i class="b6"></i><i class="b7"></i><i class="vig"></i></div>
 
   <!-- Nav -->
   <nav class="site-nav">
@@ -67,11 +106,6 @@
 
   <!-- Body -->
   <main class="doc-body">
-
-    <div class="callout">
-      <p><strong>The short version:</strong> Althea stores your health data on your own device and in your private iCloud account. We do not sell, share, or monetise your personal information. We never have access to your health records.</p>
-    </div>
-
 
     <!-- 1 -->
     <section id="who-we-are">
