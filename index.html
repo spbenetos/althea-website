@@ -99,6 +99,8 @@
     :focus-visible { outline: 2px solid #3FCFB9; outline-offset: 3px; border-radius: 4px; }
     section, header, footer, nav { overflow-x: clip; }
     #tour { overflow: visible !important; }
+    .stage-vp { height: 100vh; }
+    @supports (height: 100svh) { .stage-vp { height: 100svh; } }
     @keyframes hintSwipe { 0%, 8% { transform: translateY(-20px); opacity: 0; } 22% { transform: translateY(-11px); opacity: 1; } 62% { transform: translateY(22px); opacity: 1; } 84%, 100% { transform: translateY(30px); opacity: 0; } }
     @keyframes hintTrail { 0%, 8% { transform: scaleY(0); opacity: 0; } 22% { transform: scaleY(.18); opacity: .9; } 62% { transform: scaleY(.84); opacity: 1; } 84%, 100% { transform: scaleY(1); opacity: 0; } }
     @media print { nav { display: none !important; } }

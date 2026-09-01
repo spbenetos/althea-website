@@ -13,7 +13,7 @@ nothing reaches althea.team until it lands on `main`. `CNAME` maps the domain.
 - `site-video-app.jsx` — root component. Renders `DarkNavBar`, `ScrollStage`, `DarkFAQSection`, `DarkFooter`, `ScrollHint`.
 - `site-scrollstage.jsx` — the scroll-driven rotating 3D iPhone and its glass copy panels (`STAGE_SCENES`). Needs `vendor/phone3d.bundle.js` (global `Phone3D`) loaded first.
 - `vendor/phone3d.bundle.js` — prebuilt 3D phone renderer from althea-phone-3d.
-- `liquid-bg.js` — WebGL teal liquid field behind the phone stage; `window.createLiquidLayer({...})`.
+- `liquid-bg.js` — teal liquid field behind the phone stage: CSS radial-gradient blobs on transform-only keyframes, so it stays on the compositor. `window.createLiquidLayer({...})`.
 - `site-dark.jsx` — nav, FAQ and footer chrome.
 - `site-scrollhint.jsx` — swipe-down nudge shown after ~6s idling at the top.
 - `site-core.jsx` — shared primitives: `AnimContext`, `TweaksContext`, `RevealOnScroll`, `useIsMobile`, `AltheaLogo`, `AppStoreBadge`.

@@ -49,7 +49,7 @@ function ScrollHint() {
   return (
     <div aria-hidden="true" style={{
       position: 'fixed',
-      left: mobile ? '13%' : 'clamp(56px, 18%, 24%)',
+      left: mobile ? '9%' : 'clamp(56px, 18%, 24%)',
       top: mobile ? '40%' : '50%',
       transform: `translate(-50%, -50%) translateY(${shown ? '0' : '18px'})`,
       opacity: shown ? 1 : 0, transition: 'opacity .55s ease, transform .55s cubic-bezier(.22,1,.36,1)',

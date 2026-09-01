@@ -23,7 +23,7 @@ const STAGE_SCENES = [
   { n: '02', kicker: 'Progress', title: 'Progress you can feel',
     body: 'Smoothed trends cut through the daily noise, so one heavy Tuesday never reads as failure.',
     chip: 'Weekly \u00b7 90-day \u00b7 all-time', side: 'left', y: 28 },
-  { n: '03', kicker: 'Nutrition', title: 'Food, without the friction',
+  { n: '03', kicker: 'Nutrition', title: 'Calorie Tracking, without the friction',
     body: 'Scan a barcode, log the meal, and watch protein and hydration keep pace with the loss.',
     chip: 'Barcode scanning built in', side: 'right', y: 24 },
   { n: '04', kicker: 'Side effects', title: 'Side effects, in context',
@@ -115,35 +115,108 @@ function ScrollStage() {
         dwell: DWELL,
         frontSwing: FRONT_SWING,
         smoothing: 0.12,
-        fill: mobile ? 0.676 : 0.80,
+        fill: mobile ? 0.60 : 0.62,
       });
     } catch (e) { setFailed(true); return; }
     window.__stage = phone;
 
-    /* The phone module caps the render at 2× device pixels; on a 3× display that
-       renders the screenshots at two thirds native and lets the browser upscale.
-       Desktop can afford the real ratio. */
-    if (!mobile && (window.devicePixelRatio || 1) > 2) {
+    /* Drop clearcoat on the dark-glass materials (desktop): it's the only
+       physical-only feature in use — nothing uses transmission — so killing it
+       removes the clearcoat shader chunks and roughly halves fragment cost.
+       Compensate with tighter roughness + stronger env reflections. */
+    const maxAniso = (() => {
+      try { return phone.renderer.capabilities.getMaxAnisotropy(); } catch (e) { return 8; }
+    })();
+    const eachMaterial = fn => {
+      phone.phone.traverse(o => {
+        if (!o.material) return;
+        (Array.isArray(o.material) ? o.material : [o.material]).forEach(fn);
+      });
+    };
+    if (!mobile) {
+      eachMaterial(m => {
+        if (m.clearcoat > 0) {
+          m.clearcoat = 0;
+          m.roughness = Math.max(0.02, m.roughness * 0.8);
+          m.envMapIntensity = (m.envMapIntensity == null ? 1 : m.envMapIntensity) * 1.14;
+          m.needsUpdate = true;
+        }
+      });
+    }
+
+    /* The stage swaps the screenshot texture per scene, so anisotropy has to be
+       re-applied as maps change — sampled obliquely mid-rotation this is the
+       single biggest sharpness lever, and it costs almost nothing. */
+    const sharpenMaps = () => eachMaterial(m => {
+      if (m.map && m.map.anisotropy !== maxAniso) {
+        m.map.anisotropy = maxAniso;
+        m.map.needsUpdate = true;
+      }
+    });
+    sharpenMaps();
+
+    /* Adaptive resolution. A fixed guess can't work: the screenshot is 2622px tall
+       but the on-screen phone is only ~600-800px, so more pixel ratio keeps adding
+       real detail well past 2× — while the ceiling that holds 60fps depends on the
+       GPU. So start high and let measured frame time settle it. */
+    const maxPr = Math.min(window.devicePixelRatio || 1, mobile ? 2 : 3);
+    let curPr = maxPr;
+    const applyPr = () => {
+      const el = canvasRef.current;
+      if (!el || !el.clientWidth) return;
       try {
-        phone.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 3));
-        const el = canvasRef.current;
+        phone.renderer.setPixelRatio(curPr);
         phone.renderer.setSize(el.clientWidth, el.clientHeight, false);
       } catch (e) {}
-    }
+    };
+    const fitPixelRatio = applyPr;
+
+    /* Frame-time governor. The healthy interval is the DISPLAY's, not a constant:
+       16.7ms is perfect on 60Hz and terrible on 144Hz. Learn it from the fastest
+       quartile of early frames (capped at 17ms so a GPU that is already pegged
+       can't normalise its own slowness), then judge frames against that. */
+    let budget = 0;
+    const warmup = [];
+    let slow = 0, quick = 0, lastFrame = performance.now();
+    const governPr = () => {
+      const now = performance.now();
+      const dt = now - lastFrame;
+      lastFrame = now;
+      if (dt <= 0 || dt > 100) return;   // tab throttle or stall, not a real frame
+      if (!budget) {
+        warmup.push(dt);
+        if (warmup.length < 90) return;
+        const s = warmup.slice().sort((a, b) => a - b);
+        budget = Math.min(17, Math.max(6, s[Math.floor(s.length * 0.25)]));
+        return;
+      }
+      if (dt > budget * 1.35) { slow++; quick = 0; }
+      else { slow = 0; if (dt < budget * 1.15) quick++; }
+      if (slow > 12 && curPr > 1.25) {
+        curPr = Math.max(1.25, curPr - 0.25); slow = 0; quick = 0; applyPr();
+      } else if (quick > 240 && curPr < maxPr) {
+        curPr = Math.min(maxPr, curPr + 0.25); slow = 0; quick = 0; applyPr();
+      }
+    };
+    applyPr();
+    window.addEventListener('resize', fitPixelRatio);
 
     let liquid = null;
     if (typeof window.createLiquidLayer === 'function' && liquidRef.current) {
       try {
         liquid = window.createLiquidLayer({
           container: liquidRef.current, color: accentColor,
-          rate: 0.055, intensity: mobile ? 0.32 : 0.40,
+          rate: mobile ? 0.055 : 0.028, intensity: mobile ? 0.55 : 0.42,
         });
       } catch (e) { liquid = null; }
     }
 
+    let frameN = 0;
     const tick = () => {
       const el = wrapRef.current;
       if (!el || disposed) return;
+      if ((++frameN & 15) === 0) sharpenMaps();
+      governPr();
       const r = el.getBoundingClientRect();
       const span = r.height - window.innerHeight;
       const raw = span > 0 ? Math.max(0, Math.min(1, -r.top / span)) : 0;
@@ -180,6 +253,7 @@ function ScrollStage() {
     return () => {
       disposed = true;
       cancelAnimationFrame(raf);
+      window.removeEventListener('resize', fitPixelRatio);
       try { phone.dispose(); } catch (e) {}
       try { if (liquid) liquid.dispose(); } catch (e) {}
     };
@@ -189,7 +263,7 @@ function ScrollStage() {
 
   return (
     <section ref={wrapRef} id="tour" style={{ height: `${totalVh}vh`, position: 'relative', overflow: 'visible', background: 'transparent' }}>
-      <div style={{ position: 'sticky', top: 0, height: '100vh', overflow: 'hidden' }}>
+      <div className="stage-vp" style={{ position: 'sticky', top: 0, overflow: 'hidden' }}>
         <div style={{
           position: 'absolute', inset: 0,
           background: `radial-gradient(52% 40% at 50% 46%, ${accentColor}14 0%, rgba(0,0,0,0) 68%)`,
@@ -197,11 +271,10 @@ function ScrollStage() {
 
         <div ref={liquidRef} aria-hidden="true" style={{
           position: 'absolute', inset: '-8%', overflow: 'hidden',
-          filter: 'blur(16px) saturate(115%)', opacity: 0.55,
-          mixBlendMode: 'screen', pointerEvents: 'none',
+          opacity: mobile ? 0.7 : 0.5, pointerEvents: 'none',
         }} />
 
-        <div ref={canvasRef} style={{ position: 'absolute', inset: 0, transform: mobile ? 'translateY(-1.5%)' : 'none' }} />
+        <div ref={canvasRef} style={{ position: 'absolute', inset: 0, transform: mobile ? 'translateY(-6%)' : 'none' }} />
 
         {failed && (
           <div style={{
@@ -223,19 +296,23 @@ function ScrollStage() {
         <div ref={introRef} style={{
           position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column',
           alignItems: 'center', justifyContent: 'space-between',
-          padding: mobile ? '20px 0 30px' : '24px 0 6vh', textAlign: 'center',
+          padding: mobile ? '14px 0 max(140px, calc(env(safe-area-inset-bottom, 0px) + 140px))' : '24px 0 6vh',
+          textAlign: 'center',
         }}>
           <h1 style={{
-            fontSize: mobile ? 'clamp(26px, 7.4vw, 34px)' : 'clamp(38px, 4.6vw, 58px)',
-            lineHeight: 1.08, color: '#EFF4F3', margin: '0 20px',
+            fontSize: mobile ? 'clamp(22px, 6.2vw, 29px)' : 'clamp(28px, 3.4vw, 43px)',
+            lineHeight: 1.14, color: '#EFF4F3',
+            margin: mobile ? '0 16px' : '0 20px',
+            maxWidth: mobile ? 'none' : 'min(1000px, 88vw)',
             textShadow: '0 2px 20px rgba(0,0,0,0.5)',
-          }}>{(headline || '').split('\n').map((l, i) => <React.Fragment key={i}>{l}<br /></React.Fragment>)}</h1>
+          }}>{(subline || '').split(/(GLP-1)/).map((part, i) => (
+            <span key={i} style={{ fontWeight: part === 'GLP-1' ? 600 : 500 }}>{part}</span>
+          ))}</h1>
           <div style={{
             ...glassShell, borderRadius: 24, padding: mobile ? '16px 20px' : '18px 28px',
             margin: '0 20px', maxWidth: mobile ? 'none' : 420,
             background: 'rgba(255,255,255,0.045)',
           }}>
-            <p style={{ fontSize: mobile ? 14.5 : 16, color: 'rgba(239,244,243,0.66)', margin: '0 0 14px', textWrap: 'pretty' }}>{subline}</p>
             <div style={{ display: 'flex', justifyContent: 'center' }}><AppStoreBadge dark={false} href={appStoreUrl} /></div>
           </div>
         </div>
