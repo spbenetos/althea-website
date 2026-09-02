@@ -151,7 +151,7 @@ function ScrollStage() {
         dwell: DWELL,
         frontSwing: FRONT_SWING,
         smoothing: 0.12,
-        fill: mobile ? 0.56 : 0.62,
+        fill: mobile ? 0.56 : 0.68,
       });
     } catch (e) { setFailed(true); bootDone(); return; }
     window.__stage = phone;
@@ -408,12 +408,22 @@ function ScrollStage() {
               browser window can never push it below the fold on load. */}
           <div ref={introCtaRef} style={{
             ...glassShell, borderRadius: 24, padding: mobile ? '16px 20px' : '18px 28px',
-            position: 'absolute', left: 16, right: 16, marginInline: 'auto',
+            position: 'absolute',
+            /* Mobile keeps it docked low over the phone; desktop sits beside the
+               phone, vertically centred on the device, clear of the render. */
+            left: mobile ? 16 : 'auto',
+            /* Inset grows with the viewport: on tablet-width screens the phone render
+               fills most of the stage, so the panel hugs the edge instead of
+               overlapping the device; wide desktops get generous breathing room. */
+            right: mobile ? 16 : 'clamp(10px, calc(9vw - 70px), 120px)',
+            marginInline: mobile ? 'auto' : 0,
             bottom: mobile
               ? 'max(26px, calc(env(safe-area-inset-bottom, 0px) + 26px))'
-              : 'clamp(18px, 6vh, 54px)',
-            width: mobile ? 'auto' : 'fit-content',
-            maxWidth: mobile ? 'none' : 'min(420px, calc(100% - 32px))',
+              : 'auto',
+            top: mobile ? 'auto' : '50%',
+            transform: mobile ? 'none' : 'translateY(-50%)',
+            width: 'fit-content',
+            maxWidth: mobile ? 'calc(100% - 32px)' : 'min(420px, calc(100% - 32px))',
             background: 'rgba(255,255,255,0.045)',
           }}>
             <div style={{ display: 'flex', justifyContent: 'center' }}><AppStoreBadge dark={false} href={appStoreUrl} /></div>
