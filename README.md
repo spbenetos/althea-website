@@ -20,6 +20,10 @@ nothing reaches althea.team until it lands on `main`. `CNAME` maps the domain.
 - `tweaks-panel.jsx` — design-time tweak controls (harmless in production).
 - `ref-links.js` — normalizes App Store links to the real listing and appends the referral parameter when `?ref=` is present.
 - `404.html`, `privacy-policy/`, `terms-of-use/` — extra pages; root `privacy-policy.html` / `terms-of-use.html` are redirect stubs.
+- `boot-loader.webp` — animated loader mark for the boot screen. `index.html` holds a black
+  overlay (`#boot`, `html.booting`) until `site-scrollstage.jsx` dispatches `althea:stage-ready`,
+  then hands over on the next whole 1512ms loop. A 6s failsafe and an image-error path both
+  drop the overlay, so a missing 3D bundle degrades to the page rather than a black screen.
 - `screens/` — the six `screen-N.jpg` frames mapped onto the 3D phone in scroll order.
 - `app-icon.png`, `og-image.png` — favicon/logo mark and social card.
 

@@ -98,6 +98,7 @@ function ScrollStage() {
   const mobile = useIsMobile(860);
   const { accentColor, headline, subline, appStoreUrl } = React.useContext(TweaksContext);
   const wrapRef = React.useRef(null);
+  const stickyRef = React.useRef(null);
   const canvasRef = React.useRef(null);
   const liquidRef = React.useRef(null);
   const introRef = React.useRef(null);
@@ -106,7 +107,8 @@ function ScrollStage() {
   const [failed, setFailed] = React.useState(false);
 
   React.useEffect(() => {
-    if (typeof window.Phone3D === 'undefined') { setFailed(true); return; }
+    const bootDone = () => window.dispatchEvent(new Event('althea:stage-ready'));
+    if (typeof window.Phone3D === 'undefined') { setFailed(true); bootDone(); return; }
     let phone, raf = 0, disposed = false;
     try {
       phone = window.Phone3D.createPhoneScene({
@@ -115,9 +117,9 @@ function ScrollStage() {
         dwell: DWELL,
         frontSwing: FRONT_SWING,
         smoothing: 0.12,
-        fill: mobile ? 0.60 : 0.62,
+        fill: mobile ? 0.56 : 0.62,
       });
-    } catch (e) { setFailed(true); return; }
+    } catch (e) { setFailed(true); bootDone(); return; }
     window.__stage = phone;
 
     /* Drop clearcoat on the dark-glass materials (desktop): it's the only
@@ -201,6 +203,20 @@ function ScrollStage() {
     applyPr();
     window.addEventListener('resize', fitPixelRatio);
 
+    /* Hold the static boot frame until every screenshot texture is decoded and one
+       real frame is on screen, then hand over — so the stage is never seen empty
+       or half-textured, and the page is never scrollable into a dead zone. */
+    const signalReady = bootDone;
+    try {
+      const r = phone.ready();
+      if (r && typeof r.then === 'function') {
+        r.then(() => {
+          phone.renderAt(0);
+          requestAnimationFrame(() => requestAnimationFrame(signalReady));
+        }).catch(signalReady);
+      } else signalReady();
+    } catch (e) { signalReady(); }
+
     let liquid = null;
     if (typeof window.createLiquidLayer === 'function' && liquidRef.current) {
       try {
@@ -218,7 +234,11 @@ function ScrollStage() {
       if ((++frameN & 15) === 0) sharpenMaps();
       governPr();
       const r = el.getBoundingClientRect();
-      const span = r.height - window.innerHeight;
+      /* Measure against the sticky viewport box, not window.innerHeight: on iOS
+         those differ (innerHeight includes the area behind the toolbars), which
+         skews progress and drifts the panels out of step with the phone. */
+      const vpH = stickyRef.current ? stickyRef.current.offsetHeight : window.innerHeight;
+      const span = r.height - vpH;
       const raw = span > 0 ? Math.max(0, Math.min(1, -r.top / span)) : 0;
       const p = raw * P_END;
       phone.setProgress(p);
@@ -263,7 +283,7 @@ function ScrollStage() {
 
   return (
     <section ref={wrapRef} id="tour" style={{ height: `${totalVh}vh`, position: 'relative', overflow: 'visible', background: 'transparent' }}>
-      <div className="stage-vp" style={{ position: 'sticky', top: 0, overflow: 'hidden' }}>
+      <div ref={stickyRef} className="stage-vp" style={{ position: 'sticky', top: 0, overflow: 'hidden' }}>
         <div style={{
           position: 'absolute', inset: 0,
           background: `radial-gradient(52% 40% at 50% 46%, ${accentColor}14 0%, rgba(0,0,0,0) 68%)`,
@@ -274,7 +294,9 @@ function ScrollStage() {
           opacity: mobile ? 0.7 : 0.5, pointerEvents: 'none',
         }} />
 
-        <div ref={canvasRef} style={{ position: 'absolute', inset: 0, transform: mobile ? 'translateY(-6%)' : 'none' }} />
+        <div className="stage-3d" style={{ position: 'absolute', inset: 0 }}>
+          <div ref={canvasRef} style={{ position: 'absolute', inset: 0, transform: mobile ? 'translateY(-6%)' : 'none' }} />
+        </div>
 
         {failed && (
           <div style={{
@@ -294,9 +316,9 @@ function ScrollStage() {
         ))}
 
         <div ref={introRef} style={{
-          position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column',
-          alignItems: 'center', justifyContent: 'space-between',
-          padding: mobile ? '14px 0 max(140px, calc(env(safe-area-inset-bottom, 0px) + 140px))' : '24px 0 6vh',
+          position: 'absolute', inset: 0, display: 'grid',
+          gridTemplateRows: 'auto 1fr auto', justifyItems: 'center',
+          padding: mobile ? '14px 0 max(80px, calc(env(safe-area-inset-bottom, 0px) + 80px))' : '24px 0 6vh',
           textAlign: 'center',
         }}>
           <h1 style={{
@@ -311,7 +333,7 @@ function ScrollStage() {
           <div style={{
             ...glassShell, borderRadius: 24, padding: mobile ? '16px 20px' : '18px 28px',
             margin: '0 20px', maxWidth: mobile ? 'none' : 420,
-            background: 'rgba(255,255,255,0.045)',
+            gridRow: 3, background: 'rgba(255,255,255,0.045)',
           }}>
             <div style={{ display: 'flex', justifyContent: 'center' }}><AppStoreBadge dark={false} href={appStoreUrl} /></div>
           </div>
