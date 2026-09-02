@@ -17,14 +17,20 @@
   <meta name="twitter:description" content="Track every dose. See every result.">
   <meta name="twitter:image" content="https://althea.team/og-image.png">
   <meta name="theme-color" content="#000102">
-  <link rel="preload" as="image" href="boot-loader.webp" fetchpriority="high">
-  <link rel="preload" as="image" href="screens/screen-1.jpg" fetchpriority="high">
+  <link rel="preload" as="image" href="boot-loader.webp?v=2" fetchpriority="high">
+  <link rel="preload" as="image" href="screens/d/screen-1.jpg" media="(min-width: 861px)" fetchpriority="high">
+  <link rel="preload" as="image" href="screens/m/screen-1.jpg" media="(max-width: 860px)" fetchpriority="high">
   <link rel="preload" as="script" href="vendor/phone3d.bundle.js">
-  <link rel="preload" as="image" href="screens/screen-2.jpg">
-  <link rel="preload" as="image" href="screens/screen-3.jpg">
-  <link rel="preload" as="image" href="screens/screen-4.jpg">
-  <link rel="preload" as="image" href="screens/screen-5.jpg">
-  <link rel="preload" as="image" href="screens/screen-6.jpg">
+  <link rel="preload" as="image" href="screens/d/screen-2.jpg" media="(min-width: 861px)">
+  <link rel="preload" as="image" href="screens/d/screen-3.jpg" media="(min-width: 861px)">
+  <link rel="preload" as="image" href="screens/d/screen-4.jpg" media="(min-width: 861px)">
+  <link rel="preload" as="image" href="screens/d/screen-5.jpg" media="(min-width: 861px)">
+  <link rel="preload" as="image" href="screens/d/screen-6.jpg" media="(min-width: 861px)">
+  <link rel="preload" as="image" href="screens/m/screen-2.jpg" media="(max-width: 860px)">
+  <link rel="preload" as="image" href="screens/m/screen-3.jpg" media="(max-width: 860px)">
+  <link rel="preload" as="image" href="screens/m/screen-4.jpg" media="(max-width: 860px)">
+  <link rel="preload" as="image" href="screens/m/screen-5.jpg" media="(max-width: 860px)">
+  <link rel="preload" as="image" href="screens/m/screen-6.jpg" media="(max-width: 860px)">
   <title>Althea — GLP-1 Tracker for Ozempic®, Wegovy®, Mounjaro®, Zepbound® & more</title>
   <script type="application/ld+json">
   {
@@ -117,6 +123,13 @@
     #boot.done { opacity: 0; }
     /* own compositor layer: animated-image frame swaps never repaint the page under it */
     #boot .bl { width: min(62vw, 288px); height: auto; opacity: 0; animation: bootIn .6s ease .1s forwards; transform: translateZ(0); backface-visibility: hidden; }
+    /* held state: the mark stops on its last frame and a small spinner takes over
+       in the middle of the leaf while the rest of the site is still arriving. */
+    #boot .mark { position: relative; display: grid; place-items: center; }
+    #boot .spin { position: absolute; width: 34px; height: 34px; box-sizing: border-box; border-radius: 50%; border: 3px solid rgba(3,26,24,.3); border-top-color: #F4FFFD; opacity: 0; transition: opacity .5s ease; filter: drop-shadow(0 1px 4px rgba(0,0,0,.45)); }
+    #boot.held .spin { opacity: 1; animation: bootSpin .9s linear infinite; }
+    @keyframes bootSpin { to { transform: rotate(360deg); } }
+    @keyframes bootPulse { 0%, 100% { opacity: .3; } 50% { opacity: 1; } }
     /* the blurred cloud field is invisible behind the opaque boot screen — but it still
        costs 7 animated 150px-blur layers of GPU every frame, which is what makes the
        loader stutter on weaker phones. Nothing to draw until the site is revealed. */
@@ -125,8 +138,8 @@
     /* The 3D stage arrives with the black: fade + settle rather than a hard cut. */
     .stage-3d { opacity: 1; transition: opacity .9s ease .12s, transform 1.1s cubic-bezier(.16,1,.3,1) .12s; }
     html.booting .stage-3d { opacity: 0; transform: translateY(14px) scale(.972); }
-    @media (min-width: 861px) { #boot .bl { width: min(28vw, 320px); } }
-    @media (prefers-reduced-motion: reduce) { .stage-3d { transition: opacity .3s ease; } html.booting .stage-3d { transform: none; } }
+    @media (min-width: 861px) { #boot .bl { width: min(28vw, 320px); } #boot .spin { width: 38px; height: 38px; } }
+    @media (prefers-reduced-motion: reduce) { .stage-3d { transition: opacity .3s ease; } html.booting .stage-3d { transform: none; } #boot.held .spin { animation: bootPulse 1.5s ease-in-out infinite; } }
     @keyframes hintSwipe { 0%, 8% { transform: translateY(-20px); opacity: 0; } 22% { transform: translateY(-11px); opacity: 1; } 62% { transform: translateY(22px); opacity: 1; } 84%, 100% { transform: translateY(30px); opacity: 0; } }
     @keyframes hintTrail { 0%, 8% { transform: scaleY(0); opacity: 0; } 22% { transform: scaleY(.18); opacity: .9; } 62% { transform: scaleY(.84); opacity: 1; } 84%, 100% { transform: scaleY(1); opacity: 0; } }
     @media print { nav { display: none !important; } }
@@ -135,36 +148,41 @@
 <body>
   <div class="bg" aria-hidden="true"><i class="b1"></i><i class="b2"></i><i class="b3"></i><i class="b4"></i><i class="b6"></i><i class="b7"></i><i class="vig"></i></div>
   <div id="root"></div>
-  <div id="boot" aria-hidden="true"><img class="bl" src="boot-loader.webp" alt="" fetchpriority="high" decoding="sync"></div>
+  <div id="boot" aria-hidden="true"><div class="mark"><img class="bl" src="boot-loader.webp?v=2" alt="" fetchpriority="high" decoding="sync"><i class="spin"></i></div></div>
   <script>
     document.documentElement.classList.add('booting');
     (function () {
       var b = document.getElementById('boot'), img = b.querySelector('.bl');
-      // The loader is exactly 1512ms per cycle (measured off the file) and loops
-      // forever. It always finishes the cycle it is playing before the site is
-      // revealed, so the mark is never cut mid-reveal.
-      var LOOP = 1512, MAX_HOLD = 6000, GRACE = 2000;
-      var t = null, gone = false, t0 = null, want = false, failed = false;
+      // The loader is a single 1512ms play (the file's own loop count is 1, so the
+      // mark holds on its last frame instead of replaying). If the site still isn't
+      // ready when the draw-in finishes, a small spinner fades in over the leaf.
+      var PLAY = 1512, MAX_HOLD = 6000, GRACE = 2000;
+      var t = null, hz = null, gone = false, t0 = null, want = false, failed = false, held = false;
       var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       function drop() {
-        if (gone) return; gone = true; clearTimeout(t);
+        if (gone) return; gone = true; clearTimeout(t); clearTimeout(hz);
         document.documentElement.classList.remove('booting');
         b.classList.add('done');
         setTimeout(function () { b.remove(); }, 600);
       }
-      // the site is ready to show — hand over on the next whole-cycle boundary
+      // draw-in finished and we are still waiting: hand the wait to the spinner
+      function hold() {
+        if (gone || held || failed || want) return;
+        held = true;
+        b.classList.add('held');
+      }
+      // the site is ready to show — hand over once the single play has finished
       function settle() {
         want = true;
         if (gone) return;
-        clearTimeout(t);
-        if (reduce || failed) return drop();
+        clearTimeout(t); clearTimeout(hz);
+        if (reduce || failed || held) return drop(); // already parked on the last frame
         if (t0 === null) { t = setTimeout(drop, GRACE); return; } // art still downloading
-        var e = Date.now() - t0;
-        t = setTimeout(drop, Math.max(0, Math.ceil(e / LOOP) * LOOP - e));
+        t = setTimeout(drop, Math.max(0, PLAY - (Date.now() - t0)));
       }
       // clock starts when the first frame is actually on screen, not at page load,
       // so a slow connection never eats part of the play
-      function started() { if (t0 === null) { t0 = Date.now(); if (want) settle(); } }
+      function started() { if (t0 === null) { t0 = Date.now(); if (want) settle(); else hz = setTimeout(hold, PLAY); } }
       if (img.complete && img.naturalWidth) started();
       else {
         img.addEventListener('load', started);

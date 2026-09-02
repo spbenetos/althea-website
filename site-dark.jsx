@@ -111,8 +111,8 @@ function DarkFAQSection() {
         <RevealOnScroll>
           <div style={{ textAlign: 'center', marginBottom: 38 }}>
             <h2 style={{
-              fontSize: 'clamp(26px, 3.5vw, 40px)', color: D.ink, marginBottom: 12, lineHeight: 1.14,
-            }}>Questions, answered</h2>
+              fontSize: 'clamp(24px, 3.1vw, 36px)', color: D.ink, marginBottom: 12, lineHeight: 1.14,
+            }}>Your questions, answered</h2>
           </div>
         </RevealOnScroll>
         <RevealOnScroll delay={0.08}>

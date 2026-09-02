@@ -1,14 +1,18 @@
 // site-scrollstage.jsx — scroll-driven rotating iPhone (real 3D, from althea-phone-3d)
 // Requires vendor/phone3d.bundle.js (global Phone3D) loaded before this file.
 
-const PHONE_SCREENS = [
-  'screens/screen-1.jpg',  // home — weight + medication level graphs
-  'screens/screen-2.jpg',  // progress / insights
-  'screens/screen-3.jpg',  // nutrition
-  'screens/screen-4.jpg',  // symptom logging
-  'screens/screen-5.jpg',  // body measurements
-  'screens/screen-6.jpg',  // PDF report for doctors
-];
+/* Screenshot textures, pre-downscaled to roughly the size the phone screen actually
+   occupies on each device class (desktop ~1914px tall, mobile ~1442px). The masters
+   are 2622px, which was WORSE, not better: at that size the GPU blends in its own
+   half-resolution mip level, built with a non-gamma-correct box filter. Sizing the
+   texture just above its display size means mip 0 is the level in use — sharper AND
+   about 40% fewer bytes than the masters. Originals kept in screens/ as the source. */
+const PHONE_SCREEN_SETS = {
+  // 880×1914 — desktop, where the phone renders largest
+  d: [1, 2, 3, 4, 5, 6].map(n => `screens/d/screen-${n}.jpg`),
+  // 663×1442 — mobile; two-step downscale so the 1px UI rules survive
+  m: [1, 2, 3, 4, 5, 6].map(n => `screens/m/screen-${n}.jpg`),
+};
 
 // Must match the phone module's motion so panels land with the front of the phone.
 const DWELL = 0.72;        // share of each revolution facing the viewer
@@ -73,6 +77,34 @@ const glassShell = {
   borderRadius: 20,
 };
 
+/* App Store rating row — 5 filled stars with a soft gold glow. */
+function AppStoreStars({ value = '5.0', label = 'App Store rating' }) {
+  const star = 'M12 1.6l3.09 6.26 6.91 1-5 4.87 1.18 6.87L12 17.35 5.82 20.6 7 13.73l-5-4.87 6.91-1z';
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 9 }}>
+      <div style={{ display: 'flex', gap: 2.5, filter: 'drop-shadow(0 1px 3px rgba(255,159,10,0.35))' }}>
+        {[0, 1, 2, 3, 4].map(i => (
+          <svg key={i} width="14" height="14" viewBox="0 0 24 24" aria-hidden="true">
+            <defs>
+              <linearGradient id={`asStar${i}`} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stopColor="#FFD24A" />
+                <stop offset="1" stopColor="#FF9F0A" />
+              </linearGradient>
+            </defs>
+            <path d={star} fill={`url(#asStar${i})`} />
+          </svg>
+        ))}
+      </div>
+      <span style={{
+        fontSize: 12.5, fontWeight: 600, color: 'rgba(239,244,243,0.92)',
+        fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.01em',
+      }}>{value}</span>
+      <span style={{ width: 1, height: 11, background: 'rgba(239,244,243,0.22)' }} />
+      <span style={{ fontSize: 12, fontWeight: 500, color: 'rgba(239,244,243,0.58)', letterSpacing: '-0.005em' }}>{label}</span>
+    </div>
+  );
+}
+
 /* One scene's glass windows. Opacity/transform are written imperatively by the
    stage's rAF loop, so scrolling never re-renders React. */
 function GlassPanel({ scene, mobile, accent, cardRef, chipRef }) {
@@ -102,6 +134,8 @@ function ScrollStage() {
   const canvasRef = React.useRef(null);
   const liquidRef = React.useRef(null);
   const introRef = React.useRef(null);
+  const introTitleRef = React.useRef(null);
+  const introCtaRef = React.useRef(null);
   const cardRefs = React.useRef([]);
   const chipRefs = React.useRef([]);
   const [failed, setFailed] = React.useState(false);
@@ -113,7 +147,7 @@ function ScrollStage() {
     try {
       phone = window.Phone3D.createPhoneScene({
         container: canvasRef.current,
-        screens: PHONE_SCREENS,
+        screens: PHONE_SCREEN_SETS[mobile ? 'm' : 'd'],
         dwell: DWELL,
         frontSwing: FRONT_SWING,
         smoothing: 0.12,
@@ -146,14 +180,26 @@ function ScrollStage() {
       });
     }
 
-    /* The stage swaps the screenshot texture per scene, so anisotropy has to be
-       re-applied as maps change — sampled obliquely mid-rotation this is the
-       single biggest sharpness lever, and it costs almost nothing. */
+    /* The stage swaps the screenshot texture per scene, so sampling has to be
+       re-applied as maps change. Two levers, both nearly free:
+       · anisotropy — the phone is almost always tilted, so the screen is sampled
+         obliquely; max anisotropy is the single biggest sharpness win.
+       · no mipmaps — the textures are now display-matched, so every mip level is
+         smaller than what's on screen and can only blur. minFilter is set from
+         magFilter (LinearFilter) rather than a hard-coded constant, so it stays
+         correct across three.js versions. Safe against shimmer because anisotropic
+         filtering is doing the minification work instead. */
     const sharpenMaps = () => eachMaterial(m => {
-      if (m.map && m.map.anisotropy !== maxAniso) {
-        m.map.anisotropy = maxAniso;
-        m.map.needsUpdate = true;
+      const t = m.map;
+      if (!t || t.__altheaSharp === maxAniso) return;
+      t.anisotropy = maxAniso;
+      if (t.generateMipmaps !== false) {
+        t.generateMipmaps = false;
+        t.minFilter = t.magFilter;
+        if (t.mipmaps && t.mipmaps.length) t.mipmaps.length = 0;
       }
+      t.__altheaSharp = maxAniso;
+      t.needsUpdate = true;
     });
     sharpenMaps();
 
@@ -161,7 +207,8 @@ function ScrollStage() {
        but the on-screen phone is only ~600-800px, so more pixel ratio keeps adding
        real detail well past 2× — while the ceiling that holds 60fps depends on the
        GPU. So start high and let measured frame time settle it. */
-    const maxPr = Math.min(window.devicePixelRatio || 1, mobile ? 2 : 3);
+    const maxPr = Math.min(window.devicePixelRatio || 1, mobile ? 2.5 : 3);
+    const minPr = Math.min(maxPr, 1.6);
     let curPr = maxPr;
     const applyPr = () => {
       const el = canvasRef.current;
@@ -177,7 +224,7 @@ function ScrollStage() {
        16.7ms is perfect on 60Hz and terrible on 144Hz. Learn it from the fastest
        quartile of early frames (capped at 17ms so a GPU that is already pegged
        can't normalise its own slowness), then judge frames against that. */
-    let budget = 0;
+    let budget = 0, bgShed = false;
     const warmup = [];
     let slow = 0, quick = 0, lastFrame = performance.now();
     const governPr = () => {
@@ -194,10 +241,25 @@ function ScrollStage() {
       }
       if (dt > budget * 1.35) { slow++; quick = 0; }
       else { slow = 0; if (dt < budget * 1.15) quick++; }
-      if (slow > 12 && curPr > 1.25) {
-        curPr = Math.max(1.25, curPr - 0.25); slow = 0; quick = 0; applyPr();
-      } else if (quick > 240 && curPr < maxPr) {
-        curPr = Math.min(maxPr, curPr + 0.25); slow = 0; quick = 0; applyPr();
+      if (slow > 12) {
+        /* Shed the cheapest thing first. The liquid background is decoration —
+           several large blurred layers the compositor fills every frame — while
+           pixel ratio is the phone's legibility. Drop the background before
+           softening the product shot, and only reduce resolution if that wasn't
+           enough. Restores in reverse order once frames are healthy again. */
+        if (!bgShed && liquidRef.current) {
+          bgShed = true; liquidRef.current.style.display = 'none';
+          slow = 0; quick = 0;
+        } else if (curPr > minPr) {
+          curPr = Math.max(minPr, curPr - 0.25); slow = 0; quick = 0; applyPr();
+        }
+      } else if (quick > 240) {
+        if (curPr < maxPr) {
+          curPr = Math.min(maxPr, curPr + 0.25); slow = 0; quick = 0; applyPr();
+        } else if (bgShed && liquidRef.current) {
+          bgShed = false; liquidRef.current.style.display = '';
+          slow = 0; quick = 0;
+        }
       }
     };
     applyPr();
@@ -245,10 +307,22 @@ function ScrollStage() {
       if (liquid) liquid.setProgress(raw);
 
       const introVis = 1 - stageSmooth(0, INTRO_FADE, p);
+      /* Mobile: the CTA panel sits low over the phone, so a slide-up reads as drift.
+         It fades on its own slightly shorter window and stays put; the headline keeps
+         the lift. Desktop is unchanged (whole intro fades and lifts together). */
+      const ctaVis = mobile ? 1 - stageSmooth(0, INTRO_FADE * 0.66, p) : 1;
       if (introRef.current) {
-        introRef.current.style.opacity = introVis;
-        introRef.current.style.transform = `translateY(${(1 - introVis) * -22}px)`;
+        introRef.current.style.opacity = mobile ? 1 : introVis;
+        introRef.current.style.transform = mobile ? 'none' : `translateY(${(1 - introVis) * -22}px)`;
         introRef.current.style.pointerEvents = introVis > 0.4 ? 'auto' : 'none';
+      }
+      if (introTitleRef.current) {
+        introTitleRef.current.style.opacity = mobile ? introVis : 1;
+        introTitleRef.current.style.transform = mobile ? `translateY(${(1 - introVis) * -22}px)` : 'none';
+      }
+      if (introCtaRef.current) {
+        introCtaRef.current.style.opacity = ctaVis;
+        introCtaRef.current.style.pointerEvents = ctaVis > 0.4 ? 'auto' : 'none';
       }
 
       const { i, vis } = panelStateFor(p);
@@ -302,7 +376,7 @@ function ScrollStage() {
           <div style={{
             position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
-            <img src={PHONE_SCREENS[0]} alt="Althea app" style={{
+            <img src={PHONE_SCREEN_SETS[mobile ? 'm' : 'd'][0]} alt="Althea app" style={{
               height: mobile ? '54vh' : '76vh', borderRadius: 34, border: '9px solid #0B0E11',
               boxShadow: '0 40px 70px -24px rgba(0,0,0,0.7)',
             }} />
@@ -321,7 +395,7 @@ function ScrollStage() {
           padding: mobile ? '14px 0 max(80px, calc(env(safe-area-inset-bottom, 0px) + 80px))' : '24px 0 6vh',
           textAlign: 'center',
         }}>
-          <h1 style={{
+          <h1 ref={introTitleRef} style={{
             fontSize: mobile ? 'clamp(22px, 6.2vw, 29px)' : 'clamp(28px, 3.4vw, 43px)',
             lineHeight: 1.14, color: '#EFF4F3',
             margin: mobile ? '0 16px' : '0 20px',
@@ -330,12 +404,22 @@ function ScrollStage() {
           }}>{(subline || '').split(/(GLP-1)/).map((part, i) => (
             <span key={i} style={{ fontWeight: part === 'GLP-1' ? 600 : 500 }}>{part}</span>
           ))}</h1>
-          <div style={{
+          {/* Pinned to the stage viewport like the mobile scene panels, so a short
+              browser window can never push it below the fold on load. */}
+          <div ref={introCtaRef} style={{
             ...glassShell, borderRadius: 24, padding: mobile ? '16px 20px' : '18px 28px',
-            margin: '0 20px', maxWidth: mobile ? 'none' : 420,
-            gridRow: 3, background: 'rgba(255,255,255,0.045)',
+            position: 'absolute', left: 16, right: 16, marginInline: 'auto',
+            bottom: mobile
+              ? 'max(26px, calc(env(safe-area-inset-bottom, 0px) + 26px))'
+              : 'clamp(18px, 6vh, 54px)',
+            width: mobile ? 'auto' : 'fit-content',
+            maxWidth: mobile ? 'none' : 'min(420px, calc(100% - 32px))',
+            background: 'rgba(255,255,255,0.045)',
           }}>
             <div style={{ display: 'flex', justifyContent: 'center' }}><AppStoreBadge dark={false} href={appStoreUrl} /></div>
+            <div style={{ marginTop: 14, paddingTop: 13, borderTop: '1px solid rgba(255,255,255,0.10)' }}>
+              <AppStoreStars />
+            </div>
           </div>
         </div>
       </div>
@@ -343,4 +427,4 @@ function ScrollStage() {
   );
 }
 
-Object.assign(window, { ScrollStage, STAGE_SCENES, GlassPanel, PHONE_SCREENS });
+Object.assign(window, { ScrollStage, STAGE_SCENES, GlassPanel, AppStoreStars, PHONE_SCREEN_SETS });

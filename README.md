@@ -20,11 +20,16 @@ nothing reaches althea.team until it lands on `main`. `CNAME` maps the domain.
 - `tweaks-panel.jsx` — design-time tweak controls (harmless in production).
 - `ref-links.js` — normalizes App Store links to the real listing and appends the referral parameter when `?ref=` is present.
 - `404.html`, `privacy-policy/`, `terms-of-use/` — extra pages; root `privacy-policy.html` / `terms-of-use.html` are redirect stubs.
-- `boot-loader.webp` — animated loader mark for the boot screen. `index.html` holds a black
+- `boot-loader.webp` — loader mark for the boot screen (plays once, then holds on its last frame while a spinner fades in over the leaf; cache-busted as `?v=2`). `index.html` holds a black
   overlay (`#boot`, `html.booting`) until `site-scrollstage.jsx` dispatches `althea:stage-ready`,
   then hands over on the next whole 1512ms loop. A 6s failsafe and an image-error path both
   drop the overlay, so a missing 3D bundle degrades to the page rather than a black screen.
-- `screens/` — the six `screen-N.jpg` frames mapped onto the 3D phone in scroll order.
+- `screens/d/`, `screens/m/` — the six phone-screen textures at desktop (880x1914) and
+  mobile (663x1442) sizes; `site-scrollstage.jsx` picks a set by viewport and `index.html`
+  preloads only the matching one via `media` on each `<link>`. Sized just above their
+  on-screen size so mip 0 is the level in use.
+- `screens/*.jpg` — the 2622px masters the two sets are downscaled from. Nothing on the
+  page loads them; they are kept only as the source for regenerating `d/` and `m/`.
 - `app-icon.png`, `og-image.png` — favicon/logo mark and social card.
 
 ## Editing notes
