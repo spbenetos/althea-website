@@ -412,10 +412,10 @@ function ScrollStage() {
             /* Mobile keeps it docked low over the phone; desktop sits beside the
                phone, vertically centred on the device, clear of the render. */
             left: mobile ? 16 : 'auto',
-            /* Inset grows with the viewport: on tablet-width screens the phone render
-               fills most of the stage, so the panel hugs the edge instead of
-               overlapping the device; wide desktops get generous breathing room. */
-            right: mobile ? 16 : 'clamp(10px, calc(9vw - 70px), 120px)',
+            /* Same inset rule as the scene GlassPanels: pinned to the 1132px content
+               column so it sits just off the phone, falling back to a 24px edge
+               inset on narrower screens. */
+            right: mobile ? 16 : 'max(16px, calc(50% - 566px))',
             marginInline: mobile ? 'auto' : 0,
             bottom: mobile
               ? 'max(26px, calc(env(safe-area-inset-bottom, 0px) + 26px))'

@@ -60,7 +60,11 @@
   </script>
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-    html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+    /* Gutter is reserved at all times: the boot screen locks scrolling with
+       overflow:hidden, so without this the scrollbar appears at handover, the fixed
+       boot overlay narrows, and the centred loader mark jumps left by half a
+       scrollbar width on its final frame. */
+    html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; scrollbar-gutter: stable; }
     :root { --sans: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', system-ui, 'Segoe UI', Helvetica, Arial, sans-serif; --display: var(--sans); --display-w: 650; --display-ls: -0.035em; --label: var(--sans); --label-w: 600; }
     html { background: #000000; }
     body { font-family: var(--sans); color: #EFF4F3; background: #000000; line-height: 1.5; overflow-x: hidden; }
