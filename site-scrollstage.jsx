@@ -41,6 +41,30 @@ const STAGE_SCENES = [
     chip: 'One-tap PDF export', side: 'left', y: 24 },
 ];
 
+/* Desktop-only bridge panels, one per rotation gap. Each fills the stretch where the
+   phone is spinning between two screens and no scene panel is up, so something is
+   always readable on the way down. Each takes the side OPPOSITE the panel it follows
+   and sits in the lower band (scene panels all live high, y 21-28%), so it never
+   shares a position with the panel before or after it. Copy bridges the two screens
+   it sits between. */
+const STAGE_INTERLUDES = [
+  { n: 'i1', title: '2 in 5 American adults live with obesity',
+    body: 'A little over 40% \u2014 a chronic condition with genetic and hormonal drivers, not a matter of discipline.',
+    side: 'left', y: 62 },
+  { n: 'i2', title: 'Daily weighers lose about twice as much',
+    body: 'Stepping on the scale most days is one of the strongest predictors of weight lost \u2014 and kept off.',
+    side: 'right', y: 64 },
+  { n: 'i3', title: 'Five percent already counts',
+    body: 'A 5\u201310% loss measurably improves blood pressure, blood sugar, and cholesterol \u2014 long before you reach a goal weight.',
+    side: 'left', y: 61 },
+  { n: 'i4', title: 'Protein protects what you keep',
+    body: 'Losing weight costs muscle too. Enough protein and a little resistance work keeps more of it on you.',
+    side: 'right', y: 65 },
+  { n: 'i5', title: 'Waist tells you what the scale won\u2019t',
+    body: 'Visceral fat drives the health risk, and it starts moving before body weight does.',
+    side: 'left', y: 63 },
+];
+
 const N_SCENES = STAGE_SCENES.length;
 // Stop the phone the moment the last panel has fully faded — no return to screen 01.
 const P_END = (N_SCENES - 1 + DWELL) / N_SCENES;
@@ -57,6 +81,16 @@ function panelStateFor(p) {
   if (u >= DWELL) return { i, vis: 0 };
   const f = u / DWELL;
   return { i, vis: stageSmooth(0, 0.16, f) * (1 - stageSmooth(0.84, 1, f)) };
+}
+
+/* Bridge visibility: the gap window is the tail of each revolution (u >= DWELL),
+   shorter than the dwell, so it fades on a snappier curve. */
+function interludeStateFor(p) {
+  const cyc = Math.min(p, 0.999999) * N_SCENES;
+  const i = Math.floor(cyc), u = cyc - i;
+  if (u < DWELL) return { i, vis: 0 };
+  const f = (u - DWELL) / (1 - DWELL);
+  return { i, vis: stageSmooth(0, 0.15, f) * (1 - stageSmooth(0.86, 1, f)) };
 }
 
 const stageTitleCss = {
@@ -126,6 +160,28 @@ function GlassPanel({ scene, mobile, accent, cardRef, chipRef }) {
   );
 }
 
+/* Bridge panel — same glass, a step smaller than a scene panel so the scene panels
+   stay the primary read. */
+function InterludePanel({ scene, cardRef }) {
+  const sideStyle = scene.side === 'left'
+    ? { left: 'max(24px, calc(50% - 566px))', top: `${scene.y}%` }
+    : { right: 'max(24px, calc(50% - 566px))', top: `${scene.y}%` };
+  return (
+    <div ref={cardRef} style={{
+      ...glassShell, ...sideStyle, position: 'absolute', width: 286, padding: '18px 20px',
+      /* Faint rose wash so the fact panels read as a different voice from the
+         teal-accented feature panels — warm, not branded. */
+      background: 'linear-gradient(150deg, rgba(255,138,168,0.10) 0%, rgba(255,138,168,0.035) 58%, rgba(255,255,255,0.045) 100%)',
+      border: '1px solid rgba(255,176,196,0.17)',
+      boxShadow: '0 28px 70px -26px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,214,226,0.16)',
+      opacity: 0, pointerEvents: 'none', willChange: 'opacity, transform',
+    }}>
+      <h3 style={{ ...stageTitleCss, fontSize: 21, margin: '0 0 7px' }}>{scene.title}</h3>
+      <p style={{ ...stageBodyCss, fontSize: 14.5 }}>{scene.body}</p>
+    </div>
+  );
+}
+
 function ScrollStage() {
   const mobile = useIsMobile(860);
   const { accentColor, headline, subline, appStoreUrl } = React.useContext(TweaksContext);
@@ -137,6 +193,7 @@ function ScrollStage() {
   const introTitleRef = React.useRef(null);
   const introCtaRef = React.useRef(null);
   const cardRefs = React.useRef([]);
+  const interRefs = React.useRef([]);
   const chipRefs = React.useRef([]);
   const [failed, setFailed] = React.useState(false);
 
@@ -340,6 +397,16 @@ function ScrollStage() {
           chip.style.transform = `translate3d(${(1 - v) * -11 * dir}px, ${(1 - v) * 39}px, 0)`;
         }
       }
+      const gap = interludeStateFor(p);
+      for (let k = 0; k < STAGE_INTERLUDES.length; k++) {
+        const el = interRefs.current[k];
+        if (!el) continue;
+        const v = (k === gap.i ? gap.vis : 0) * (1 - introVis);
+        const dir = STAGE_INTERLUDES[k].side === 'left' ? -1 : 1;
+        el.style.opacity = v;
+        el.style.transform = `translate3d(${(1 - v) * 16 * dir}px, ${(1 - v) * 22}px, 0)`;
+      }
+
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
@@ -389,6 +456,11 @@ function ScrollStage() {
             chipRef={el => { chipRefs.current[i] = el; }} />
         ))}
 
+        {!mobile && STAGE_INTERLUDES.map((s, i) => (
+          <InterludePanel key={s.n} scene={s}
+            cardRef={el => { interRefs.current[i] = el; }} />
+        ))}
+
         <div ref={introRef} style={{
           position: 'absolute', inset: 0, display: 'grid',
           gridTemplateRows: 'auto 1fr auto', justifyItems: 'center',
@@ -399,7 +471,10 @@ function ScrollStage() {
             fontSize: mobile ? 'clamp(22px, 6.2vw, 29px)' : 'clamp(28px, 3.4vw, 43px)',
             lineHeight: 1.14, color: '#EFF4F3',
             margin: mobile ? '0 16px' : '0 20px',
-            maxWidth: mobile ? 'none' : 'min(1000px, 88vw)',
+            maxWidth: 'none',
+            /* Desktop holds it on one line: the vw-based size means the line scales
+               with the window, so it never overflows above the 860px breakpoint. */
+            whiteSpace: mobile ? 'normal' : 'nowrap',
             textShadow: '0 2px 20px rgba(0,0,0,0.5)',
           }}>{(subline || '').split(/(GLP-1)/).map((part, i) => (
             <span key={i} style={{ fontWeight: part === 'GLP-1' ? 600 : 500 }}>{part}</span>

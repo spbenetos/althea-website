@@ -4,7 +4,7 @@
 const VIDEO_TWEAK_DEFAULTS = {
   accentColor: '#2AB5A2',
   headline: 'Track every dose.\nSee every result.',
-  subline: 'The companion app for your GLP-1 medication journey.',
+  subline: 'The #1 companion app for your GLP-1 medication journey.',
   appStoreUrl: 'https://apps.apple.com/gr/app/althea-glp-1-tracker/id6792283773',
   trialDays: 7,
   animChartDraw: true,
