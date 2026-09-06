@@ -101,7 +101,7 @@
   <header class="doc-hero">
     <h1 class="doc-title">Privacy Policy</h1>
     <p class="doc-app">Althea</p>
-    <p class="doc-meta">Last Updated: July 1, 2026</p>
+    <p class="doc-meta">Last Updated: September 6, 2026</p>
   </header>
 
   <!-- Body -->
@@ -183,12 +183,35 @@
 
       <p>A limited summary — your next-dose date and dosing interval — is also stored in an on-device App Group so the Althea Home Screen widget can display your countdown. This never leaves your device.</p>
 
-      <p>We do <strong>not</strong> collect crash analytics, advertising identifiers, device fingerprints, location data, or any form of behavioural tracking.</p>
+      <p>Aside from the setup-screen record described in section 3, we do <strong>not</strong> collect crash analytics, advertising identifiers, device fingerprints, location data, or any form of behavioural tracking.</p>
     </section>
 
     <!-- 3 -->
+    <section id="onboarding-analytics">
+      <h2>3. Onboarding analytics</h2>
+      <p>When you first set up Althea, we record how far you get through the setup screens. This helps us find the places where the app is confusing, so we can fix them.</p>
+
+      <h3>What we record</h3>
+      <p>Which setup screens you were shown, the order you saw them in, and how long you spent on each one, together with a small number of non-medical answers: the reason you gave for using Althea, the colour theme and light/dark mode you picked, whether you chose kilograms or pounds, whether you allowed the Apple Health and notification permissions, and which subscription plan you selected. We also record your app version, device model, iOS version and language.</p>
+
+      <h3>What we never record</h3>
+      <p>None of your health information is included. Your weight, goal weight, BMI, height, age, sex, medication, dose and any medical conditions stay on your device and in your own private iCloud. They are never sent to us.</p>
+
+      <div class="callout"><p>One thing this does reveal: because we record which screens you saw, and people who are not yet taking a GLP-1 medication are not shown the medication screens, this record indirectly indicates whether you told us you were already on a medication. It is a single yes-or-no, carried by the names of screens rather than by any medical detail.</p></div>
+
+      <h3>How it is stored</h3>
+      <p>The record is kept in Althea's own database on Apple's iCloud servers. It is not sent to any other company, and we do not use any third-party analytics service. It is labelled with a random code created on your device — not your name, email, Apple ID, phone number or advertising identifier. Apple also attaches an anonymous identifier of its own to records like this, which we cannot switch off and which does not tell us who you are.</p>
+
+      <h3>Tracking</h3>
+      <p>We do not track you across other apps or websites, and we do not sell or share this information. It is never used for advertising.</p>
+
+      <h3>Deleting it</h3>
+      <p>The random code is deleted when you delete Althea from your device. Deleting the app stops any further records being created.</p>
+    </section>
+
+    <!-- 4 -->
     <section id="healthkit">
-      <h2>3. Apple HealthKit</h2>
+      <h2>4. Apple HealthKit</h2>
       <p>Althea integrates with Apple HealthKit. This integration is entirely optional, and iOS lets you grant or deny each data type individually.</p>
       <ul>
         <li><strong>Write:</strong> With your permission, weight you log in Althea is written to HealthKit (as body mass) so your other health apps stay in sync. This is the only data Althea writes to HealthKit.</li>
@@ -198,16 +221,16 @@
       <p>You can review or revoke any HealthKit permission at any time via <strong>Settings › Privacy &amp; Security › Health › Althea</strong>.</p>
     </section>
 
-    <!-- 4 -->
+    <!-- 5 -->
     <section id="icloud">
-      <h2>4. iCloud &amp; CloudKit</h2>
+      <h2>5. iCloud &amp; CloudKit</h2>
       <p>If you are signed into iCloud on your device, Althea uses Apple's CloudKit framework to sync your data across your personal devices (iPhone, iPad). Your data is stored in your <strong>private iCloud database</strong> — accessible only to you and governed by Apple's iCloud Terms and Privacy Policy. We cannot access your CloudKit data.</p>
       <p>You can disable iCloud sync at any time via <strong>Settings › [Your Name] › iCloud › Althea</strong>. Disabling sync does not delete existing data from your device; it only stops future synchronisation.</p>
     </section>
 
-    <!-- 5 -->
+    <!-- 6 -->
     <section id="third-parties">
-      <h2>5. Third-party services</h2>
+      <h2>6. Third-party services</h2>
       <h3>Open Food Facts</h3>
       <p>When you use the barcode scanner or food search feature, Althea sends the scanned barcode number or search text to <a href="https://world.openfoodfacts.org" target="_blank" rel="noopener">Open Food Facts</a> — a free, open-source food database. The query is made anonymously and no personal information is attached. Please review Open Food Facts' own privacy policy for details on how they handle query data.</p>
 
@@ -215,18 +238,18 @@
       <p>Subscription billing is handled entirely by Apple through the App Store. Althea never receives, stores, or processes your payment card details. Subscription status is verified on-device via StoreKit. Please refer to <a href="https://www.apple.com/legal/privacy/" target="_blank" rel="noopener">Apple's Privacy Policy</a> for how they handle payment data.</p>
 
       <h3>No advertising SDKs</h3>
-      <p>Althea contains no advertising SDKs, tracking pixels, social media embeds, or analytics services that profile your behaviour for commercial purposes.</p>
-    </section>
-
-    <!-- 6 -->
-    <section id="notifications">
-      <h2>6. Notifications</h2>
-      <p>Althea may request permission to send you local push notifications for dose reminders and doctor appointment alerts. These notifications are scheduled entirely on-device using iOS's local notification system. No notification content is transmitted to external servers. You can disable notifications at any time via <strong>Settings › Notifications › Althea</strong>.</p>
+      <p>Althea contains no advertising SDKs, tracking pixels, social media embeds, or analytics services that profile your behaviour for commercial purposes. The setup-screen record described in section 3 is kept in our own iCloud database — no third-party analytics provider is involved.</p>
     </section>
 
     <!-- 7 -->
+    <section id="notifications">
+      <h2>7. Notifications</h2>
+      <p>Althea may request permission to send you local push notifications for dose reminders and doctor appointment alerts. These notifications are scheduled entirely on-device using iOS's local notification system. No notification content is transmitted to external servers. You can disable notifications at any time via <strong>Settings › Notifications › Althea</strong>.</p>
+    </section>
+
+    <!-- 8 -->
     <section id="subscriptions">
-      <h2>7. Subscriptions &amp; payments</h2>
+      <h2>8. Subscriptions &amp; payments</h2>
       <p>Althea offers an auto-renewing subscription managed entirely by Apple through the App Store. We do not collect or store any payment information. Subscription management — including cancellation — is handled through your Apple ID settings:</p>
       <ul>
         <li>On your iPhone: <strong>Settings › [Your Name] › Subscriptions</strong></li>
@@ -235,9 +258,9 @@
       <p>Apple may share limited purchase verification data with us (e.g. whether a valid subscription exists) solely to unlock premium features. This data contains no payment card information.</p>
     </section>
 
-    <!-- 8 -->
+    <!-- 9 -->
     <section id="retention">
-      <h2>8. Data retention &amp; deletion</h2>
+      <h2>9. Data retention &amp; deletion</h2>
       <p>Because your data is stored on your device and in your private iCloud, <strong>you control retention completely</strong>. You can:</p>
       <ul>
         <li><strong>Delete individual entries</strong> within the app by swiping left on an entry in any of its lists (doses, weight, food, side effects, and so on).</li>
@@ -247,28 +270,28 @@
       <p>Any PDF report you generate is created on-device and shared only when, and to whom, you choose. We do not retain copies of your data on any servers, so there is no separate data-deletion request required on our end.</p>
     </section>
 
-    <!-- 9 -->
+    <!-- 10 -->
     <section id="children">
-      <h2>9. Children's privacy</h2>
+      <h2>10. Children's privacy</h2>
       <p>Althea is rated 13+ on the App Store and is not directed at or designed for use by children under the age of 13. We do not knowingly collect personal information from children. GLP-1 medications are prescribed medical treatments intended for adults; if you believe a minor is using the App without appropriate supervision, please contact your healthcare provider.</p>
     </section>
 
-    <!-- 10 -->
+    <!-- 11 -->
     <section id="your-rights">
-      <h2>10. Your rights</h2>
+      <h2>11. Your rights</h2>
       <p>Because we do not collect or process your personal health data on our servers, most traditional data-subject requests (access, portability, rectification, erasure) are fulfilled directly through your device and iCloud account. You always have full control and access to your own data.</p>
       <p>If you are located in the European Economic Area, United Kingdom, or California, you may have additional rights under GDPR, UK GDPR, or CCPA respectively. Given our architecture — no server-side data storage — those rights are inherently satisfied. If you have a specific concern, please contact us at the address below.</p>
     </section>
 
-    <!-- 11 -->
+    <!-- 12 -->
     <section id="changes">
-      <h2>11. Changes to this policy</h2>
+      <h2>12. Changes to this policy</h2>
       <p>We may update this Privacy Policy from time to time. When we do, we will revise the "Last updated" date at the top of this page and, for material changes, we will notify you via an in-app notice. Continued use of Althea after a policy update constitutes your acceptance of the revised terms.</p>
     </section>
 
-    <!-- 12 -->
+    <!-- 13 -->
     <section id="contact">
-      <h2>12. Contact us</h2>
+      <h2>13. Contact us</h2>
       <p>If you have questions or concerns about this Privacy Policy or Althea's data practices, please reach out:</p>
       <div class="contact-card">
         <div>
