@@ -89,7 +89,7 @@ function DarkFAQSection() {
   const [open, setOpen] = React.useState(0);
   const faqs = [
     { q: 'Is my health data private?',
-      a: 'Completely. Your data lives on your device and in your own private iCloud — we run no servers and never see it. No analytics, no tracking, no ads. Read our Privacy Policy for the full details.' },
+      a: 'Your health data — weight, doses, side effects — stays on your device and in your own private iCloud. We never see it, and it is never sold or shared. The one exception: when you first set up the app we record which setup screens you saw, so we can fix the confusing ones. That record holds no health data and no name or email, just a random code. No third-party trackers, no ads. Read our Privacy Policy for the full details.' },
     { q: 'Which medications does Althea support?',
       a: 'All the major GLP-1 medications — Ozempic®, Wegovy®, Mounjaro®, Zepbound®, Rybelsus®, Saxenda®, Trulicity®, Victoza®, Retatrutide and more. 16+ drugs with dosing schedules, titration steps, and pharmacokinetic curves, in injectable and oral forms.' },
     { q: 'Does Althea support compounded GLP-1s?',
