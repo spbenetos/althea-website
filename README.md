@@ -39,10 +39,12 @@ nothing reaches althea.team until it lands on `main`. `CNAME` maps the domain.
 - `screens/d/`, `screens/m/` — the six phone-screen textures at desktop (880x1914) and
   mobile (663x1442) sizes; `site-scrollstage.jsx` picks a set by viewport and `index.html`
   preloads only the matching one via `media` on each `<link>`.
-- `screens/*.jpg` — the 2622px masters the two sets are downscaled from. Nothing on the
-  page loads them; kept only as the source for regenerating `d/` and `m/`.
-- `icon-192.png`, `og-image.jpg`, `leaf-mark-sm.png` — favicon/logo mark, social card, and
-  the leaf in the static hero.
+- `icon-192.png`, `og-image.jpg`, `leaf-mark-sm.png`, `laurel-mark-hd.png` — favicon/logo
+  mark, social card, and the leaf and award wreaths in the static hero.
+- `vendor/phone3d.bundle.js` + `liquid-bg.js` are **not** referenced by `index.html`. They
+  are injected at runtime by `STAGE_DEPS` in `site-scrollstage.jsx` when the tour comes
+  within a viewport (or after 4s idle, skipped on save-data/2G). They must stay on the
+  server: without them the stage falls back to a static phone image forever.
 
 ## Editing notes
 - Each .jsx file has its own scope; shared components are exported via
@@ -51,8 +53,11 @@ nothing reaches althea.team until it lands on `main`. `CNAME` maps the domain.
 - Adding a .jsx file means adding it to `FILES` in `index.html` — nothing else picks it up.
 - Typography is the system stack (SF Pro on Apple platforms). No web fonts are loaded.
 - Animations respect `prefers-reduced-motion`.
-- Every file in the repo is reachable from `index.html`. If you add an asset, wire it up or
-  drop it — dead files are how the tree got confusing before.
+- Every file in the repo is reachable from `index.html` **or from `STAGE_DEPS`**. If you add
+  an asset, wire it up or drop it — dead files are how the tree got confusing before.
+- Hero images are first-paint cost. Ship them at roughly 2-3x their CSS display size, not at
+  master resolution: `laurel-mark-hd.png` was 450x940 for a 33x68 slot and cost 193 KB on
+  every first paint; at 100x209 it costs 3.7 KB and looks identical.
 - **Privacy copy is load-bearing.** The hero chip and the FAQ answer both describe what the
   app collects, and section 3 of the privacy policy is the source of truth. If the policy
   changes, change both. Do not restore "runs with no servers" or "no analytics" — the

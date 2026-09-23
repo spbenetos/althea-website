@@ -131,7 +131,7 @@
     @media (max-width: 879px) { .hero-cta { font-size: 16.5px; } }
     .hero-cta::after { content: ''; position: absolute; top: -70%; bottom: -70%; left: 0; width: 34%; pointer-events: none; background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.08) 42%, rgba(255,255,255,.2) 52%, rgba(255,255,255,.07) 62%, rgba(255,255,255,0) 100%); filter: blur(7px); animation: ctaGlare 5s cubic-bezier(.36,0,.5,1) 1.1s infinite; }
     @keyframes ctaGlare { 0% { transform: translate(-190%, 14%) skewX(-24deg); } 46%, 100% { transform: translate(430%, -14%) skewX(-24deg); } }
-    .hero-cta:hover { opacity: 1; transform: translateY(-2px); box-shadow: 0 24px 44px -18px rgba(14,124,110,.85), inset 0 1px 0 rgba(255,255,255,.22); }
+    .hero-cta:hover { opacity: 1; transform: translateY(-2px); box-shadow: inset 0 1px 0 rgba(255,255,255,.22); }
     @media (prefers-reduced-motion: reduce) { .stage-3d { transition: opacity .3s ease; transform: none; } .hero-in, .hero-leaf, .hero-mark, .hero-cue { animation: none !important; opacity: 1 !important; transform: none !important; } .hero-cta::after { display: none; } }
     @media (max-width: 480px) { #pricing [style*="repeat(2"] { grid-template-columns: 1fr !important; } }
     .features-scroll::-webkit-scrollbar, .showcase-scroll::-webkit-scrollbar { height: 8px; }
@@ -151,22 +151,27 @@
     .hero-h1{font-size:clamp(37px,4.35vw,58px);line-height:1.03;letter-spacing:-.042em;margin:0;max-width:640px;animation-delay:.06s}
     .hero-strike{position:relative;white-space:nowrap;color:rgba(20,31,29,.34)}
     .hero-strike i{position:absolute;left:-.04em;right:-.05em;top:.6em;height:.072em;min-height:3px;background:#D9584A;border-radius:3px;transform:rotate(-1.3deg)}
-    .hero-accent{color:#0E7C6E}
+    .hero-accent{color:#0E7C6E;white-space:nowrap}
+    .hero-leaf{display:inline-block;width:.92em;height:.92em;vertical-align:-.04em;margin-left:.02em;filter:brightness(.7) saturate(1.95) hue-rotate(-3deg)}
     .hero-proof{display:flex;align-items:center;gap:22px;animation-delay:.14s}
     .hero-stat{line-height:1.16}
+    .hero-award{display:flex;align-items:center;gap:3px}
+    .hero-award .hero-stat{text-align:center}
+    .hero-award .hero-stat-top{justify-content:center}
+    .hero-laurel{flex:none;display:block;height:68px;width:32.6px;opacity:.88}
+    .hero-laurel-r{transform:scaleX(-1)}
     .hero-stat-top{display:flex;align-items:baseline;gap:7px}
     .hero-stat-big{font-size:23px;font-weight:700;letter-spacing:-.03em}
     .hero-stars{display:inline-flex;gap:1.5px;vertical-align:middle}
     .hero-stat-label{margin-top:3px;font-size:12.5px;font-weight:600;color:rgba(20,31,29,.66);letter-spacing:.01em;white-space:nowrap}
     .hero-div{width:1px;height:38px;background:rgba(20,31,29,.16);flex-shrink:0}
-    .hero-leaf{display:block;width:62px;height:62px;margin-left:8px;margin-top:-8px;flex-shrink:0;filter:brightness(.7) saturate(1.95) hue-rotate(-3deg)}
     .hero-chips{display:flex;flex-wrap:wrap;gap:8px 18px;animation-delay:.2s}
     .hero-chip{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;font-weight:600;color:rgba(20,31,29,.66)}
     .hero-quote{animation-delay:.26s;max-width:440px}
     .hero-quote p{margin:0;font-family:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif;font-style:italic;font-size:19px;line-height:1.4;text-wrap:pretty}
     .hero-quote-by{margin-top:7px;font-size:12.5px;font-weight:600;letter-spacing:.02em;color:rgba(20,31,29,.66)}
     .hero-cta-wrap{display:flex;flex-direction:column;gap:12px;align-items:flex-start;animation-delay:.32s}
-    .hero-cta{display:flex;align-items:center;justify-content:center;gap:10px;background:#0E7C6E;color:#fff;text-decoration:none;padding:18px 34px;border-radius:999px;font-weight:650;letter-spacing:-.015em;box-shadow:0 18px 34px -16px rgba(14,124,110,.75),inset 0 1px 0 rgba(255,255,255,.22)}
+    .hero-cta{display:flex;align-items:center;justify-content:center;gap:10px;background:#0E7C6E;color:#fff;text-decoration:none;padding:18px 34px;border-radius:999px;font-weight:650;letter-spacing:-.015em;box-shadow:inset 0 1px 0 rgba(255,255,255,.22)}
     .hero-apple{display:none}
     .hero-badge{display:inline-flex;align-items:center;gap:10px;background:#000;color:#fff;border-radius:14px;padding:10px 20px 10px 16px;text-decoration:none;transition:transform .18s ease,box-shadow .18s ease}
     .hero-badge:hover{opacity:1;transform:scale(1.03);box-shadow:0 6px 20px rgba(0,0,0,.14)}
@@ -193,18 +198,19 @@
       .hero-grid{display:flex;flex-direction:column;align-items:center;text-align:center;gap:20px;padding:20px 22px 0;min-height:auto}
       .hero-col{display:contents}
       .hero-h1{order:1;font-size:clamp(30px,8.6vw,42px);max-width:none}
-      .hero-proof{order:2;gap:16px;justify-content:center}
+      .hero-proof{order:2;gap:12px 14px;justify-content:center;flex-wrap:wrap}
       .hero-phone-wrap{order:3;animation-delay:.2s}
-      .hero-chips{order:4;gap:8px 14px;justify-content:center}
-      .hero-quote{order:5}
-      .hero-cta-wrap{order:6;align-items:stretch;width:100%}
+      .hero-chips{display:none}
+      .hero-quote{order:6}
+      .hero-cta-wrap{order:5;align-items:stretch;width:100%}
       .hero-stat{text-align:center}
       .hero-stat-top{justify-content:center}
       .hero-stat-big{font-size:20px}
       .hero-stat-label{font-size:11.5px}
+      .hero-laurel{height:54px;width:25.9px}
+      .hero-award{gap:1px}
       .hero-stars svg{width:11px;height:11px}
       .hero-div{height:34px}
-      .hero-leaf{width:52px;height:52px;margin-left:4px;margin-top:-5px}
       .hero-chip{font-size:12.5px}
       .hero-quote p{font-size:17px}
       .hero-phone-shell{padding:7px;border-radius:41px}
@@ -226,18 +232,16 @@
     <div class="hero-tint" aria-hidden="true"></div>
     <div class="hero-grid">
       <div class="hero-col">
-        <h1 class="hero-h1 hero-in">Replace <span class="hero-strike">guesswork<i aria-hidden="true"></i></span><br>with <span class="hero-accent">real progress</span></h1>
+        <h1 class="hero-h1 hero-in">Replace <span class="hero-strike">guesswork<i aria-hidden="true"></i></span><br>with <span class="hero-accent">real progress<img class="hero-leaf" src="leaf-mark-sm.png" alt="" width="62" height="62" fetchpriority="high" decoding="sync"></span></h1>
         <div class="hero-proof hero-in">
-          <div class="hero-stat">
+          <div class="hero-award"><img class="hero-laurel" src="laurel-mark-hd.png" alt="" width="33" height="68"><div class="hero-stat">
             <div class="hero-stat-top"><span class="hero-stat-big">5.0</span><span class="hero-stars" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.6l3.09 6.26 6.91 1-5 4.87 1.18 6.87L12 17.35 5.82 20.6 7 13.73l-5-4.87 6.91-1z" fill="#E4941B"></path></svg><svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.6l3.09 6.26 6.91 1-5 4.87 1.18 6.87L12 17.35 5.82 20.6 7 13.73l-5-4.87 6.91-1z" fill="#E4941B"></path></svg><svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.6l3.09 6.26 6.91 1-5 4.87 1.18 6.87L12 17.35 5.82 20.6 7 13.73l-5-4.87 6.91-1z" fill="#E4941B"></path></svg><svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.6l3.09 6.26 6.91 1-5 4.87 1.18 6.87L12 17.35 5.82 20.6 7 13.73l-5-4.87 6.91-1z" fill="#E4941B"></path></svg><svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.6l3.09 6.26 6.91 1-5 4.87 1.18 6.87L12 17.35 5.82 20.6 7 13.73l-5-4.87 6.91-1z" fill="#E4941B"></path></svg></span></div>
             <div class="hero-stat-label">App Store rating</div>
-          </div>
-          <span class="hero-div" aria-hidden="true"></span>
-          <div class="hero-stat">
+          </div><img class="hero-laurel hero-laurel-r" src="laurel-mark-hd.png" alt="" width="33" height="68"></div>
+          <div class="hero-award"><img class="hero-laurel" src="laurel-mark-hd.png" alt="" width="33" height="68"><div class="hero-stat">
             <div class="hero-stat-top"><span class="hero-stat-big">10,000+ kg</span></div>
             <div class="hero-stat-label">lost by users</div>
-          </div>
-          <img class="hero-leaf" src="leaf-mark-sm.png" alt="Althea" width="62" height="62" fetchpriority="high" decoding="sync">
+          </div><img class="hero-laurel hero-laurel-r" src="laurel-mark-hd.png" alt="" width="33" height="68"></div>
         </div>
         <div class="hero-chips hero-in"><span class="hero-chip"><svg width="13" height="13" viewBox="0 0 14 14" aria-hidden="true"><path d="M2.4 7.4l2.9 2.9L11.7 4" fill="none" stroke="#0E7C6E" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path></svg>Built with doctors</span><span class="hero-chip"><svg width="13" height="13" viewBox="0 0 14 14" aria-hidden="true"><path d="M2.4 7.4l2.9 2.9L11.7 4" fill="none" stroke="#0E7C6E" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path></svg>Private — your health data stays on your device</span><span class="hero-chip"><svg width="13" height="13" viewBox="0 0 14 14" aria-hidden="true"><path d="M2.4 7.4l2.9 2.9L11.7 4" fill="none" stroke="#0E7C6E" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path></svg>16+ medications</span></div>
         <div class="hero-quote hero-in">
