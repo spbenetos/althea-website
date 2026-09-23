@@ -23,7 +23,11 @@ function DarkNavBar() {
   const [scrolled, setScrolled] = React.useState(false);
   const mobile = useIsMobile(640);
   React.useEffect(() => {
-    const fn = () => setScrolled(window.scrollY > 32);
+    // Stays hidden across the paper hero — the dark bar only belongs over the dark tour.
+    const fn = () => {
+      const hero = document.getElementById('hero');
+      setScrolled(window.scrollY > (hero ? hero.offsetHeight * 0.72 : 32));
+    };
     window.addEventListener('scroll', fn, { passive: true });
     fn();
     return () => window.removeEventListener('scroll', fn);

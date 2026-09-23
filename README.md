@@ -9,31 +9,51 @@ run; the site is live about a minute later. Work on a branch if you like, but
 nothing reaches althea.team until it lands on `main`. `CNAME` maps the domain.
 
 ## Files
-- `index.html` — page shell: SEO meta/OG tags, FAQ structured data, the drifting-cloud background, base CSS, pinned React/Babel loads. Keep the script versions + integrity hashes pinned, and keep `site-core.jsx` loading first.
-- `site-video-app.jsx` — root component. Renders `DarkNavBar`, `ScrollStage`, `DarkFAQSection`, `DarkFooter`, `ScrollHint`.
-- `site-scrollstage.jsx` — the scroll-driven rotating 3D iPhone and its glass copy panels (`STAGE_SCENES`). Needs `vendor/phone3d.bundle.js` (global `Phone3D`) loaded first.
-- `vendor/phone3d.bundle.js` — prebuilt 3D phone renderer from althea-phone-3d.
-- `liquid-bg.js` — teal liquid field behind the phone stage: CSS radial-gradient blobs on transform-only keyframes, so it stays on the compositor. `window.createLiquidLayer({...})`.
+- `index.html` — the whole first screen. The hero is **static HTML**: it paints with no
+  React, no JSX compiler and no CDN round-trip. Below it sits the loader that pulls
+  PRODUCTION React (~139 KB, not the 1.2 MB dev builds) and the app only on intent —
+  a scroll toward the tour, a click on the scroll cue, a deep link, or an idle moment.
+  Also holds SEO meta/OG tags, FAQ structured data and the base CSS. Keep the script
+  versions and their SRI hashes pinned together; a hash that does not match the pinned
+  file silently stops the app from ever booting.
+- Compiled JSX is cached in `localStorage` under `althea.app.<hash>`, where the hash is
+  taken from the **contents** of the .jsx files. Change a .jsx and the key changes with
+  it, so there is nothing to bump by hand.
+- `site-kit.jsx` — shared primitives, lifted verbatim from `site-sections.jsx`:
+  `TweaksContext`, `AnimContext`, `RevealOnScroll`, `useIsMobile`, `AltheaLogo`,
+  `AppStoreBadge`. Loads first; the other files depend on it.
+- `site-video-app.jsx` — root component for everything below the hero.
+- `site-scrollstage.jsx` — the scroll-driven rotating 3D iPhone and its glass copy panels
+  (`STAGE_SCENES`) plus the desktop interlude panels. Needs `vendor/phone3d.bundle.js`
+  (global `Phone3D`). Dispatches `althea:stage-ready`, which adds `html.stage-ready` and
+  fades `.stage-3d` up; a 9s failsafe reveals it anyway.
 - `site-dark.jsx` — nav, FAQ and footer chrome.
-- `site-scrollhint.jsx` — swipe-down nudge shown after ~6s idling at the top.
-- `site-core.jsx` — shared primitives: `AnimContext`, `TweaksContext`, `RevealOnScroll`, `useIsMobile`, `AltheaLogo`, `AppStoreBadge`.
 - `tweaks-panel.jsx` — design-time tweak controls (harmless in production).
-- `ref-links.js` — normalizes App Store links to the real listing and appends the referral parameter when `?ref=` is present.
-- `404.html`, `privacy-policy/`, `terms-of-use/` — extra pages; root `privacy-policy.html` / `terms-of-use.html` are redirect stubs.
-- `boot-loader.webp` — loader mark for the boot screen (plays once, then holds on its last frame while a spinner fades in over the leaf; cache-busted as `?v=2`). `index.html` holds a black
-  overlay (`#boot`, `html.booting`) until `site-scrollstage.jsx` dispatches `althea:stage-ready`,
-  then hands over on the next whole 1512ms loop. A 6s failsafe and an image-error path both
-  drop the overlay, so a missing 3D bundle degrades to the page rather than a black screen.
+- `vendor/phone3d.bundle.js` — prebuilt 3D phone renderer from althea-phone-3d.
+- `liquid-bg.js` — teal liquid field behind the phone stage: CSS radial-gradient blobs on
+  transform-only keyframes, so it stays on the compositor. `window.createLiquidLayer({...})`.
+- `ref-links.js` — normalizes App Store links to the real listing and appends the referral
+  parameter when `?ref=` is present.
+- `404.html`, `privacy-policy/`, `terms-of-use/` — extra pages; root `privacy-policy.html`
+  / `terms-of-use.html` are redirect stubs.
 - `screens/d/`, `screens/m/` — the six phone-screen textures at desktop (880x1914) and
   mobile (663x1442) sizes; `site-scrollstage.jsx` picks a set by viewport and `index.html`
-  preloads only the matching one via `media` on each `<link>`. Sized just above their
-  on-screen size so mip 0 is the level in use.
+  preloads only the matching one via `media` on each `<link>`.
 - `screens/*.jpg` — the 2622px masters the two sets are downscaled from. Nothing on the
-  page loads them; they are kept only as the source for regenerating `d/` and `m/`.
-- `app-icon.png`, `og-image.png` — favicon/logo mark and social card.
+  page loads them; kept only as the source for regenerating `d/` and `m/`.
+- `icon-192.png`, `og-image.jpg`, `leaf-mark-sm.png` — favicon/logo mark, social card, and
+  the leaf in the static hero.
 
 ## Editing notes
-- Each `<script type="text/babel">` file has its own scope; shared components are exported via `Object.assign(window, {...})` at the end of each file. Keep that pattern, and keep `site-core.jsx` ahead of its consumers in `index.html`.
-- Typography is the system stack (SF Pro on Apple platforms); h1/h2 pick it up through the `--display` custom property in `index.html`. No web fonts are loaded.
-- Background clouds and the scroll hint respect `prefers-reduced-motion`.
-- Every file in the repo is reachable from `index.html`. If you add an asset, wire it up or drop it — dead files are how the tree got confusing before.
+- Each .jsx file has its own scope; shared components are exported via
+  `Object.assign(window, {...})` at the end of each file. Keep that pattern, and keep
+  `site-kit.jsx` first in the loader's `FILES` list.
+- Adding a .jsx file means adding it to `FILES` in `index.html` — nothing else picks it up.
+- Typography is the system stack (SF Pro on Apple platforms). No web fonts are loaded.
+- Animations respect `prefers-reduced-motion`.
+- Every file in the repo is reachable from `index.html`. If you add an asset, wire it up or
+  drop it — dead files are how the tree got confusing before.
+- **Privacy copy is load-bearing.** The hero chip and the FAQ answer both describe what the
+  app collects, and section 3 of the privacy policy is the source of truth. If the policy
+  changes, change both. Do not restore "runs with no servers" or "no analytics" — the
+  onboarding record in section 3 contradicts them.

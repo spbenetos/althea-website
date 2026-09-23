@@ -7,6 +7,25 @@
    half-resolution mip level, built with a non-gamma-correct box filter. Sizing the
    texture just above its display size means mip 0 is the level in use — sharper AND
    about 40% fewer bytes than the masters. Originals kept in screens/ as the source. */
+/* The 3D bundle (534KB) and the liquid layer are the heaviest assets on the page
+   and both live below the fold, so the document no longer references them: this
+   injects them when the tour comes within a viewport, leaving the first screen's
+   bandwidth to the hero. */
+const STAGE_DEPS = ['vendor/phone3d.bundle.js', 'liquid-bg.js'];
+let stageDepsPromise = null;
+function loadStageDeps() {
+  if (stageDepsPromise) return stageDepsPromise;
+  stageDepsPromise = Promise.all(STAGE_DEPS.map(src => new Promise((res, rej) => {
+    const el = document.createElement('script');
+    el.src = src;
+    el.async = false;
+    el.onload = res;
+    el.onerror = () => rej(new Error('failed: ' + src));
+    document.head.appendChild(el);
+  })));
+  return stageDepsPromise;
+}
+
 const PHONE_SCREEN_SETS = {
   // 880×1914 — desktop, where the phone renders largest
   d: [1, 2, 3, 4, 5, 6].map(n => `screens/d/screen-${n}.jpg`),
@@ -184,7 +203,7 @@ function InterludePanel({ scene, cardRef }) {
 
 function ScrollStage() {
   const mobile = useIsMobile(860);
-  const { accentColor, headline, subline, appStoreUrl } = React.useContext(TweaksContext);
+  const { accentColor, headline, subline, appStoreUrl, stageGloss } = React.useContext(TweaksContext);
   const wrapRef = React.useRef(null);
   const stickyRef = React.useRef(null);
   const canvasRef = React.useRef(null);
@@ -197,7 +216,36 @@ function ScrollStage() {
   const chipRefs = React.useRef([]);
   const [failed, setFailed] = React.useState(false);
 
+  const [deps, setDeps] = React.useState(() => typeof window.Phone3D !== 'undefined');
+
   React.useEffect(() => {
+    if (deps) return;
+    const el = wrapRef.current;
+    if (!el) return;
+    let fired = false;
+    const go = () => {
+      if (fired) return;
+      fired = true;
+      loadStageDeps().then(() => setDeps(true)).catch(() => {
+        setFailed(true);
+        window.dispatchEvent(new Event('althea:stage-ready'));
+      });
+    };
+    const io = new IntersectionObserver(es => {
+      if (es.some(e => e.isIntersecting)) { io.disconnect(); go(); }
+    }, { rootMargin: '100% 0px 100% 0px' });
+    io.observe(el);
+    /* Someone who never scrolls still gets a warm tour once the hero has settled —
+       unless the browser says the connection is metered or very slow, where the
+       bytes should only ever be spent on demand. */
+    const c = navigator.connection || {};
+    const thrifty = c.saveData || /^(slow-)?2g$/.test(c.effectiveType || '');
+    const idle = thrifty ? 0 : setTimeout(go, 4000);
+    return () => { io.disconnect(); clearTimeout(idle); };
+  }, [deps]);
+
+  React.useEffect(() => {
+    if (!deps) return;
     const bootDone = () => window.dispatchEvent(new Event('althea:stage-ready'));
     if (typeof window.Phone3D === 'undefined') { setFailed(true); bootDone(); return; }
     let phone, raf = 0, disposed = false;
@@ -213,10 +261,8 @@ function ScrollStage() {
     } catch (e) { setFailed(true); bootDone(); return; }
     window.__stage = phone;
 
-    /* Drop clearcoat on the dark-glass materials (desktop): it's the only
-       physical-only feature in use — nothing uses transmission — so killing it
-       removes the clearcoat shader chunks and roughly halves fragment cost.
-       Compensate with tighter roughness + stronger env reflections. */
+    /* Drop clearcoat on the dark-glass materials (desktop) and keep the shell
+       reflections low — see the material pass below. */
     const maxAniso = (() => {
       try { return phone.renderer.capabilities.getMaxAnisotropy(); } catch (e) { return 8; }
     })();
@@ -226,16 +272,32 @@ function ScrollStage() {
         (Array.isArray(o.material) ? o.material : [o.material]).forEach(fn);
       });
     };
-    if (!mobile) {
-      eachMaterial(m => {
-        if (m.clearcoat > 0) {
-          m.clearcoat = 0;
-          m.roughness = Math.max(0.02, m.roughness * 0.8);
-          m.envMapIntensity = (m.envMapIntensity == null ? 1 : m.envMapIntensity) * 1.14;
-          m.needsUpdate = true;
-        }
-      });
-    }
+    /* Tame the shell's gloss. The back panel was catching the whole environment map
+       and flashing bright against the dark page on every revolution, so every shell
+       material — anything that isn't the screen — gets rougher and reflects far
+       less. `stageGloss` (0–1, Tweaks) scales how much reflection is left.
+       Desktop also drops clearcoat: the only physical-only feature in use, so
+       killing it removes those shader chunks and roughly halves fragment cost. */
+    /* A material carrying a colour map IS the screen — nothing else on the model is
+       textured. Test the map slot, not its pixels: with the screenshots now loading
+       lazily the image can still be in flight here, and the gloss pass runs once. */
+    const isScreen = m => !!m.map || !!(m.name && /screen|display/i.test(m.name));
+    const gloss = Math.max(0, Math.min(1, stageGloss == null ? 0.38 : stageGloss));
+    /* Materials are shared across meshes, so this pass must be idempotent: cache the
+       authored values on first touch and always derive from that base, never from the
+       current (already-reduced) value. */
+    eachMaterial(m => {
+      if (!mobile && m.clearcoat > 0) m.clearcoat = 0;
+      if (isScreen(m)) return;
+      if (!m.__glossBase) m.__glossBase = { r: m.roughness, mt: m.metalness, env: m.envMapIntensity == null ? 1 : m.envMapIntensity };
+      if (m.__glossAt === gloss) return;
+      const b = m.__glossBase;
+      if (typeof b.r === 'number') m.roughness = Math.min(0.92, Math.max(b.r, 0.3) * (1 + (1 - gloss) * 0.7));
+      if (typeof b.mt === 'number') m.metalness = Math.min(b.mt, 0.45 + gloss * 0.4);
+      m.envMapIntensity = Math.min(b.env, 1) * gloss;
+      m.__glossAt = gloss;
+      m.needsUpdate = true;
+    });
 
     /* The stage swaps the screenshot texture per scene, so sampling has to be
        re-applied as maps change. Two levers, both nearly free:
@@ -248,6 +310,11 @@ function ScrollStage() {
          filtering is doing the minification work instead. */
     const sharpenMaps = () => eachMaterial(m => {
       const t = m.map;
+      /* Skip textures whose bitmap has not arrived yet — flagging one for upload with
+         no image data makes three.js warn on every frame. Left unstamped so the pass
+         picks it up once decoded. */
+      const img = t && t.image;
+      if (!img || !(img.width || img.videoWidth)) return;
       if (!t || t.__altheaSharp === maxAniso) return;
       t.anisotropy = maxAniso;
       if (t.generateMipmaps !== false) {
@@ -418,7 +485,7 @@ function ScrollStage() {
       try { phone.dispose(); } catch (e) {}
       try { if (liquid) liquid.dispose(); } catch (e) {}
     };
-  }, [mobile, accentColor]);
+  }, [deps, mobile, accentColor, stageGloss]);
 
   const totalVh = N_SCENES * P_END * VH_PER_SCREEN + 40;
 
@@ -467,7 +534,7 @@ function ScrollStage() {
           padding: mobile ? '14px 0 max(80px, calc(env(safe-area-inset-bottom, 0px) + 80px))' : '24px 0 6vh',
           textAlign: 'center',
         }}>
-          <h1 ref={introTitleRef} style={{
+          <h2 ref={introTitleRef} style={{
             fontSize: mobile ? 'clamp(22px, 6.2vw, 29px)' : 'clamp(28px, 3.4vw, 43px)',
             lineHeight: 1.14, color: '#EFF4F3',
             margin: mobile ? '0 16px' : '0 20px',
@@ -478,7 +545,7 @@ function ScrollStage() {
             textShadow: '0 2px 20px rgba(0,0,0,0.5)',
           }}>{(subline || '').split(/(GLP-1)/).map((part, i) => (
             <span key={i} style={{ fontWeight: part === 'GLP-1' ? 600 : 500 }}>{part}</span>
-          ))}</h1>
+          ))}</h2>
           {/* Pinned to the stage viewport like the mobile scene panels, so a short
               browser window can never push it below the fold on load. */}
           <div ref={introCtaRef} style={{

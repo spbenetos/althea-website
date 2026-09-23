@@ -5,32 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Althea — the private GLP-1 companion app for Ozempic®, Wegovy®, Mounjaro®, Zepbound® and 16+ medications. Track doses, weight and side effects — all on your device.">
   <link rel="canonical" href="https://althea.team/">
-  <link rel="icon" type="image/png" href="app-icon.png">
-  <link rel="apple-touch-icon" href="app-icon.png">
+  <link rel="icon" type="image/png" href="icon-192.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://althea.team/">
   <meta property="og:title" content="Althea — GLP-1 Tracker for Ozempic®, Wegovy®, Mounjaro® & more">
   <meta property="og:description" content="Track every dose. See every result. Download Althea on the App Store.">
-  <meta property="og:image" content="https://althea.team/og-image.png">
+  <meta property="og:image" content="https://althea.team/og-image.jpg">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Althea — GLP-1 Companion App">
   <meta name="twitter:description" content="Track every dose. See every result.">
-  <meta name="twitter:image" content="https://althea.team/og-image.png">
-  <meta name="theme-color" content="#000102">
-  <link rel="preload" as="image" href="boot-loader.webp?v=2" fetchpriority="high">
-  <link rel="preload" as="image" href="screens/d/screen-1.jpg" media="(min-width: 861px)" fetchpriority="high">
-  <link rel="preload" as="image" href="screens/m/screen-1.jpg" media="(max-width: 860px)" fetchpriority="high">
-  <link rel="preload" as="script" href="vendor/phone3d.bundle.js">
-  <link rel="preload" as="image" href="screens/d/screen-2.jpg" media="(min-width: 861px)">
-  <link rel="preload" as="image" href="screens/d/screen-3.jpg" media="(min-width: 861px)">
-  <link rel="preload" as="image" href="screens/d/screen-4.jpg" media="(min-width: 861px)">
-  <link rel="preload" as="image" href="screens/d/screen-5.jpg" media="(min-width: 861px)">
-  <link rel="preload" as="image" href="screens/d/screen-6.jpg" media="(min-width: 861px)">
-  <link rel="preload" as="image" href="screens/m/screen-2.jpg" media="(max-width: 860px)">
-  <link rel="preload" as="image" href="screens/m/screen-3.jpg" media="(max-width: 860px)">
-  <link rel="preload" as="image" href="screens/m/screen-4.jpg" media="(max-width: 860px)">
-  <link rel="preload" as="image" href="screens/m/screen-5.jpg" media="(max-width: 860px)">
-  <link rel="preload" as="image" href="screens/m/screen-6.jpg" media="(max-width: 860px)">
+  <meta name="twitter:image" content="https://althea.team/og-image.jpg">
+  <meta name="theme-color" content="#F2EEE6">
+  <link rel="preconnect" href="https://unpkg.com" crossorigin>
+  <link rel="preload" as="image" href="leaf-mark-sm.png" fetchpriority="high">
+  <link rel="preload" as="image" href="screens/d/screen-2.jpg" media="(min-width: 880px)" fetchpriority="high">
+  <link rel="preload" as="image" href="screens/m/screen-2.jpg" media="(max-width: 879px)" fetchpriority="high">
   <title>Althea — GLP-1 Tracker for Ozempic®, Wegovy®, Mounjaro®, Zepbound® & more</title>
   <script type="application/ld+json">
   {
@@ -66,7 +56,7 @@
        scrollbar width on its final frame. */
     html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; scrollbar-gutter: stable; }
     :root { --sans: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', system-ui, 'Segoe UI', Helvetica, Arial, sans-serif; --display: var(--sans); --display-w: 650; --display-ls: -0.035em; --label: var(--sans); --label-w: 600; }
-    html { background: #000000; }
+    html { background: #EFEBE3; }
     body { font-family: var(--sans); color: #EFF4F3; background: #000000; line-height: 1.5; overflow-x: hidden; }
     .bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; background: #000000; }
     .bg i { position: absolute; display: block; filter: blur(150px); will-change: transform; }
@@ -106,6 +96,10 @@
     @keyframes driftE { 0% { transform: translate3d(0,0,0) rotate(0deg) scale(1); } 17% { transform: translate3d(10vw,4vh,0) rotate(5deg) scale(1.09); } 33% { transform: translate3d(4vw,-13vh,0) rotate(-10deg) scale(0.91); } 51% { transform: translate3d(-12vw,-5vh,0) rotate(4deg) scale(1.13); } 70% { transform: translate3d(-16vw,8vh,0) rotate(-6deg) scale(0.97); } 86% { transform: translate3d(-3vw,14vh,0) rotate(9deg) scale(1.02); } 100% { transform: translate3d(0,0,0) rotate(0deg) scale(1); } }
     @keyframes driftF { 0% { transform: translate3d(0,0,0) rotate(0deg) scale(1.02); } 13% { transform: translate3d(-6vw,8vh,0) rotate(-4deg) scale(0.96); } 31% { transform: translate3d(-15vw,-6vh,0) rotate(8deg) scale(1.1); } 49% { transform: translate3d(-5vw,-17vh,0) rotate(-9deg) scale(0.94); } 66% { transform: translate3d(9vw,-7vh,0) rotate(5deg) scale(1.06); } 83% { transform: translate3d(13vw,6vh,0) rotate(-6deg) scale(1); } 100% { transform: translate3d(0,0,0) rotate(0deg) scale(1.02); } }
     @media (prefers-reduced-motion: reduce) { .bg i { animation: none !important; } }
+    /* While the opaque paper hero fills the viewport the blur field behind #root
+       cannot be seen: park it instead of compositing seven blur(150px) layers. */
+    html.bg-idle .bg { visibility: hidden; }
+    html.bg-idle .bg i { animation-play-state: paused; }
     #root { position: relative; z-index: 1; }
     #root { min-height: 100vh; }
     a { color: #3FCFB9; transition: opacity 0.15s ease; }
@@ -118,95 +112,300 @@
     #tour { overflow: visible !important; }
     .stage-vp { height: 100vh; }
     @supports (height: 100dvh) { .stage-vp { height: 100dvh; } }
-    /* Boot frame: black hold with the loader mark, painted immediately so the page
-       never shows an empty viewport or a dead scroll while React, Babel, the 3D
-       bundle and the screenshot textures arrive. No stand-in phone — the real
-       3D iPhone fades up underneath the moment the stage reports ready. */
-    html.booting, html.booting body { overflow: hidden !important; }
-    #boot { position: fixed; inset: 0; z-index: 40; background: #000; display: grid; place-items: center; opacity: 1; transition: opacity .6s ease; pointer-events: none; will-change: opacity; }
-    #boot.done { opacity: 0; }
-    /* own compositor layer: animated-image frame swaps never repaint the page under it */
-    #boot .bl { width: min(62vw, 288px); height: auto; opacity: 0; animation: bootIn .6s ease .1s forwards; transform: translateZ(0); backface-visibility: hidden; }
-    /* held state: the mark stops on its last frame and a small spinner takes over
-       in the middle of the leaf while the rest of the site is still arriving. */
-    #boot .mark { position: relative; display: grid; place-items: center; }
-    #boot .spin { position: absolute; width: 34px; height: 34px; box-sizing: border-box; border-radius: 50%; border: 3px solid rgba(3,26,24,.3); border-top-color: #F4FFFD; opacity: 0; transition: opacity .5s ease; filter: drop-shadow(0 1px 4px rgba(0,0,0,.45)); }
-    #boot.held .spin { opacity: 1; animation: bootSpin .9s linear infinite; }
-    @keyframes bootSpin { to { transform: rotate(360deg); } }
-    @keyframes bootPulse { 0%, 100% { opacity: .3; } 50% { opacity: 1; } }
-    /* the blurred cloud field is invisible behind the opaque boot screen — but it still
-       costs 7 animated 150px-blur layers of GPU every frame, which is what makes the
-       loader stutter on weaker phones. Nothing to draw until the site is revealed. */
-    html.booting .bg { display: none; }
-    @keyframes bootIn { to { opacity: 1; } }
-    /* The 3D stage arrives with the black: fade + settle rather than a hard cut. */
-    .stage-3d { opacity: 1; transition: opacity .9s ease .12s, transform 1.1s cubic-bezier(.16,1,.3,1) .12s; }
-    html.booting .stage-3d { opacity: 0; transform: translateY(14px) scale(.972); }
-    @media (min-width: 861px) { #boot .bl { width: min(28vw, 320px); } #boot .spin { width: 38px; height: 38px; } }
-    @media (prefers-reduced-motion: reduce) { .stage-3d { transition: opacity .3s ease; } html.booting .stage-3d { transform: none; } #boot.held .spin { animation: bootPulse 1.5s ease-in-out infinite; } }
+    /* No boot overlay: the paper hero is the first paint. The 3D tour below fades up
+       when it reports its textures decoded (failsafe after 9s), so it is never seen
+       half-built — but nothing locks the page while it loads. */
+    .stage-3d { opacity: 0; transform: translateY(14px) scale(.972); transition: opacity .9s ease, transform 1.1s cubic-bezier(.16,1,.3,1); }
+    html.stage-ready .stage-3d { opacity: 1; transform: none; }
+    @keyframes heroIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+    .hero-in { animation: heroIn .82s cubic-bezier(.16,1,.3,1) both; }
+    @keyframes leafIn { 0% { opacity: 0; transform: scale(.7) rotate(-14deg); } 62% { opacity: 1; } 100% { opacity: 1; transform: scale(1) rotate(0deg); } }
+    .hero-leaf { animation: leafIn .9s cubic-bezier(.22,1.1,.3,1) both; }
+    @keyframes markIn { from { opacity: 0; transform: translateX(-9px); } to { opacity: 1; transform: none; } }
+    .hero-mark { display: inline-block; animation: markIn .7s cubic-bezier(.16,1,.3,1) .22s both; }
+    @keyframes cueBob { 0%, 100% { transform: translateY(0); opacity: .5; } 50% { transform: translateY(5px); opacity: 1; } }
+    .hero-cue { animation: cueBob 2.1s ease-in-out infinite; }
+    .hero-cta { position: relative; overflow: hidden; isolation: isolate; font-size: 17.5px; transition: transform .18s ease, box-shadow .18s ease; }
+    .hero-cta-label { display: inline-block; transition: transform .18s ease; transform-origin: center; }
+    .hero-cta:hover .hero-cta-label { transform: scale(1.06); }
+    @media (max-width: 879px) { .hero-cta { font-size: 16.5px; } }
+    .hero-cta::after { content: ''; position: absolute; top: -70%; bottom: -70%; left: 0; width: 34%; pointer-events: none; background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.08) 42%, rgba(255,255,255,.2) 52%, rgba(255,255,255,.07) 62%, rgba(255,255,255,0) 100%); filter: blur(7px); animation: ctaGlare 5s cubic-bezier(.36,0,.5,1) 1.1s infinite; }
+    @keyframes ctaGlare { 0% { transform: translate(-190%, 14%) skewX(-24deg); } 46%, 100% { transform: translate(430%, -14%) skewX(-24deg); } }
+    .hero-cta:hover { opacity: 1; transform: translateY(-2px); box-shadow: 0 24px 44px -18px rgba(14,124,110,.85), inset 0 1px 0 rgba(255,255,255,.22); }
+    @media (prefers-reduced-motion: reduce) { .stage-3d { transition: opacity .3s ease; transform: none; } .hero-in, .hero-leaf, .hero-mark, .hero-cue { animation: none !important; opacity: 1 !important; transform: none !important; } .hero-cta::after { display: none; } }
+    @media (max-width: 480px) { #pricing [style*="repeat(2"] { grid-template-columns: 1fr !important; } }
+    .features-scroll::-webkit-scrollbar, .showcase-scroll::-webkit-scrollbar { height: 8px; }
+    .features-scroll::-webkit-scrollbar-track, .showcase-scroll::-webkit-scrollbar-track { background: transparent; }
+    .features-scroll::-webkit-scrollbar-thumb, .showcase-scroll::-webkit-scrollbar-thumb { background: rgba(42,181,162,0.28); border-radius: 20px; border: 2px solid transparent; background-clip: padding-box; }
+    .features-scroll, .showcase-scroll { scrollbar-width: thin; scrollbar-color: rgba(42,181,162,0.35) transparent; }
+    @keyframes impactRise { 0% { transform: translateY(28px); opacity: 0; } 45% { opacity: 1; } 100% { transform: translateY(-40px); opacity: 0; } }
     @keyframes hintSwipe { 0%, 8% { transform: translateY(-20px); opacity: 0; } 22% { transform: translateY(-11px); opacity: 1; } 62% { transform: translateY(22px); opacity: 1; } 84%, 100% { transform: translateY(30px); opacity: 0; } }
     @keyframes hintTrail { 0%, 8% { transform: scaleY(0); opacity: 0; } 22% { transform: scaleY(.18); opacity: .9; } 62% { transform: scaleY(.84); opacity: 1; } 84%, 100% { transform: scaleY(1); opacity: 0; } }
+    /* ── Paper hero ──────────────────────────────────────────────────────────
+       Static markup, CSS-only responsiveness: the first screen paints from HTML
+       alone, so it no longer waits on React + Babel over the network. */
+    #hero{position:relative;z-index:3;overflow:hidden;background:radial-gradient(120% 90% at 78% 6%,#FBF8F2 0%,#F3EFE7 46%,#E9E4D9 100%);min-height:100vh;padding-bottom:176px;color:#141F1D}
+    .hero-tint{position:absolute;inset:0;pointer-events:none;background:radial-gradient(42% 34% at 86% 12%,rgba(42,181,162,.16) 0%,rgba(42,181,162,0) 70%),radial-gradient(38% 30% at 6% 82%,rgba(217,88,74,.07) 0%,rgba(217,88,74,0) 72%)}
+    .hero-grid{position:relative;max-width:1132px;margin:0 auto;padding:26px 24px 0;display:grid;grid-template-columns:minmax(0,1.02fr) minmax(0,.98fr);gap:40px;align-items:center;min-height:calc(100vh - 202px)}
+    .hero-col{display:flex;flex-direction:column;gap:24px}
+    .hero-h1{font-size:clamp(37px,4.35vw,58px);line-height:1.03;letter-spacing:-.042em;margin:0;max-width:640px;animation-delay:.06s}
+    .hero-strike{position:relative;white-space:nowrap;color:rgba(20,31,29,.34)}
+    .hero-strike i{position:absolute;left:-.04em;right:-.05em;top:.6em;height:.072em;min-height:3px;background:#D9584A;border-radius:3px;transform:rotate(-1.3deg)}
+    .hero-accent{color:#0E7C6E}
+    .hero-proof{display:flex;align-items:center;gap:22px;animation-delay:.14s}
+    .hero-stat{line-height:1.16}
+    .hero-stat-top{display:flex;align-items:baseline;gap:7px}
+    .hero-stat-big{font-size:23px;font-weight:700;letter-spacing:-.03em}
+    .hero-stars{display:inline-flex;gap:1.5px;vertical-align:middle}
+    .hero-stat-label{margin-top:3px;font-size:12.5px;font-weight:600;color:rgba(20,31,29,.66);letter-spacing:.01em;white-space:nowrap}
+    .hero-div{width:1px;height:38px;background:rgba(20,31,29,.16);flex-shrink:0}
+    .hero-leaf{display:block;width:62px;height:62px;margin-left:8px;margin-top:-8px;flex-shrink:0;filter:brightness(.7) saturate(1.95) hue-rotate(-3deg)}
+    .hero-chips{display:flex;flex-wrap:wrap;gap:8px 18px;animation-delay:.2s}
+    .hero-chip{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;font-weight:600;color:rgba(20,31,29,.66)}
+    .hero-quote{animation-delay:.26s;max-width:440px}
+    .hero-quote p{margin:0;font-family:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif;font-style:italic;font-size:19px;line-height:1.4;text-wrap:pretty}
+    .hero-quote-by{margin-top:7px;font-size:12.5px;font-weight:600;letter-spacing:.02em;color:rgba(20,31,29,.66)}
+    .hero-cta-wrap{display:flex;flex-direction:column;gap:12px;align-items:flex-start;animation-delay:.32s}
+    .hero-cta{display:flex;align-items:center;justify-content:center;gap:10px;background:#0E7C6E;color:#fff;text-decoration:none;padding:18px 34px;border-radius:999px;font-weight:650;letter-spacing:-.015em;box-shadow:0 18px 34px -16px rgba(14,124,110,.75),inset 0 1px 0 rgba(255,255,255,.22)}
+    .hero-apple{display:none}
+    .hero-badge{display:inline-flex;align-items:center;gap:10px;background:#000;color:#fff;border-radius:14px;padding:10px 20px 10px 16px;text-decoration:none;transition:transform .18s ease,box-shadow .18s ease}
+    .hero-badge:hover{opacity:1;transform:scale(1.03);box-shadow:0 6px 20px rgba(0,0,0,.14)}
+    .hero-badge-txt{display:flex;flex-direction:column;line-height:1}
+    .hero-badge-txt small{font-size:10px;font-weight:400;opacity:.8}
+    .hero-badge-txt strong{font-size:17px;font-weight:650;letter-spacing:-.01em;margin-top:2px}
+    .hero-fine{font-size:12.5px;color:rgba(20,31,29,.66)}
+    .hero-phone-wrap{position:relative;animation-delay:.1s}
+    .hero-phone{position:relative;display:flex;justify-content:center}
+    .hero-phone-glow{position:absolute;inset:-8% -16%;background:radial-gradient(48% 40% at 50% 54%,rgba(42,181,162,.26) 0%,rgba(42,181,162,0) 72%)}
+    .hero-phone-shell{position:relative;padding:8px;border-radius:46px;background:linear-gradient(152deg,#35443F 0%,#0B1312 44%,#1B2523 100%);box-shadow:0 46px 90px -34px rgba(12,26,23,.62),0 10px 26px -12px rgba(12,26,23,.42),inset 0 1px 0 rgba(255,255,255,.24)}
+    .hero-phone-shell img{display:block;height:min(64vh,610px);width:auto;border-radius:38px}
+    .hero-bubble-pos{position:absolute;z-index:2;top:-5%;right:52%;width:min(300px,96%)}
+    .hero-bubble{position:relative;max-width:322px;padding:15px 19px;background:#15241F;border-radius:19px;transform:rotate(-1.6deg);box-shadow:0 20px 38px -18px rgba(12,26,23,.6),0 3px 10px -4px rgba(12,26,23,.4)}
+    .hero-bubble p{margin:0;font-size:15.5px;font-weight:600;line-height:1.38;letter-spacing:-.012em;color:#fff;text-wrap:pretty}
+    .hero-bubble-lead{color:#7FD8C9}
+    .hero-bubble-tail{position:absolute;bottom:-6px;left:30px;width:17px;height:17px;background:#15241F;border-radius:0 0 4px 0;transform:rotate(45deg)}
+    .hero-fade{position:absolute;left:0;right:0;bottom:0;height:130px;pointer-events:none;background:linear-gradient(180deg,rgba(4,10,9,0) 0%,rgba(4,10,9,.5) 46%,rgba(0,0,0,.92) 84%,#000 100%)}
+    #hero-end{position:absolute;left:0;right:0;bottom:0;height:1px}
+    .hero-cue-link{position:absolute;left:50%;bottom:24px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:7px;z-index:4;text-decoration:none;color:rgba(255,255,255,.78);font-size:11.5px;font-weight:650;letter-spacing:.14em;text-transform:uppercase}
+    .hero-cue-link:hover{opacity:1;color:#fff}
+    @media (max-width:879px){
+      #hero{min-height:auto;padding-bottom:148px}
+      .hero-grid{display:flex;flex-direction:column;align-items:center;text-align:center;gap:20px;padding:20px 22px 0;min-height:auto}
+      .hero-col{display:contents}
+      .hero-h1{order:1;font-size:clamp(30px,8.6vw,42px);max-width:none}
+      .hero-proof{order:2;gap:16px;justify-content:center}
+      .hero-phone-wrap{order:3;animation-delay:.2s}
+      .hero-chips{order:4;gap:8px 14px;justify-content:center}
+      .hero-quote{order:5}
+      .hero-cta-wrap{order:6;align-items:stretch;width:100%}
+      .hero-stat{text-align:center}
+      .hero-stat-top{justify-content:center}
+      .hero-stat-big{font-size:20px}
+      .hero-stat-label{font-size:11.5px}
+      .hero-stars svg{width:11px;height:11px}
+      .hero-div{height:34px}
+      .hero-leaf{width:52px;height:52px;margin-left:4px;margin-top:-5px}
+      .hero-chip{font-size:12.5px}
+      .hero-quote p{font-size:17px}
+      .hero-phone-shell{padding:7px;border-radius:41px}
+      .hero-phone-shell img{height:min(50vh,420px);border-radius:34px}
+      .hero-bubble-pos{top:-14px;left:50%;right:auto;transform:translateX(-50%);width:max-content;max-width:calc(100vw - 48px)}
+      .hero-bubble{max-width:300px;padding:13px 17px}
+      .hero-bubble p{font-size:14.5px}
+      .hero-cta{padding:17px 26px}
+      .hero-apple{display:block;margin-top:-2px}
+      .hero-arrow,.hero-badge{display:none}
+      .hero-cue-link{bottom:20px}
+    }
     @media print { nav { display: none !important; } }
   </style>
 </head>
 <body>
   <div class="bg" aria-hidden="true"><i class="b1"></i><i class="b2"></i><i class="b3"></i><i class="b4"></i><i class="b6"></i><i class="b7"></i><i class="vig"></i></div>
+  <section id="hero" data-screen-label="Hero">
+    <div class="hero-tint" aria-hidden="true"></div>
+    <div class="hero-grid">
+      <div class="hero-col">
+        <h1 class="hero-h1 hero-in">Replace <span class="hero-strike">guesswork<i aria-hidden="true"></i></span><br>with <span class="hero-accent">real progress</span></h1>
+        <div class="hero-proof hero-in">
+          <div class="hero-stat">
+            <div class="hero-stat-top"><span class="hero-stat-big">5.0</span><span class="hero-stars" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.6l3.09 6.26 6.91 1-5 4.87 1.18 6.87L12 17.35 5.82 20.6 7 13.73l-5-4.87 6.91-1z" fill="#E4941B"></path></svg><svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.6l3.09 6.26 6.91 1-5 4.87 1.18 6.87L12 17.35 5.82 20.6 7 13.73l-5-4.87 6.91-1z" fill="#E4941B"></path></svg><svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.6l3.09 6.26 6.91 1-5 4.87 1.18 6.87L12 17.35 5.82 20.6 7 13.73l-5-4.87 6.91-1z" fill="#E4941B"></path></svg><svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.6l3.09 6.26 6.91 1-5 4.87 1.18 6.87L12 17.35 5.82 20.6 7 13.73l-5-4.87 6.91-1z" fill="#E4941B"></path></svg><svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.6l3.09 6.26 6.91 1-5 4.87 1.18 6.87L12 17.35 5.82 20.6 7 13.73l-5-4.87 6.91-1z" fill="#E4941B"></path></svg></span></div>
+            <div class="hero-stat-label">App Store rating</div>
+          </div>
+          <span class="hero-div" aria-hidden="true"></span>
+          <div class="hero-stat">
+            <div class="hero-stat-top"><span class="hero-stat-big">10,000+ kg</span></div>
+            <div class="hero-stat-label">lost by users</div>
+          </div>
+          <img class="hero-leaf" src="leaf-mark-sm.png" alt="Althea" width="62" height="62" fetchpriority="high" decoding="sync">
+        </div>
+        <div class="hero-chips hero-in"><span class="hero-chip"><svg width="13" height="13" viewBox="0 0 14 14" aria-hidden="true"><path d="M2.4 7.4l2.9 2.9L11.7 4" fill="none" stroke="#0E7C6E" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path></svg>Built with doctors</span><span class="hero-chip"><svg width="13" height="13" viewBox="0 0 14 14" aria-hidden="true"><path d="M2.4 7.4l2.9 2.9L11.7 4" fill="none" stroke="#0E7C6E" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path></svg>Private — your health data stays on your device</span><span class="hero-chip"><svg width="13" height="13" viewBox="0 0 14 14" aria-hidden="true"><path d="M2.4 7.4l2.9 2.9L11.7 4" fill="none" stroke="#0E7C6E" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path></svg>16+ medications</span></div>
+        <div class="hero-quote hero-in">
+          <p>“Losing weight has never been easier to track!”</p>
+          <div class="hero-quote-by">John M. · App Store review</div>
+        </div>
+        <div class="hero-cta-wrap hero-in">
+          <a class="hero-cta" href="https://apps.apple.com/gr/app/althea-glp-1-tracker/id6792283773"><svg class="hero-apple" width="18" height="21" viewBox="0 0 22 26" fill="#FFFFFF" aria-hidden="true"><path d="M18.07 13.62c-.03-3.1 2.53-4.6 2.65-4.67-1.44-2.11-3.69-2.4-4.49-2.43-1.91-.2-3.73 1.12-4.7 1.12-.97 0-2.47-1.1-4.06-1.07-2.09.03-4.01 1.21-5.09 3.08-2.17 3.77-.56 9.36 1.56 12.42 1.03 1.5 2.27 3.18 3.89 3.12 1.56-.06 2.15-1.01 4.04-1.01 1.89 0 2.42 1.01 4.07.98 1.68-.03 2.74-1.53 3.76-3.03 1.19-1.74 1.68-3.42 1.71-3.51-.04-.02-3.28-1.26-3.34-5z"></path><path d="M14.95 4.27c.86-1.04 1.44-2.48 1.28-3.92-1.24.05-2.74.82-3.63 1.86-.79.92-1.49 2.38-1.3 3.79 1.38.11 2.79-.7 3.65-1.73z"></path></svg><span class="hero-cta-label">Start today for free</span><svg class="hero-arrow" width="17" height="17" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M10.5 5l5 5-5 5" fill="none" stroke="#fff" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path></svg></a>
+          <a class="hero-badge" href="https://apps.apple.com/gr/app/althea-glp-1-tracker/id6792283773"><svg width="22" height="26" viewBox="0 0 22 26" fill="#fff" aria-hidden="true"><path d="M18.07 13.62c-.03-3.1 2.53-4.6 2.65-4.67-1.44-2.11-3.69-2.4-4.49-2.43-1.91-.2-3.73 1.12-4.7 1.12-.97 0-2.47-1.1-4.06-1.07-2.09.03-4.01 1.21-5.09 3.08-2.17 3.77-.56 9.36 1.56 12.42 1.03 1.5 2.27 3.18 3.89 3.12 1.56-.06 2.15-1.01 4.04-1.01 1.89 0 2.42 1.01 4.07.98 1.68-.03 2.74-1.53 3.76-3.03 1.19-1.74 1.68-3.42 1.71-3.51-.04-.02-3.28-1.26-3.34-5z"></path><path d="M14.95 4.27c.86-1.04 1.44-2.48 1.28-3.92-1.24.05-2.74.82-3.63 1.86-.79.92-1.49 2.38-1.3 3.79 1.38.11 2.79-.7 3.65-1.73z"></path></svg><span class="hero-badge-txt"><small>Download on the</small><strong>App Store</strong></span></a>
+          <div class="hero-fine">7-day free trial · cancel any time · no account needed</div>
+        </div>
+      </div>
+      <div class="hero-phone-wrap hero-in">
+        <div class="hero-phone">
+          <div class="hero-phone-glow" aria-hidden="true"></div>
+          <div class="hero-phone-shell"><picture><source media="(max-width: 879px)" srcset="screens/m/screen-2.jpg"><img src="screens/d/screen-2.jpg" alt="Althea progress screen showing 27.1 kg total lost, pace and dose streak" fetchpriority="high" decoding="sync"></picture></div>
+        </div>
+        <div class="hero-bubble-pos">
+          <div class="hero-bubble">
+            <p><span class="hero-bubble-lead">Me at the doctor:</span> “The nausea started… Tuesday? Maybe?”</p>
+            <span class="hero-bubble-tail" aria-hidden="true"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-fade" aria-hidden="true"></div>
+    <div id="hero-end" aria-hidden="true"></div>
+    <a class="hero-cue-link" href="#tour">See it in motion<svg class="hero-cue" width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3.5v11M5 10l5 5 5-5" fill="none" stroke="rgba(255,255,255,0.78)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path></svg></a>
+  </section>
   <div id="root"></div>
-  <div id="boot" aria-hidden="true"><div class="mark"><img class="bl" src="boot-loader.webp?v=2" alt="" fetchpriority="high" decoding="sync"><i class="spin"></i></div></div>
   <script>
-    document.documentElement.classList.add('booting');
     (function () {
-      var b = document.getElementById('boot'), img = b.querySelector('.bl');
-      // The loader is a single 1512ms play (the file's own loop count is 1, so the
-      // mark holds on its last frame instead of replaying). If the site still isn't
-      // ready when the draw-in finishes, a small spinner fades in over the leaf.
-      var PLAY = 1512, MAX_HOLD = 6000, GRACE = 2000;
-      var t = null, hz = null, gone = false, t0 = null, want = false, failed = false, held = false;
-      var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      function drop() {
-        if (gone) return; gone = true; clearTimeout(t); clearTimeout(hz);
-        document.documentElement.classList.remove('booting');
-        b.classList.add('done');
-        setTimeout(function () { b.remove(); }, 600);
+      var reveal = function () { document.documentElement.classList.add('stage-ready'); };
+      window.addEventListener('althea:stage-ready', reveal);
+      setTimeout(reveal, 9000);
+      /* The hero is opaque and a viewport tall, so while it is in front the fixed
+         blur field behind the page cannot be seen — park it instead of compositing
+         seven blur(150px) layers for nothing. */
+      var end = document.getElementById('hero-end');
+      if (end && 'IntersectionObserver' in window) {
+        new IntersectionObserver(function (es) {
+          var e = es[0];
+          document.documentElement.classList.toggle('bg-idle', !e.isIntersecting && e.boundingClientRect.top > 0);
+        }, { threshold: 0 }).observe(end);
       }
-      // draw-in finished and we are still waiting: hand the wait to the spinner
-      function hold() {
-        if (gone || held || failed || want) return;
-        held = true;
-        b.classList.add('held');
-      }
-      // the site is ready to show — hand over once the single play has finished
-      function settle() {
-        want = true;
-        if (gone) return;
-        clearTimeout(t); clearTimeout(hz);
-        if (reduce || failed || held) return drop(); // already parked on the last frame
-        if (t0 === null) { t = setTimeout(drop, GRACE); return; } // art still downloading
-        t = setTimeout(drop, Math.max(0, PLAY - (Date.now() - t0)));
-      }
-      // clock starts when the first frame is actually on screen, not at page load,
-      // so a slow connection never eats part of the play
-      function started() { if (t0 === null) { t0 = Date.now(); if (want) settle(); else hz = setTimeout(hold, PLAY); } }
-      if (img.complete && img.naturalWidth) started();
-      else {
-        img.addEventListener('load', started);
-        img.addEventListener('error', function () { failed = true; if (want) drop(); });
-      }
-      window.addEventListener('althea:stage-ready', settle);
-      setTimeout(settle, MAX_HOLD); // failsafe: 3D stage errored out or is unsupported
     })();
   </script>
   <script src="ref-links.js"></script>
-  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
-  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
-  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
-  <script src="vendor/phone3d.bundle.js"></script>
-  <script src="liquid-bg.js"></script>
-  <script type="text/babel" src="site-core.jsx"></script>
-  <script type="text/babel" src="tweaks-panel.jsx"></script>
-  <script type="text/babel" src="site-dark.jsx"></script>
-  <script type="text/babel" src="site-scrollstage.jsx"></script>
-  <script type="text/babel" src="site-scrollhint.jsx"></script>
-  <script type="text/babel" src="site-video-app.jsx"></script>
+  <script>
+    /* Everything below the hero is React, and React + the JSX compiler are the
+       heaviest thing the page can ask for. The hero is now static HTML, so none of
+       it is needed for first paint: this loader pulls PRODUCTION React (10 + 129 KB
+       instead of 1.2 MB of dev builds) and the app only on intent — a scroll toward
+       the tour, a click on the scroll cue, a deep link, or an idle moment on a
+       connection that can spare it. Compiled output is cached in localStorage under
+       one key, so a returning visitor never downloads the 2.9 MB compiler again.
+       Bump CACHE_KEY whenever a .jsx file changes. */
+    (function () {
+      var FILES = ['site-kit.jsx', 'tweaks-panel.jsx', 'site-dark.jsx', 'site-scrollstage.jsx', 'site-video-app.jsx'];
+      var CACHE_PREFIX = 'althea.app.';
+      var REACT = [
+        ['https://unpkg.com/react@18.3.1/umd/react.production.min.js', 'sha384-DGyLxAyjq0f9SPpVevD6IgztCFlnMF6oW/XQGmfe+IsZ8TqEiDrcHkMLKI6fiB/Z'],
+        ['https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js', 'sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1']
+      ];
+      var BABEL = ['https://unpkg.com/@babel/standalone@7.29.0/babel.min.js', 'sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y'];
+      var started = false, ready = false, pending = null;
+
+      function load(src, sri) {
+        return new Promise(function (res, rej) {
+          var s = document.createElement('script');
+          s.src = src; s.async = false; // in-order execution: react-dom needs react
+          if (sri) { s.integrity = sri; s.crossOrigin = 'anonymous'; }
+          s.onload = res; s.onerror = function () { rej(new Error('load ' + src)); };
+          document.head.appendChild(s);
+        });
+      }
+      function run(code, name) {
+        var s = document.createElement('script');
+        s.textContent = code + '\n//# sourceURL=' + name;
+        document.head.appendChild(s);
+      }
+      /* The cache is keyed by a hash of the sources themselves, so editing any .jsx
+         invalidates it automatically — no build step, nothing to remember to bump.
+         The sources are fetched either way (≈25 KB gzipped, revalidated by ETag);
+         what the cache saves is the 2.9 MB compiler. */
+      function hash(s) {
+        var h1 = 0x811c9dc5, h2 = 5381;
+        for (var i = 0; i < s.length; i++) {
+          var c = s.charCodeAt(i);
+          h1 = (h1 ^ c) * 16777619 >>> 0;
+          h2 = (h2 * 33 ^ c) >>> 0;
+        }
+        return h1.toString(36) + h2.toString(36) + s.length.toString(36);
+      }
+      function cached(key) {
+        try {
+          var o = JSON.parse(localStorage.getItem(key) || 'null');
+          return (o && o.code && o.code.length === FILES.length) ? o.code : null;
+        } catch (e) { return null; }
+      }
+      function store(key, code) {
+        try {
+          for (var i = localStorage.length - 1; i >= 0; i--) {
+            var k = localStorage.key(i);
+            if (k && k.indexOf(CACHE_PREFIX) === 0 && k !== key) localStorage.removeItem(k);
+          }
+          localStorage.setItem(key, JSON.stringify({ code: code }));
+        } catch (e) {}
+      }
+      function settle() {
+        ready = true;
+        document.documentElement.classList.add('app-ready');
+        if (pending) { var t = pending; pending = null; jump(t); }
+      }
+      function jump(sel) {
+        var tries = 0;
+        (function tick() {
+          var el = document.querySelector(sel);
+          if (el) { window.scrollTo({ top: el.getBoundingClientRect().top + window.pageYOffset - 70, behavior: 'smooth' }); return; }
+          if (++tries < 60) requestAnimationFrame(tick);
+        })();
+      }
+      function boot(target) {
+        if (target) { if (ready) { jump(target); return; } pending = target; }
+        if (started) return;
+        started = true;
+        var chain = load(REACT[0][0], REACT[0][1]).then(function () { return load(REACT[1][0], REACT[1][1]); });
+        var sources = Promise.all(FILES.map(function (f) { return fetch(f).then(function (r) { return r.text(); }); }));
+        Promise.all([chain, sources]).then(function (r) {
+          var srcs = r[1];
+          var key = CACHE_PREFIX + hash(srcs.join('\u0000'));
+          var pre = cached(key);
+          if (pre) { pre.forEach(function (c, i) { run(c, FILES[i]); }); return; }
+          return load(BABEL[0], BABEL[1]).then(function () {
+            var out = srcs.map(function (src, i) { return Babel.transform(src, { presets: ['react'], filename: FILES[i] }).code; });
+            out.forEach(function (c, i) { run(c, FILES[i]); });
+            store(key, out);
+          });
+        }).then(settle).catch(function (e) { started = false; console.error('[althea] app boot failed', e); });
+      }
+      window.altheaBoot = boot;
+
+      // 1. Deep link into a section below the hero — needed right away.
+      if (location.hash && location.hash.length > 1) boot(location.hash);
+
+      // 2. Real intent: a third of the way down the hero, or the scroll cue.
+      var onScroll = function () {
+        var hero = document.getElementById('hero');
+        if (window.pageYOffset > (hero ? hero.offsetHeight * 0.3 : 240)) { boot(); window.removeEventListener('scroll', onScroll); }
+      };
+      window.addEventListener('scroll', onScroll, { passive: true });
+      var cue = document.querySelector('.hero-cue-link');
+      if (cue) cue.addEventListener('click', function (ev) { ev.preventDefault(); boot('#tour'); });
+      document.addEventListener('click', function (ev) {
+        var a = ev.target.closest && ev.target.closest('a[href^="#"]');
+        if (!a || a.classList.contains('hero-cue-link')) return;
+        var id = a.getAttribute('href');
+        if (id.length > 1 && !document.querySelector(id)) { ev.preventDefault(); boot(id); }
+      });
+
+      // 3. Free moment on a connection that can spare it — never on 2G or Data Saver.
+      var c = navigator.connection || {};
+      var thin = c.saveData === true || /2g/.test(c.effectiveType || '');
+      if (!thin) {
+        var idle = window.requestIdleCallback || function (fn) { return setTimeout(fn, 2500); };
+        setTimeout(function () { idle(function () { boot(); }, { timeout: 3000 }); }, 2600);
+      }
+    })();
+  </script>
 </body>
 </html>

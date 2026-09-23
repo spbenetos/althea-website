@@ -1,28 +1,23 @@
-// site-core.jsx — shared primitives for the landing page.
-// Context, scroll reveal, viewport helper and brand marks. Everything the
-// dark scroll-tour page (site-dark / site-scrollstage / site-scrollhint /
-// site-video-app) needs from the old section library lives here.
+// site-kit.jsx — the four shared pieces the home page actually uses.
+// Lifted verbatim from site-sections.jsx (1,344 lines) so the page stops shipping
+// — and Babel stops compiling — the ~90% of that file that never renders here.
 
-/* ── Animation context ──────────────────────────────────────────────────── */
+const TweaksContext = React.createContext({
+  accentColor: '#2AB5A2',
+  headline: 'Track every dose.\nSee every result.',
+  subline: 'The companion app for your GLP-1 medication journey.',
+  appStoreUrl: '#',
+  trialDays: 7,
+});
+window.TweaksContext = TweaksContext;
+
 const AnimContext = React.createContext({
   animChartDraw: true,
   animCountUp: true,
   animProgressRail: true,
   animHeroParallax: true,
 });
-window.AnimContext = AnimContext;
 
-/* ── Tweaks context ─────────────────────────────────────────────────────── */
-const TweaksContext = React.createContext({
-  accentColor: '#2AB5A2',
-  headline: 'Track every dose.\nSee every result.',
-  subline: 'The companion app for your GLP-1 medication journey — dose logging, weight tracking, and side effect monitoring in one place.',
-  appStoreUrl: '#',
-  trialDays: 7,
-});
-window.TweaksContext = TweaksContext;
-
-/* ── Scroll reveal ──────────────────────────────────────────────────────── */
 function RevealOnScroll({ children, delay = 0, from = 'bottom' }) {
   const ref = React.useRef(null);
   const [vis, setVis] = React.useState(false);
@@ -51,7 +46,6 @@ function RevealOnScroll({ children, delay = 0, from = 'bottom' }) {
   );
 }
 
-/* ── useIsMobile ────────────────────────────────────────────────────────── */
 function useIsMobile(bp = 768) {
   const [m, setM] = React.useState(window.innerWidth < bp);
   React.useEffect(() => {
@@ -62,14 +56,15 @@ function useIsMobile(bp = 768) {
   return m;
 }
 
-/* ── Brand ──────────────────────────────────────────────────────────────── */
+/* 192px source: the mark never renders above 34px, so the 1024px master was ~800KB
+   of bytes for 34 device-independent pixels. */
 function AltheaLogo({ size = 32 }) {
-  return <img src="app-icon.png" alt="Althea" width={size} height={size}
+  return <img src="icon-192.png" alt="Althea" width={size} height={size}
     style={{ borderRadius: Math.round(size * 0.22), display: 'block', flexShrink: 0 }} />;
 }
 
 function AppStoreBadge({ dark = true, size = 'md', compact = false }) {
-  const { appStoreUrl, accentColor } = React.useContext(TweaksContext);
+  const { appStoreUrl } = React.useContext(TweaksContext);
   const bg = dark ? '#000' : '#fff';
   const fg = dark ? '#fff' : '#000';
   const border = dark ? 'none' : '1.5px solid rgba(0,0,0,0.12)';
@@ -112,4 +107,4 @@ function AppStoreBadge({ dark = true, size = 'md', compact = false }) {
   );
 }
 
-Object.assign(window, { AnimContext, TweaksContext, RevealOnScroll, useIsMobile, AltheaLogo, AppStoreBadge });
+Object.assign(window, { TweaksContext, AnimContext, RevealOnScroll, useIsMobile, AltheaLogo, AppStoreBadge });
