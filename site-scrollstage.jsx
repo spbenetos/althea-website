@@ -292,6 +292,17 @@ function ScrollStage() {
     } catch (e) { setFailed(true); bootDone(); return; }
     window.__stage = phone;
 
+    /* The module starts its OWN requestAnimationFrame loop internally and keeps it
+       running for the life of the page — it has a pause() but no resume(), and its
+       dispose() does not stop it. Paired with the loop below that is two render
+       loops, both drawing at full pixel ratio, both still going when the tour is
+       thousands of pixels offscreen. Shut the internal one down immediately and do
+       the easing here instead: one loop, and one this component can actually stop.
+       SMOOTHING duplicates the value passed above, which now goes unused. */
+    try { phone.pause(); } catch (e) {}
+    const SMOOTHING = 0.12;
+    let cur = 0, snap = true;
+
     /* Drop clearcoat on the dark-glass materials (desktop) and keep the shell
        reflections low — see the material pass below. */
     const maxAniso = (() => {
@@ -458,9 +469,23 @@ function ScrollStage() {
        phones under memory pressure. Nothing repainted the canvas afterwards, so
        scrolling back up landed on a dead black rectangle. Put the poster back, and
        take it down again if the browser restores the context. */
+    let lost = false;
     const glCanvas = phone.renderer && phone.renderer.domElement;
-    const onLost = ev => { ev.preventDefault(); setRevealed(false); };
-    const onRestored = () => { try { phone.renderAt(0); } catch (e) {} setRevealed(true); };
+    /* preventDefault is what makes the loss recoverable at all. Stop the loop while
+       it is gone: every renderAt into a lost context throws, which at 60fps is its
+       own problem. The poster comes back up in the meantime. */
+    const onLost = ev => {
+      ev.preventDefault();
+      lost = true;
+      stop();
+      setRevealed(false);
+    };
+    const onRestored = () => {
+      lost = false;
+      try { phone.renderAt(cur); } catch (e) {}
+      setRevealed(true);
+      start();
+    };
     if (glCanvas) {
       glCanvas.addEventListener('webglcontextlost', onLost);
       glCanvas.addEventListener('webglcontextrestored', onRestored);
@@ -479,7 +504,7 @@ function ScrollStage() {
     let frameN = 0;
     const tick = () => {
       const el = wrapRef.current;
-      if (!el || disposed) return;
+      if (!el || disposed || !running) return;
       if ((++frameN & 15) === 0) sharpenMaps();
       governPr();
       const r = el.getBoundingClientRect();
@@ -490,7 +515,11 @@ function ScrollStage() {
       const span = r.height - vpH;
       const raw = span > 0 ? Math.max(0, Math.min(1, -r.top / span)) : 0;
       const p = raw * P_END;
-      phone.setProgress(p);
+      /* Snap on the first frame after a resume: easing up from wherever the phone
+         was parked would read as an unexplained spin when the tour comes back. */
+      cur = snap ? p : cur + (p - cur) * SMOOTHING;
+      snap = false;
+      try { phone.renderAt(cur); } catch (e) {}
       if (liquid) liquid.setProgress(raw);
 
       const introVis = 1 - stageSmooth(0, INTRO_FADE, p);
@@ -539,16 +568,51 @@ function ScrollStage() {
 
       raf = requestAnimationFrame(tick);
     };
-    raf = requestAnimationFrame(tick);
+
+    /* Run only while the tour is near the viewport. Before this the phone rendered
+       continuously from the moment it loaded — so scrolling back up to the hero left
+       a WebGL renderer and a stack of blurred liquid layers pinning the GPU for a
+       page that showed neither, until the browser gave up and dropped the context:
+       a black rectangle on the way back down, and a page janky throughout. One
+       viewport of margin keeps it warm slightly before it is visible. */
+    let running = false;
+    const start = () => {
+      if (running || disposed || lost) return;
+      running = true; snap = true;
+      raf = requestAnimationFrame(tick);
+    };
+    const stop = () => {
+      if (!running) return;
+      running = false;
+      cancelAnimationFrame(raf);
+    };
+    let near = false;
+    const vis = new IntersectionObserver(es => {
+      near = es.some(e => e.isIntersecting);
+      if (near && !document.hidden) start(); else stop();
+    }, { rootMargin: '100% 0px 100% 0px' });
+    vis.observe(wrapRef.current);
+    const onVisibility = () => {
+      if (document.hidden) stop();
+      else if (near) start();
+    };
+    document.addEventListener('visibilitychange', onVisibility);
 
     return () => {
       disposed = true;
+      stop();
+      vis.disconnect();
+      document.removeEventListener('visibilitychange', onVisibility);
       cancelAnimationFrame(raf);
       window.removeEventListener('resize', fitPixelRatio);
       if (glCanvas) {
         glCanvas.removeEventListener('webglcontextlost', onLost);
         glCanvas.removeEventListener('webglcontextrestored', onRestored);
       }
+      /* pause() before dispose(): the module's dispose does not stop its internal
+         loop, so without this a re-run (breakpoint cross, tweak change) would leave
+         an orphan loop rendering into a disposed renderer for the rest of the page. */
+      try { phone.pause(); } catch (e) {}
       try { phone.dispose(); } catch (e) {}
       try { if (liquid) liquid.dispose(); } catch (e) {}
     };
