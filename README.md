@@ -16,9 +16,12 @@ nothing reaches althea.team until it lands on `main`. `CNAME` maps the domain.
   Also holds SEO meta/OG tags, FAQ structured data and the base CSS. Keep the script
   versions and their SRI hashes pinned together; a hash that does not match the pinned
   file silently stops the app from ever booting.
-- Compiled JSX is cached in `localStorage` under `althea.app.<hash>`, where the hash is
-  taken from the **contents** of the .jsx files. Change a .jsx and the key changes with
-  it, so there is nothing to bump by hand.
+- `app-bundle.js` — the five .jsx files precompiled and concatenated in `FILES` order.
+  When present it is the fast path: **one** request, and the 3 MB in-browser Babel is
+  never downloaded. If it is missing the page falls back to fetching the .jsx and
+  compiling in the browser, caching the output in `localStorage`.
+- `build-bundle.html` — open it on the deployed site and click Compile & download to
+  regenerate `app-bundle.js`. It must stay deployed: it fetches the .jsx over HTTP.
 - `site-kit.jsx` — shared primitives, lifted verbatim from `site-sections.jsx`:
   `TweaksContext`, `AnimContext`, `RevealOnScroll`, `useIsMobile`, `AltheaLogo`,
   `AppStoreBadge`. Loads first; the other files depend on it.
@@ -39,8 +42,10 @@ nothing reaches althea.team until it lands on `main`. `CNAME` maps the domain.
 - `screens/d/`, `screens/m/` — the six phone-screen textures at desktop (880x1914) and
   mobile (663x1442) sizes; `site-scrollstage.jsx` picks a set by viewport and `index.html`
   preloads only the matching one via `media` on each `<link>`.
-- `icon-192.png`, `og-image.jpg`, `leaf-mark-sm.png`, `laurel-mark-hd.png` — favicon/logo
+- `icon-192.png`, `og-image.jpg`, `leaf-icon-hd.png`, `laurel-mark-hd.png` — favicon/logo
   mark, social card, and the leaf and award wreaths in the static hero.
+- `screens/hero-d.jpg` (560x1218) / `screens/hero-m.jpg` (386x840) — the hero phone shot,
+  sized for the hero rather than reusing a full 3D texture.
 - `vendor/phone3d.bundle.js` + `liquid-bg.js` are **not** referenced by `index.html`. They
   are injected at runtime by `STAGE_DEPS` in `site-scrollstage.jsx` when the tour comes
   within a viewport (or after 4s idle, skipped on save-data/2G). They must stay on the
@@ -50,7 +55,10 @@ nothing reaches althea.team until it lands on `main`. `CNAME` maps the domain.
 - Each .jsx file has its own scope; shared components are exported via
   `Object.assign(window, {...})` at the end of each file. Keep that pattern, and keep
   `site-kit.jsx` first in the loader's `FILES` list.
-- Adding a .jsx file means adding it to `FILES` in `index.html` — nothing else picks it up.
+- Adding a .jsx file means adding it to `FILES` in `index.html` AND in `build-bundle.html`.
+- **Editing any .jsx means rebuilding `app-bundle.js`.** The bundle is what actually runs;
+  a .jsx edit alone changes nothing on the live site and silently leaves source and
+  behaviour out of step.
 - Typography is the system stack (SF Pro on Apple platforms). No web fonts are loaded.
 - Animations respect `prefers-reduced-motion`.
 - Every file in the repo is reachable from `index.html` **or from `STAGE_DEPS`**. If you add
@@ -58,7 +66,8 @@ nothing reaches althea.team until it lands on `main`. `CNAME` maps the domain.
 - Hero images are first-paint cost. Ship them at roughly 2-3x their CSS display size, not at
   master resolution: `laurel-mark-hd.png` was 450x940 for a 33x68 slot and cost 193 KB on
   every first paint; at 100x209 it costs 3.7 KB and looks identical.
-- **Privacy copy is load-bearing.** The hero chip and the FAQ answer both describe what the
-  app collects, and section 3 of the privacy policy is the source of truth. If the policy
-  changes, change both. Do not restore "runs with no servers" or "no analytics" — the
+- **Privacy copy is load-bearing.** It now lives in FOUR places: the hero chip and the
+  FAQPage structured data in `index.html`, the FAQ answer in `site-dark.jsx`, and the
+  compiled copy of that answer inside `app-bundle.js`. Section 3 of the privacy policy is
+  the source of truth. Do not restore "runs with no servers" or "no analytics" — the
   onboarding record in section 3 contradicts them.

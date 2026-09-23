@@ -13,8 +13,13 @@
    bandwidth to the hero. */
 const STAGE_DEPS = ['vendor/phone3d.bundle.js', 'liquid-bg.js'];
 let stageDepsPromise = null;
+/* index.html starts these in parallel with React and parks the promise on the
+   window, so the usual path finds them already in flight and this never issues a
+   second request. The local path stays for a direct .jsx load. */
 function loadStageDeps() {
+  if (window.__altheaStageDeps) return window.__altheaStageDeps;
   if (stageDepsPromise) return stageDepsPromise;
+  window.dispatchEvent(new Event('althea:stage-loading'));
   stageDepsPromise = Promise.all(STAGE_DEPS.map(src => new Promise((res, rej) => {
     const el = document.createElement('script');
     el.src = src;
@@ -23,6 +28,7 @@ function loadStageDeps() {
     el.onerror = () => rej(new Error('failed: ' + src));
     document.head.appendChild(el);
   })));
+  window.__altheaStageDeps = stageDepsPromise;
   return stageDepsPromise;
 }
 
@@ -32,6 +38,19 @@ const PHONE_SCREEN_SETS = {
   // 663×1442 — mobile; two-step downscale so the 1px UI rules survive
   m: [1, 2, 3, 4, 5, 6].map(n => `screens/m/screen-${n}.jpg`),
 };
+
+/* Which set to use. Texture weight IS the tour's payload — six desktop shots are
+   ~1.5 MB and the phone module waits on all of them — so a metered or slow link
+   gets the mobile set (~126 KB each) even on a wide screen. index.html picks the
+   same key before first paint for its static poster, so the poster and the phone's
+   first texture are one file and only one of them is ever fetched. */
+function stageScreenKey(mobile) {
+  if (mobile) return 'm';
+  if (window.__altheaScreenKey) return window.__altheaScreenKey;
+  const c = navigator.connection || {};
+  const thin = c.saveData === true || /(^(slow-)?2g$)|(^3g$)/.test(c.effectiveType || '');
+  return thin ? 'm' : 'd';
+}
 
 // Must match the phone module's motion so panels land with the front of the phone.
 const DWELL = 0.72;        // share of each revolution facing the viewer
@@ -215,6 +234,9 @@ function ScrollStage() {
   const interRefs = React.useRef([]);
   const chipRefs = React.useRef([]);
   const [failed, setFailed] = React.useState(false);
+  /* The poster still covers the canvas until a real textured frame is up. */
+  const [revealed, setRevealed] = React.useState(false);
+  const screens = PHONE_SCREEN_SETS[stageScreenKey(mobile)];
 
   const [deps, setDeps] = React.useState(() => typeof window.Phone3D !== 'undefined');
 
@@ -241,7 +263,16 @@ function ScrollStage() {
     const c = navigator.connection || {};
     const thrifty = c.saveData || /^(slow-)?2g$/.test(c.effectiveType || '');
     const idle = thrifty ? 0 : setTimeout(go, 4000);
-    return () => { io.disconnect(); clearTimeout(idle); };
+    /* A script that never errors and never arrives — a stalled connection rather
+       than a failed one — left the page waiting forever. Give up out loud, so the
+       poster becomes the final state instead of a hang. */
+    const guard = setTimeout(() => {
+      if (typeof window.Phone3D === 'undefined') {
+        setFailed(true);
+        window.dispatchEvent(new Event('althea:stage-ready'));
+      }
+    }, 25000);
+    return () => { io.disconnect(); clearTimeout(idle); clearTimeout(guard); };
   }, [deps]);
 
   React.useEffect(() => {
@@ -252,7 +283,7 @@ function ScrollStage() {
     try {
       phone = window.Phone3D.createPhoneScene({
         container: canvasRef.current,
-        screens: PHONE_SCREEN_SETS[mobile ? 'm' : 'd'],
+        screens,
         dwell: DWELL,
         frontSwing: FRONT_SWING,
         smoothing: 0.12,
@@ -389,19 +420,51 @@ function ScrollStage() {
     applyPr();
     window.addEventListener('resize', fitPixelRatio);
 
-    /* Hold the static boot frame until every screenshot texture is decoded and one
-       real frame is on screen, then hand over — so the stage is never seen empty
-       or half-textured, and the page is never scrollable into a dead zone. */
-    const signalReady = bootDone;
-    try {
-      const r = phone.ready();
-      if (r && typeof r.then === 'function') {
-        r.then(() => {
-          phone.renderAt(0);
-          requestAnimationFrame(() => requestAnimationFrame(signalReady));
-        }).catch(signalReady);
-      } else signalReady();
-    } catch (e) { signalReady(); }
+    /* Handover. phone.ready() resolves on ALL SIX screenshots, and on a slow link
+       that held the poster up (or, before the poster existed, left the section
+       black) for tens of seconds. Only screen 01 is on the front face at the start
+       of the tour, so race the full set against the FIRST decoded texture: the
+       phone takes over as soon as it can be shown correctly and 02-06 stream in
+       during the first revolution. The cap keeps one stalled image from pinning it. */
+    const firstTextureUp = () => new Promise(res => {
+      const t0 = performance.now();
+      const poll = () => {
+        if (disposed) return res();
+        let any = false;
+        eachMaterial(m => {
+          const im = m.map && m.map.image;
+          if (im && (im.width || im.videoWidth)) any = true;
+        });
+        if (any || performance.now() - t0 > 7000) return res();
+        setTimeout(poll, 80);
+      };
+      poll();
+    });
+    const handOver = () => {
+      if (disposed) return;
+      try { phone.renderAt(0); } catch (e) {}
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        if (disposed) return;
+        setRevealed(true);
+        bootDone();
+      }));
+    };
+    Promise.race([
+      Promise.resolve().then(() => phone.ready()).catch(() => {}),
+      firstTextureUp(),
+    ]).then(handOver, handOver);
+
+    /* A WebGL context can be dropped while the tour sits offscreen — routine on
+       phones under memory pressure. Nothing repainted the canvas afterwards, so
+       scrolling back up landed on a dead black rectangle. Put the poster back, and
+       take it down again if the browser restores the context. */
+    const glCanvas = phone.renderer && phone.renderer.domElement;
+    const onLost = ev => { ev.preventDefault(); setRevealed(false); };
+    const onRestored = () => { try { phone.renderAt(0); } catch (e) {} setRevealed(true); };
+    if (glCanvas) {
+      glCanvas.addEventListener('webglcontextlost', onLost);
+      glCanvas.addEventListener('webglcontextrestored', onRestored);
+    }
 
     let liquid = null;
     if (typeof window.createLiquidLayer === 'function' && liquidRef.current) {
@@ -482,6 +545,10 @@ function ScrollStage() {
       disposed = true;
       cancelAnimationFrame(raf);
       window.removeEventListener('resize', fitPixelRatio);
+      if (glCanvas) {
+        glCanvas.removeEventListener('webglcontextlost', onLost);
+        glCanvas.removeEventListener('webglcontextrestored', onRestored);
+      }
       try { phone.dispose(); } catch (e) {}
       try { if (liquid) liquid.dispose(); } catch (e) {}
     };
@@ -506,16 +573,14 @@ function ScrollStage() {
           <div ref={canvasRef} style={{ position: 'absolute', inset: 0, transform: mobile ? 'translateY(-6%)' : 'none' }} />
         </div>
 
-        {failed && (
-          <div style={{
-            position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
-            <img src={PHONE_SCREEN_SETS[mobile ? 'm' : 'd'][0]} alt="Althea app" style={{
-              height: mobile ? '54vh' : '76vh', borderRadius: 34, border: '9px solid #0B0E11',
-              boxShadow: '0 40px 70px -24px rgba(0,0,0,0.7)',
-            }} />
-          </div>
-        )}
+        {/* Always present, not only on failure: the same still the static
+            placeholder in index.html paints, held over the canvas until a textured
+            frame is up. So the tour is never a black void — not on a slow link, a
+            lost context, or an outright failure. Same JPEG as the phone's first
+            texture, so it costs no extra bytes. */}
+        <div className="stage-poster" style={{ opacity: revealed && !failed ? 0 : 1 }}>
+          <img src={screens[0]} alt="Althea app" decoding="async" />
+        </div>
 
         {STAGE_SCENES.map((s, i) => (
           <GlassPanel key={s.n} scene={s} mobile={mobile} accent={accentColor}
