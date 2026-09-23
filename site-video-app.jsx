@@ -1,3 +1,7 @@
+// ⚠ COMPILED FILE. index.html runs app-bundle.js in production, not this source.
+//   Editing here alone changes nothing on the live site — rebuild app-bundle.js
+//   (see README-bundle.md). Open the page on localhost or with ?src to bypass the
+//   bundle and run these sources directly.
 // site-video-app.jsx — root for the scroll-video landing page
 // Same section library as index.html; the hero + showcase are replaced by <ScrollStage />.
 

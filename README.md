@@ -20,8 +20,11 @@ nothing reaches althea.team until it lands on `main`. `CNAME` maps the domain.
   When present it is the fast path: **one** request, and the 3 MB in-browser Babel is
   never downloaded. If it is missing the page falls back to fetching the .jsx and
   compiling in the browser, caching the output in `localStorage`.
-- `build-bundle.html` — open it on the deployed site and click Compile & download to
-  regenerate `app-bundle.js`. It must stay deployed: it fetches the .jsx over HTTP.
+- `README-bundle.md` — the bundle's own contract: the file order, the per-file IIFE
+  wrapper, and the rebuild recipe. Read it before touching a .jsx.
+- On `localhost`, `127.0.0.1` or with `?src` in the URL, `index.html` skips the bundle and
+  compiles the sources, so local editing always shows the truth. Testing the real
+  production path therefore needs a non-loopback hostname.
 - `site-kit.jsx` — shared primitives, lifted verbatim from `site-sections.jsx`:
   `TweaksContext`, `AnimContext`, `RevealOnScroll`, `useIsMobile`, `AltheaLogo`,
   `AppStoreBadge`. Loads first; the other files depend on it.
@@ -58,7 +61,9 @@ nothing reaches althea.team until it lands on `main`. `CNAME` maps the domain.
 - Adding a .jsx file means adding it to `FILES` in `index.html` AND in `build-bundle.html`.
 - **Editing any .jsx means rebuilding `app-bundle.js`.** The bundle is what actually runs;
   a .jsx edit alone changes nothing on the live site and silently leaves source and
-  behaviour out of step.
+  behaviour out of step. Follow the recipe in `README-bundle.md` — each part must keep its
+  own IIFE wrapper. If in doubt, delete the bundle: the page falls back to compiling the
+  sources, which is correct but slow.
 - Typography is the system stack (SF Pro on Apple platforms). No web fonts are loaded.
 - Animations respect `prefers-reduced-motion`.
 - Every file in the repo is reachable from `index.html` **or from `STAGE_DEPS`**. If you add

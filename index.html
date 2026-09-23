@@ -284,7 +284,7 @@
   <div id="root">
     <div id="tour-hold">
       <div class="stage-vp" style="position:sticky;top:0;overflow:hidden">
-        <div class="stage-poster"><img id="tour-hold-img" alt="Althea app" decoding="async" fetchpriority="low"></div>
+        <div class="stage-poster"><img id="tour-hold-img" alt="" decoding="async" fetchpriority="low"></div>
         <h2 class="stage-hold-h2">The #1 companion app for your <span style="font-weight:600">GLP-1</span> medication journey.</h2>
       </div>
     </div>
@@ -298,8 +298,14 @@
       var c = navigator.connection || {};
       var thin = c.saveData === true || /(^(slow-)?2g$)|(^3g$)/.test(c.effectiveType || '');
       window.__altheaScreenKey = (thin || window.innerWidth < 880) ? 'm' : 'd';
-      var img = document.getElementById('tour-hold-img');
-      if (img) img.src = 'screens/' + window.__altheaScreenKey + '/screen-1.jpg';
+      /* The src is deliberately NOT set here. This runs during initial parse, and
+         assigning it pulled 261 KB of tour texture into first paint for a poster
+         nobody can see until they scroll. boot() sets it on the first real move
+         toward the tour instead — still well ahead of the 3D it stands in for. */
+      window.__altheaPoster = function () {
+        var img = document.getElementById('tour-hold-img');
+        if (img && !img.getAttribute('src')) img.src = 'screens/' + window.__altheaScreenKey + '/screen-1.jpg';
+      };
     })();
   </script>
   <script>
@@ -347,6 +353,9 @@
          .jsx in the browser, so the no-build round-trip still works. */
       var BUNDLE = 'app-bundle.js';
       var STAGE = ['vendor/phone3d.bundle.js', 'liquid-bg.js'];
+      /* Local editing must never be fooled by a stale bundle: on localhost, or with
+         ?src in the URL, compile the .jsx instead so what you edit is what you see. */
+      var DEV = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) || /[?&]src\b/.test(location.search);
       var started = false, ready = false, pending = null;
 
       function load(src, sri) {
@@ -404,22 +413,28 @@
           if (++tries < 60) requestAnimationFrame(tick);
         })();
       }
-      function boot(target) {
+      /* Two levels of intent, because they cost an order of magnitude apart.
+         The idle warm-up loads React + the app (≈215 KB) so the tour mounts the
+         instant it is wanted — and must NOT touch the 3D bundle, its liquid layer
+         or the poster texture (≈800 KB together), which is what made a mobile
+         first paint ~1 MB with nobody having scrolled. Only a real move toward the
+         tour — a scroll past the hero, the cue, a deep link — buys those.
+         Deliberately called before the `started` guard, so an already-warmed page
+         still upgrades to the heavy assets when the visitor actually heads down. */
+      function stagePrefetch() {
+        if (window.__altheaPoster) window.__altheaPoster();
+        if (window.__altheaStageDeps) return;
+        window.dispatchEvent(new Event('althea:stage-loading'));
+        window.__altheaStageDeps = Promise.all(STAGE.map(function (src) { return load(src); }));
+        window.__altheaStageDeps.catch(function () {});
+      }
+      function boot(target, eager) {
         if (target) { if (ready) { jump(target); return; } pending = target; }
+        if (!eager) stagePrefetch();
         if (started) return;
         started = true;
-        /* The tour's dependencies (three.js bundle + liquid layer, 538 KB) used to
-           be requested only after React had mounted and an observer had fired —
-           three serial round-trip waves on a high-latency link, which is why the
-           phone took so long to appear. Start them here, next to React, and park
-           the promise where ScrollStage will find it so it never re-requests. */
-        if (!window.__altheaStageDeps) {
-          window.dispatchEvent(new Event('althea:stage-loading'));
-          window.__altheaStageDeps = Promise.all(STAGE.map(function (src) { return load(src); }));
-          window.__altheaStageDeps.catch(function () {});
-        }
         var chain = load(REACT[0][0], REACT[0][1]).then(function () { return load(REACT[1][0], REACT[1][1]); });
-        var bundle = fetch(BUNDLE).then(function (r) { return r.ok ? r.text() : null; })
+        var bundle = DEV ? Promise.resolve(null) : fetch(BUNDLE).then(function (r) { return r.ok ? r.text() : null; })
           // A host that serves index.html for unknown paths would hand back markup;
           // only accept something that actually looks like script.
           .then(function (t) { return (t && t.charAt(0) !== '<') ? t : null; })
@@ -467,7 +482,7 @@
       var thin = c.saveData === true || /2g/.test(c.effectiveType || '');
       if (!thin) {
         var idle = window.requestIdleCallback || function (fn) { return setTimeout(fn, 2500); };
-        setTimeout(function () { idle(function () { boot(); }, { timeout: 3000 }); }, 2600);
+        setTimeout(function () { idle(function () { boot(undefined, true); }, { timeout: 3000 }); }, 2600);
       }
     })();
   </script>

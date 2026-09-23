@@ -1,3 +1,7 @@
+// ⚠ COMPILED FILE. index.html runs app-bundle.js in production, not this source.
+//   Editing here alone changes nothing on the live site — rebuild app-bundle.js
+//   (see README-bundle.md). Open the page on localhost or with ?src to bypass the
+//   bundle and run these sources directly.
 // site-dark.jsx — dark-theme chrome for the video/tour landing page.
 // Only this page uses these; index.html keeps its light components untouched.
 

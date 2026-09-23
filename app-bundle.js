@@ -1,7 +1,12 @@
 /* Althea app bundle — precompiled from site-kit.jsx, tweaks-panel.jsx, site-dark.jsx, site-scrollstage.jsx, site-video-app.jsx.
-   Generated; edit the .jsx sources and rebuild. */
+   GENERATED. Edit the .jsx sources, then rebuild this file — see README-bundle.md.
+   Built: 2026-09-23T14:25:35.133Z */
 /* site-kit.jsx */
 (function(){
+// ⚠ COMPILED FILE. index.html runs app-bundle.js in production, not this source.
+//   Editing here alone changes nothing on the live site — rebuild app-bundle.js
+//   (see README-bundle.md). Open the page on localhost or with ?src to bypass the
+//   bundle and run these sources directly.
 // site-kit.jsx — the four shared pieces the home page actually uses.
 // Lifted verbatim from site-sections.jsx (1,344 lines) so the page stops shipping
 // — and Babel stops compiling — the ~90% of that file that never renders here.
@@ -202,6 +207,10 @@ Object.assign(window, {
 })();
 /* tweaks-panel.jsx */
 (function(){
+// ⚠ COMPILED FILE. index.html runs app-bundle.js in production, not this source.
+//   Editing here alone changes nothing on the live site — rebuild app-bundle.js
+//   (see README-bundle.md). Open the page on localhost or with ?src to bypass the
+//   bundle and run these sources directly.
 // @ds-adherence-ignore -- omelette starter scaffold (raw elements/hex/px by design)
 
 /* BEGIN USAGE */
@@ -867,6 +876,10 @@ Object.assign(window, {
 })();
 /* site-dark.jsx */
 (function(){
+// ⚠ COMPILED FILE. index.html runs app-bundle.js in production, not this source.
+//   Editing here alone changes nothing on the live site — rebuild app-bundle.js
+//   (see README-bundle.md). Open the page on localhost or with ?src to bypass the
+//   bundle and run these sources directly.
 // site-dark.jsx — dark-theme chrome for the video/tour landing page.
 // Only this page uses these; index.html keeps its light components untouched.
 
@@ -1178,6 +1191,10 @@ Object.assign(window, {
 })();
 /* site-scrollstage.jsx */
 (function(){
+// ⚠ COMPILED FILE. index.html runs app-bundle.js in production, not this source.
+//   Editing here alone changes nothing on the live site — rebuild app-bundle.js
+//   (see README-bundle.md). Open the page on localhost or with ?src to bypass the
+//   bundle and run these sources directly.
 // site-scrollstage.jsx — scroll-driven rotating iPhone (real 3D, from althea-phone-3d)
 // Requires vendor/phone3d.bundle.js (global Phone3D) loaded before this file.
 
@@ -1585,24 +1602,20 @@ function ScrollStage() {
         window.dispatchEvent(new Event('althea:stage-ready'));
       });
     };
+    /* Backstop only, at a zero margin. index.html starts these on the first real
+       scroll intent, which is both earlier and better judged. The old one-viewport
+       margin was useless as a gate anyway: the tour begins ~176px below the fold,
+       so any margin larger than that intersected at page load — which is why a
+       mobile visitor who had not scrolled was served the whole 3D tour. */
     const io = new IntersectionObserver(es => {
       if (es.some(e => e.isIntersecting)) {
         io.disconnect();
         go();
       }
     }, {
-      rootMargin: '100% 0px 100% 0px'
+      rootMargin: '0px'
     });
     io.observe(el);
-    /* Someone who never scrolls still gets a warm tour once the hero has settled —
-       unless the browser says the connection is metered or very slow, where the
-       bytes should only ever be spent on demand. */
-    const c = navigator.connection || {};
-    const thrifty = c.saveData || /^(slow-)?2g$/.test(c.effectiveType || '');
-    const idle = thrifty ? 0 : setTimeout(go, 4000);
-    /* A script that never errors and never arrives — a stalled connection rather
-       than a failed one — left the page waiting forever. Give up out loud, so the
-       poster becomes the final state instead of a hang. */
     const guard = setTimeout(() => {
       if (typeof window.Phone3D === 'undefined') {
         setFailed(true);
@@ -1611,7 +1624,6 @@ function ScrollStage() {
     }, 25000);
     return () => {
       io.disconnect();
-      clearTimeout(idle);
       clearTimeout(guard);
     };
   }, [deps]);
@@ -2092,6 +2104,10 @@ Object.assign(window, {
 })();
 /* site-video-app.jsx */
 (function(){
+// ⚠ COMPILED FILE. index.html runs app-bundle.js in production, not this source.
+//   Editing here alone changes nothing on the live site — rebuild app-bundle.js
+//   (see README-bundle.md). Open the page on localhost or with ?src to bypass the
+//   bundle and run these sources directly.
 // site-video-app.jsx — root for the scroll-video landing page
 // Same section library as index.html; the hero + showcase are replaced by <ScrollStage />.
 

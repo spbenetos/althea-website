@@ -1,3 +1,7 @@
+// ⚠ COMPILED FILE. index.html runs app-bundle.js in production, not this source.
+//   Editing here alone changes nothing on the live site — rebuild app-bundle.js
+//   (see README-bundle.md). Open the page on localhost or with ?src to bypass the
+//   bundle and run these sources directly.
 // site-kit.jsx — the four shared pieces the home page actually uses.
 // Lifted verbatim from site-sections.jsx (1,344 lines) so the page stops shipping
 // — and Babel stops compiling — the ~90% of that file that never renders here.

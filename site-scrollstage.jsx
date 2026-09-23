@@ -1,3 +1,7 @@
+// ⚠ COMPILED FILE. index.html runs app-bundle.js in production, not this source.
+//   Editing here alone changes nothing on the live site — rebuild app-bundle.js
+//   (see README-bundle.md). Open the page on localhost or with ?src to bypass the
+//   bundle and run these sources directly.
 // site-scrollstage.jsx — scroll-driven rotating iPhone (real 3D, from althea-phone-3d)
 // Requires vendor/phone3d.bundle.js (global Phone3D) loaded before this file.
 
@@ -253,26 +257,22 @@ function ScrollStage() {
         window.dispatchEvent(new Event('althea:stage-ready'));
       });
     };
+    /* Backstop only, at a zero margin. index.html starts these on the first real
+       scroll intent, which is both earlier and better judged. The old one-viewport
+       margin was useless as a gate anyway: the tour begins ~176px below the fold,
+       so any margin larger than that intersected at page load — which is why a
+       mobile visitor who had not scrolled was served the whole 3D tour. */
     const io = new IntersectionObserver(es => {
       if (es.some(e => e.isIntersecting)) { io.disconnect(); go(); }
-    }, { rootMargin: '100% 0px 100% 0px' });
+    }, { rootMargin: '0px' });
     io.observe(el);
-    /* Someone who never scrolls still gets a warm tour once the hero has settled —
-       unless the browser says the connection is metered or very slow, where the
-       bytes should only ever be spent on demand. */
-    const c = navigator.connection || {};
-    const thrifty = c.saveData || /^(slow-)?2g$/.test(c.effectiveType || '');
-    const idle = thrifty ? 0 : setTimeout(go, 4000);
-    /* A script that never errors and never arrives — a stalled connection rather
-       than a failed one — left the page waiting forever. Give up out loud, so the
-       poster becomes the final state instead of a hang. */
     const guard = setTimeout(() => {
       if (typeof window.Phone3D === 'undefined') {
         setFailed(true);
         window.dispatchEvent(new Event('althea:stage-ready'));
       }
     }, 25000);
-    return () => { io.disconnect(); clearTimeout(idle); clearTimeout(guard); };
+    return () => { io.disconnect(); clearTimeout(guard); };
   }, [deps]);
 
   React.useEffect(() => {
