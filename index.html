@@ -59,7 +59,7 @@
     html { background: #EFEBE3; }
     body { font-family: var(--sans); color: #EFF4F3; background: #000000; line-height: 1.5; overflow-x: hidden; }
     .bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; background: #000000; }
-    .bg i { position: absolute; display: block; filter: blur(150px); will-change: transform; }
+    .bg i { position: absolute; display: block; opacity: .88; }
     /* irregular multi-lobed clouds, each on its own long, asymmetric path so none ever sync up */
     .bg .b1 { width: 88vw; height: 80vw; left: -20vw; top: -30vw;
       background: radial-gradient(ellipse 52% 38% at 28% 32%, rgba(10,42,38,0.62) 0%, transparent 68%),
@@ -96,8 +96,8 @@
     @keyframes driftE { 0% { transform: translate3d(0,0,0) rotate(0deg) scale(1); } 17% { transform: translate3d(10vw,4vh,0) rotate(5deg) scale(1.09); } 33% { transform: translate3d(4vw,-13vh,0) rotate(-10deg) scale(0.91); } 51% { transform: translate3d(-12vw,-5vh,0) rotate(4deg) scale(1.13); } 70% { transform: translate3d(-16vw,8vh,0) rotate(-6deg) scale(0.97); } 86% { transform: translate3d(-3vw,14vh,0) rotate(9deg) scale(1.02); } 100% { transform: translate3d(0,0,0) rotate(0deg) scale(1); } }
     @keyframes driftF { 0% { transform: translate3d(0,0,0) rotate(0deg) scale(1.02); } 13% { transform: translate3d(-6vw,8vh,0) rotate(-4deg) scale(0.96); } 31% { transform: translate3d(-15vw,-6vh,0) rotate(8deg) scale(1.1); } 49% { transform: translate3d(-5vw,-17vh,0) rotate(-9deg) scale(0.94); } 66% { transform: translate3d(9vw,-7vh,0) rotate(5deg) scale(1.06); } 83% { transform: translate3d(13vw,6vh,0) rotate(-6deg) scale(1); } 100% { transform: translate3d(0,0,0) rotate(0deg) scale(1.02); } }
     @media (prefers-reduced-motion: reduce) { .bg i { animation: none !important; } }
-    /* While the opaque paper hero fills the viewport the blur field behind #root
-       cannot be seen: park it instead of compositing seven blur(150px) layers. */
+    /* While the opaque paper hero fills the viewport the field behind #root cannot
+       be seen, so park it rather than animate it for nothing. */
     html.bg-idle .bg { visibility: hidden; }
     html.bg-idle .bg i { animation-play-state: paused; }
     #root { position: relative; z-index: 1; }
@@ -317,14 +317,20 @@
          slow link, revealing an empty canvas. */
       window.addEventListener('althea:stage-loading', function () { setTimeout(reveal, 14000); });
       /* The hero is opaque and a viewport tall, so while it is in front the fixed
-         blur field behind the page cannot be seen — park it instead of compositing
-         seven blur(150px) layers for nothing. */
-      var end = document.getElementById('hero-end');
-      if (end && 'IntersectionObserver' in window) {
-        new IntersectionObserver(function (es) {
-          var e = es[0];
-          document.documentElement.classList.toggle('bg-idle', !e.isIntersecting && e.boundingClientRect.top > 0);
-        }, { threshold: 0 }).observe(end);
+         field behind the page cannot be seen — park it rather than animate it. */
+      var hero = document.getElementById('hero');
+      if (hero) {
+        var parked = null;
+        var syncBg = function () {
+          /* Parked exactly while the opaque hero still covers the viewport. */
+          var idle = window.scrollY < hero.offsetHeight - 1;
+          if (idle === parked) return;
+          parked = idle;
+          document.documentElement.classList.toggle('bg-idle', idle);
+        };
+        window.addEventListener('scroll', syncBg, { passive: true });
+        window.addEventListener('resize', syncBg);
+        syncBg();
       }
     })();
   </script>

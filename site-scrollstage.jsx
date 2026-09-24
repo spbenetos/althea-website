@@ -240,6 +240,9 @@ function ScrollStage() {
   const [failed, setFailed] = React.useState(false);
   /* The poster still covers the canvas until a real textured frame is up. */
   const [revealed, setRevealed] = React.useState(false);
+  /* Bumping this re-runs the stage effect from scratch — the recovery path for a
+     context the browser never restores on its own. */
+  const [gen, setGen] = React.useState(0);
   const screens = PHONE_SCREEN_SETS[stageScreenKey(mobile)];
 
   const [deps, setDeps] = React.useState(() => typeof window.Phone3D !== 'undefined');
@@ -252,7 +255,7 @@ function ScrollStage() {
     const go = () => {
       if (fired) return;
       fired = true;
-      loadStageDeps().then(() => setDeps(true)).catch(() => {
+      loadStageDeps().then(() => { setFailed(false); setDeps(true); }).catch(() => {
         setFailed(true);
         window.dispatchEvent(new Event('althea:stage-ready'));
       });
@@ -290,6 +293,8 @@ function ScrollStage() {
         fill: mobile ? 0.56 : 0.68,
       });
     } catch (e) { setFailed(true); bootDone(); return; }
+    /* The scene exists and is about to render: whatever failed earlier is moot. */
+    setFailed(false);
     window.__stage = phone;
 
     /* The module starts its OWN requestAnimationFrame loop internally and keeps it
@@ -442,10 +447,12 @@ function ScrollStage() {
       const poll = () => {
         if (disposed) return res();
         let any = false;
-        eachMaterial(m => {
-          const im = m.map && m.map.image;
-          if (im && (im.width || im.videoWidth)) any = true;
-        });
+        try {
+          eachMaterial(m => {
+            const im = m.map && m.map.image;
+            if (im && (im.width || im.videoWidth)) any = true;
+          });
+        } catch (e) { any = true; }
         if (any || performance.now() - t0 > 7000) return res();
         setTimeout(poll, 80);
       };
@@ -464,6 +471,9 @@ function ScrollStage() {
       Promise.resolve().then(() => phone.ready()).catch(() => {}),
       firstTextureUp(),
     ]).then(handOver, handOver);
+    /* Last resort: if the handover has not happened by now and the context is
+       alive, reveal regardless. */
+    const revealFailsafe = setTimeout(() => { if (!disposed && !lost) handOver(); }, 9000);
 
     /* A WebGL context can be dropped while the tour sits offscreen — routine on
        phones under memory pressure. Nothing repainted the canvas afterwards, so
@@ -474,14 +484,23 @@ function ScrollStage() {
     /* preventDefault is what makes the loss recoverable at all. Stop the loop while
        it is gone: every renderAt into a lost context throws, which at 60fps is its
        own problem. The poster comes back up in the meantime. */
+    let relost = 0;
     const onLost = ev => {
       ev.preventDefault();
       lost = true;
       stop();
       setRevealed(false);
+      /* webglcontextrestored is not guaranteed to fire — frequently it never does.
+         Waiting on it left `lost` true for the life of the page and the tour dead
+         behind the poster. If the browser has not come back on its own, rebuild the
+         whole scene: the cleanup disposes the old renderer and the re-run gets a
+         fresh context. */
+      clearTimeout(relost);
+      relost = setTimeout(() => { if (lost && !disposed) setGen(g => g + 1); }, 2500);
     };
     const onRestored = () => {
       lost = false;
+      clearTimeout(relost);
       try { phone.renderAt(cur); } catch (e) {}
       setRevealed(true);
       start();
@@ -502,7 +521,7 @@ function ScrollStage() {
     }
 
     let frameN = 0;
-    const tick = () => {
+    const frame = () => {
       const el = wrapRef.current;
       if (!el || disposed || !running) return;
       if ((++frameN & 15) === 0) sharpenMaps();
@@ -566,18 +585,38 @@ function ScrollStage() {
         el.style.transform = `translate3d(${(1 - v) * 16 * dir}px, ${(1 - v) * 22}px, 0)`;
       }
 
+    };
+    const tick = () => {
+      if (disposed || !running) return;
       raf = requestAnimationFrame(tick);
+      try { frame(); } catch (e) {}
     };
 
-    /* Run only while the tour is near the viewport. Before this the phone rendered
-       continuously from the moment it loaded — so scrolling back up to the hero left
-       a WebGL renderer and a stack of blurred liquid layers pinning the GPU for a
-       page that showed neither, until the browser gave up and dropped the context:
-       a black rectangle on the way back down, and a page janky throughout. One
-       viewport of margin keeps it warm slightly before it is visible. */
+    /* Run only while the tour is on screen — or about to be.
+    
+       An IntersectionObserver cannot express that here, which is why the previous
+       attempt at this gate silently never fired. The observed wrapper is seven
+       viewports tall and its top sits EXACTLY at the fold, so the gap between it and
+       the viewport is zero: any positive rootMargin — the one viewport of warm-up
+       that was wanted — makes the box intersect at scrollY 0 and the loop never
+       idles. Zero margin would idle correctly but drops the warm-up. Proximity is
+       simply the wrong signal when the thing is already touching the fold.
+    
+       Direction is the right signal. Strict overlap decides when to STOP; scrolling
+       downward anywhere within half a viewport of the tour decides when to START. So
+       sitting on the hero renders nothing at all, a scroll toward the tour warms the
+       phone before it is visible, and scrolling back up stops it — which is the case
+       that was pinning the GPU until the browser dropped the context. */
+    const WARM = 0.6;
     let running = false;
     const start = () => {
-      if (running || disposed || lost) return;
+      if (running || disposed) return;
+      if (lost) {
+        let alive = false;
+        try { const gl = phone.renderer.getContext(); alive = gl && !gl.isContextLost(); } catch (e) {}
+        if (!alive) return;
+        lost = false;
+      }
       running = true; snap = true;
       raf = requestAnimationFrame(tick);
     };
@@ -586,12 +625,30 @@ function ScrollStage() {
       running = false;
       cancelAnimationFrame(raf);
     };
-    let near = false;
-    const vis = new IntersectionObserver(es => {
-      near = es.some(e => e.isIntersecting);
+    let near = false, lastY = window.scrollY, settle = 0;
+    /* strict = the stage is actually on screen. Also the resting test: once scrolling
+       stops, a page parked just above the tour must not keep rendering, so the settle
+       timer re-evaluates without the directional allowance. */
+    const evaluate = down => {
+      const el = wrapRef.current;
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      const vh = window.innerHeight;
+      const strict = r.top < vh && r.bottom > 0;
+      near = strict || (down && r.top < vh * (1 + WARM) && r.bottom > 0);
       if (near && !document.hidden) start(); else stop();
-    }, { rootMargin: '100% 0px 100% 0px' });
-    vis.observe(wrapRef.current);
+    };
+    const onScroll = () => {
+      const y = window.scrollY;
+      const down = y > lastY;
+      lastY = y;
+      evaluate(down);
+      clearTimeout(settle);
+      settle = setTimeout(() => evaluate(false), 400);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    evaluate(false);
     const onVisibility = () => {
       if (document.hidden) stop();
       else if (near) start();
@@ -601,7 +658,11 @@ function ScrollStage() {
     return () => {
       disposed = true;
       stop();
-      vis.disconnect();
+      clearTimeout(settle);
+      clearTimeout(relost);
+      clearTimeout(revealFailsafe);
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
       document.removeEventListener('visibilitychange', onVisibility);
       cancelAnimationFrame(raf);
       window.removeEventListener('resize', fitPixelRatio);
@@ -616,7 +677,7 @@ function ScrollStage() {
       try { phone.dispose(); } catch (e) {}
       try { if (liquid) liquid.dispose(); } catch (e) {}
     };
-  }, [deps, mobile, accentColor, stageGloss]);
+  }, [deps, mobile, accentColor, stageGloss, gen]);
 
   const totalVh = N_SCENES * P_END * VH_PER_SCREEN + 40;
 
@@ -642,7 +703,7 @@ function ScrollStage() {
             frame is up. So the tour is never a black void — not on a slow link, a
             lost context, or an outright failure. Same JPEG as the phone's first
             texture, so it costs no extra bytes. */}
-        <div className="stage-poster" style={{ opacity: revealed && !failed ? 0 : 1 }}>
+        <div className="stage-poster" style={{ opacity: revealed ? 0 : 1 }}>
           <img src={screens[0]} alt="Althea app" decoding="async" />
         </div>
 
