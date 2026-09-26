@@ -3,10 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Althea — the private GLP-1 companion app for Ozempic®, Wegovy®, Mounjaro®, Zepbound® and 16+ medications. Track doses, weight and side effects — all on your device.">
+  <meta name="description" content="The private GLP-1 companion app for Ozempic®, Wegovy®, Mounjaro®, Zepbound® and 16+ medications. Track doses, weight and side effects — all on your device.">
   <link rel="canonical" href="https://althea.team/">
-  <link rel="icon" type="image/png" href="icon-192.png">
-  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://althea.team/">
   <meta property="og:title" content="Althea — GLP-1 Tracker for Ozempic®, Wegovy®, Mounjaro® & more">
@@ -18,6 +20,9 @@
   <meta name="twitter:image" content="https://althea.team/og-image.jpg">
   <meta name="theme-color" content="#F2EEE6">
   <link rel="preconnect" href="https://unpkg.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@800&display=swap">
   <link rel="preload" as="image" href="leaf-icon-hd.png" fetchpriority="high">
   <link rel="preload" as="image" href="screens/hero-d.jpg" media="(min-width: 880px)" fetchpriority="high">
   <link rel="preload" as="image" href="screens/hero-m.jpg" media="(max-width: 879px)" fetchpriority="high">
@@ -125,7 +130,9 @@
     .stage-poster img { display: block; height: 76vh; width: auto; border-radius: 34px; border: 9px solid #0B0E11; background: #0B0E11; box-shadow: 0 40px 70px -24px rgba(0,0,0,.7); }
     .stage-hold-h2 { position: absolute; left: 0; right: 0; top: 24px; margin: 0 20px; text-align: center; font-size: clamp(28px, 3.4vw, 43px); line-height: 1.14; font-weight: 500; color: #EFF4F3; white-space: nowrap; text-shadow: 0 2px 20px rgba(0,0,0,.5); }
     @media (max-width: 879px) { .stage-poster img { height: 54vh; } .stage-hold-h2 { top: 14px; white-space: normal; font-size: clamp(22px, 6.2vw, 29px); } }
-    .stage-3d { opacity: 0; transform: translateY(14px) scale(.972); transition: opacity .9s ease, transform 1.1s cubic-bezier(.16,1,.3,1); }
+    /* Sequenced handoff: the poster fades out first (.8s), then the 3D fades in,
+       so the two phones are never on screen together mismatched in size/tilt. */
+    .stage-3d { opacity: 0; transform: translateY(14px) scale(.972); transition: opacity .75s ease .82s, transform 1s cubic-bezier(.16,1,.3,1) .82s; }
     html.stage-ready .stage-3d { opacity: 1; transform: none; }
     @keyframes heroIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
     .hero-in { animation: heroIn .82s cubic-bezier(.16,1,.3,1) both; }
@@ -191,8 +198,9 @@
     .hero-fine{font-size:12.5px;color:rgba(20,31,29,.66)}
     .hero-phone-wrap{position:relative;animation-delay:.1s}
     .hero-phone{position:relative;display:flex;justify-content:center}
+    .hero-rank{position:absolute;right:100%;top:50%;transform:translateY(-50%);margin-right:clamp(9px,1.5vw,20px);display:flex;flex-direction:column;align-items:flex-end;text-align:right;font-family:'Nunito',var(--sans);font-weight:800;line-height:.96;letter-spacing:-.03em;font-size:clamp(17px,2.05vw,27px);background:linear-gradient(168deg,#2BB8A4 0%,#189D8A 46%,#0E7C6E 100%);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
     .hero-phone-glow{position:absolute;inset:-8% -16%;background:radial-gradient(48% 40% at 50% 54%,rgba(42,181,162,.26) 0%,rgba(42,181,162,0) 72%)}
-    .hero-phone-shell{position:relative;padding:8px;border-radius:46px;background:linear-gradient(152deg,#35443F 0%,#0B1312 44%,#1B2523 100%);box-shadow:0 46px 90px -34px rgba(12,26,23,.62),0 10px 26px -12px rgba(12,26,23,.42),inset 0 1px 0 rgba(255,255,255,.24)}
+    .hero-phone-shell{position:relative;padding:8px;border-radius:46px;background:linear-gradient(152deg,#35443F 0%,#0B1312 44%,#1B2523 100%);box-shadow:26px 46px 90px -34px rgba(12,26,23,.62),8px 10px 26px -12px rgba(12,26,23,.42),inset 0 1px 0 rgba(255,255,255,.24)}
     .hero-phone-shell img{display:block;height:min(64vh,610px);width:auto;border-radius:38px}
     .hero-bubble-pos{position:absolute;z-index:2;top:-5%;left:-24px;right:auto;width:min(300px,96%)}
     .hero-bubble{position:relative;max-width:322px;padding:15px 19px;background:#15241F;border-radius:19px;transform:rotate(-1.6deg);box-shadow:0 20px 38px -18px rgba(12,26,23,.6),0 3px 10px -4px rgba(12,26,23,.4)}
@@ -223,8 +231,9 @@
       .hero-div{height:34px}
       .hero-chip{font-size:12.5px}
       .hero-quote p{font-size:17px}
-      .hero-phone-shell{padding:7px;border-radius:41px}
+      .hero-phone-shell{padding:7px;border-radius:41px;box-shadow:-26px 46px 90px -34px rgba(12,26,23,.62),-8px 10px 26px -12px rgba(12,26,23,.42),inset 0 1px 0 rgba(255,255,255,.24)}
       .hero-phone-shell img{height:min(50vh,420px);border-radius:34px}
+      .hero-rank{right:auto;left:100%;margin-right:0;margin-left:9px;align-items:flex-start;text-align:left;font-size:clamp(13px,3.8vw,20px);letter-spacing:-.04em}
       .hero-bubble-pos{top:-14px;left:50%;right:auto;transform:translateX(-50%);width:max-content;max-width:calc(100vw - 48px)}
       .hero-bubble{max-width:300px;padding:13px 17px}
       .hero-bubble p{font-size:14.5px}
@@ -267,7 +276,7 @@
       <div class="hero-phone-wrap hero-in">
         <div class="hero-phone">
           <div class="hero-phone-glow" aria-hidden="true"></div>
-          <div class="hero-phone-shell"><picture><source media="(max-width: 879px)" srcset="screens/hero-m.jpg"><img src="screens/hero-d.jpg" width="560" height="1218" alt="Althea progress screen showing 27.1 kg total lost, pace and dose streak" fetchpriority="high" decoding="sync"></picture></div>
+          <div class="hero-phone-shell"><picture><source media="(max-width: 879px)" srcset="screens/hero-m.jpg"><img src="screens/hero-d.jpg" width="560" height="1218" alt="Althea progress screen showing 27.1 kg total lost, pace and dose streak" fetchpriority="high" decoding="sync"></picture><div class="hero-rank"><span>#1</span><span>GLP-1</span><span>Tracker</span></div></div>
         </div>
         <div class="hero-bubble-pos">
           <div class="hero-bubble">

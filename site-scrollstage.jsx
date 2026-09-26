@@ -436,6 +436,20 @@ function ScrollStage() {
     applyPr();
     window.addEventListener('resize', fitPixelRatio);
 
+    /* Where the tour ACTUALLY is right now, by the same math frame() uses. The
+       handover has to draw this pose: a visitor who scrolled partway in and then
+       got the phone drawn at progress 0 saw it edge-on for a beat before the loop
+       caught up. */
+    const progressNow = () => {
+      const el = wrapRef.current;
+      if (!el) return 0;
+      const r = el.getBoundingClientRect();
+      const vpH = stickyRef.current ? stickyRef.current.offsetHeight : window.innerHeight;
+      const span = r.height - vpH;
+      const raw = span > 0 ? Math.max(0, Math.min(1, -r.top / span)) : 0;
+      return raw * P_END;
+    };
+
     /* Handover. phone.ready() resolves on ALL SIX screenshots, and on a slow link
        that held the poster up (or, before the poster existed, left the section
        black) for tens of seconds. Only screen 01 is on the front face at the start
@@ -460,7 +474,9 @@ function ScrollStage() {
     });
     const handOver = () => {
       if (disposed) return;
-      try { phone.renderAt(0); } catch (e) {}
+      const p0 = progressNow();
+      cur = p0; snap = true;
+      try { phone.renderAt(p0); } catch (e) {}
       requestAnimationFrame(() => requestAnimationFrame(() => {
         if (disposed) return;
         setRevealed(true);

@@ -1856,8 +1856,19 @@ function ScrollStage() {
     });
     const handOver = () => {
       if (disposed) return;
+      const p0 = (function () {
+        const el = wrapRef.current;
+        if (!el) return 0;
+        const r = el.getBoundingClientRect();
+        const vpH = stickyRef.current ? stickyRef.current.offsetHeight : window.innerHeight;
+        const span = r.height - vpH;
+        const raw = span > 0 ? Math.max(0, Math.min(1, -r.top / span)) : 0;
+        return raw * P_END;
+      })();
+      cur = p0;
+      snap = true;
       try {
-        phone.renderAt(0);
+        phone.renderAt(p0);
       } catch (e) {}
       requestAnimationFrame(() => requestAnimationFrame(() => {
         if (disposed) return;
